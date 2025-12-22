@@ -1,5 +1,5 @@
 # dependencies
-node_modules/
+
 
 # build outputs
 .next/
@@ -24,3 +24,4 @@ Thumbs.db
 # editor files
 .vscode/
 .idea/
+node_modules

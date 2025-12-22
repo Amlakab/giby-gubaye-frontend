@@ -15,6 +15,7 @@ import {
   FaArrowLeft,
   FaArrowRight,
 } from 'react-icons/fa';
+import api from '@/app/utils/api';
 
 // Import images
 const images = {
@@ -32,11 +33,37 @@ const images = {
   logo2: '/images/logo2.png',
 };
 
+// Interface for Blog
+interface Blog {
+  _id: string;
+  title: string;
+  description: string;
+  content: string;
+  image?: string;
+  category: string;
+  createdBy: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatar?: string;
+  };
+  blogDate: string;
+  slug: string;
+  status: 'published';
+  tags: string[];
+  isFeatured: boolean;
+  viewsCount: number;
+  readingTime: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Slides data
 const slides = [
   {
     image: images.image1,
-    title: "Welcome to INSA",
+    title: "Welcome to Tepi Giby Gubaye",
     description: "Innovative solutions for a smarter tomorrow.",
   },
   {
@@ -66,7 +93,75 @@ export default function Home() {
   const [slideDirection, setSlideDirection] = useState("right");
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [topBlogs, setTopBlogs] = useState<Blog[]>([]);
+  const [loadingBlogs, setLoadingBlogs] = useState(true);
   const { theme } = useTheme();
+
+  // Helper function to get image URL - Same as BlogPage
+  const getImageUrl = (imagePath: string | undefined): string => {
+    if (!imagePath) return '/api/placeholder/400/250';
+    
+    if (imagePath.startsWith('http')) return imagePath;
+    
+    const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    
+    if (imagePath.startsWith('/uploads')) {
+      return `${serverUrl}${imagePath}`;
+    }
+    
+    return `${serverUrl}/uploads/blogs/${imagePath}`;
+  };
+
+  // Format date function - Same as BlogPage
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
+  // Get author initials - Same as BlogPage
+  const getAuthorInitials = (author: { firstName?: string; lastName?: string }): string => {
+    const first = author?.firstName?.charAt(0) || '';
+    const last = author?.lastName?.charAt(0) || '';
+    return `${first}${last}`.toUpperCase() || 'A';
+  };
+
+  // Get author avatar color - Same as BlogPage
+  const getAuthorAvatarColor = (authorId: string): string => {
+    const colors = ['#1976d2', '#2e7d32', '#ed6c02', '#d32f2f', '#7b1fa2', '#00796b', '#388e3c', '#f57c00', '#0288d1', '#c2185b'];
+    const index = authorId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+    return colors[index];
+  };
+
+  // Fetch top 3 blogs
+  useEffect(() => {
+    const fetchTopBlogs = async () => {
+      try {
+        setLoadingBlogs(true);
+        const params = new URLSearchParams({
+          limit: '3',
+          sortBy: 'blogDate',
+          sortOrder: 'desc'
+        });
+        
+        const response = await api.get(`/blogs/public/approved?${params}`);
+        setTopBlogs(response.data.data.blogs || []);
+      } catch (error) {
+        console.error('Error fetching top blogs:', error);
+        setTopBlogs([]);
+      } finally {
+        setLoadingBlogs(false);
+      }
+    };
+
+    fetchTopBlogs();
+  }, []);
 
   // Handle URL parameters
   useEffect(() => {
@@ -300,115 +395,123 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Blog Section */}
+        {/* Blog Section - DYNAMIC - USING <img> TAG LIKE BLOGPAGE */}
         <section className={`py-16 px-4 ${theme === 'dark' ? 'bg-transparent' : 'bg-background'}`}>
           <div className="container mx-auto">
             <h2 className={`text-3xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-white' : 'text-text-primary'}`}>
               Latest from Our Blog
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Blog Post 1 */}
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-surface/30 backdrop-blur-sm' : 'bg-surface'
-                }`}
-              >
-                <Link href="/news1" className="block">
-                  <div className="relative h-48">
-                    <Image
-                      src={images.image21}
-                      alt="INSA Headquarters"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <p className={`text-base ${theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'}`}>
-                      በስመአብ ወወልድ ወመንፈስ ቅዱስ አሐዱ አምላክ አሜን
-                      ✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️
-                      ሰላም የእግዚአብሔር ቤተሰቦች
-                      እንደምን አላችሁ ቅዳሜ ማለትም 08/02/2018 ዓ.ም ከቀኑ 3:30 የ 2018 ዓ.ም የመጀመሪያችን ነደያን ጥየቃ ስለምንጀምር ተቀሳቅሰን ያልሰሙትን በማሰማት እህት ወንድሞቻችንን ይዘን በመምጣት የበረከቱ ተሳታፊ እንድንሆን።
-                      ወስብሀት ለ እግዚአብሔር ወለወላዲቱ ድንግል ወለ መስቀሉ ክብር ይቆየን።
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-
-              {/* Blog Post 2 */}
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-surface/30 backdrop-blur-sm' : 'bg-surface'
-                }`}
-              >
-                <Link href="/news2" className="block">
-                  <div className="relative h-48">
-                    <Image
-                      src={images.image22}
-                      alt="Cybersecurity Operations"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <p className={`text-base ${theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'}`}>
-                      በስመ አብ ወወልድ ወመንፈስ ቅዱስ አሐዱ አምላክ።
-                       ✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️
-                      እንኳን ለእመቤታችን የልደት በዓል በሰላም አደረሳችሁ/አደረሰን። ይህን ታላቅ መንፈሳዊ በዓል በመከበር ምክንያት፣ በሰርክ ሰዓት 11:30 ላይ ልዩ መርሐ ግብር ተዘጋጅቶ ስለሚቀርብ፣ ሁላችሁም በተመደበው ሰዓት ከትልቁ አዳራሽ በመገኘት በመንፈሳዊው ዝግጅት እንድትሳተፉ በከበረ አክብሮት እንጋብዛችኋለን።
-                      ወስብሐት ለእግዚአብሔር።
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-
-              {/* Blog Post 3 */}
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -5 }}
-                className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-surface/30 backdrop-blur-sm' : 'bg-surface'
-                }`}
-              >
-                <Link href="/news3" className="block">
-                  <div className="relative h-48">
-                    <Image
-                      src={images.image23}
-                      alt="INSA Collaboration"
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <p className={`text-base ${theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'}`}>
-                      በስመ አብ ወወልድ ወመንፈስ ቅዱስ አሐዱ አምላክ አሜን።
-                      ✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️✝️
-                     የግቢ-ጉባኤያችን 17ኛ ዓመት የምሥረታ በዓል በእግዚአብሔር ፈቃድ በደስታና በስኬት ተፈጽሟል። በበዓሉ መርሃ ግብራት ሁሉ ላይ ለተሳተፉ ክቡራን አባላትና ተማሪዎች ሁሉ አምላከ ቅዱሳን በረከቱን ያድለን። ግቢ-ጉባኤያችንን እስከ መጨረሻው ድረስ በሰላም እና በእምነት ይጠብቅልን፤ ለሚቀጥለውም ዓመት በሰላምና በጤና እንዲያደርሰን እንለምናለን። 
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-            </div>
+            
+            {loadingBlogs ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : topBlogs.length === 0 ? (
+              <div className="text-center py-12">
+                <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'}`}>
+                  No blog posts available at the moment.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {topBlogs.map((blog, index) => (
+                  <motion.div
+                    key={blog._id}
+                    initial={{ y: 50, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -5 }}
+                    className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      theme === 'dark' ? 'bg-surface/30 backdrop-blur-sm' : 'bg-surface'
+                    }`}
+                  >
+                    <Link href={`/blog`} className="block">
+                      {/* Blog Image - Using <img> tag like BlogPage */}
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={getImageUrl(blog.image)}
+                          alt={blog.title}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            objectFit: 'cover',
+                            transition: 'transform 0.3s'
+                          }}
+                          className="group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            target.src = '/api/placeholder/400/250';
+                          }}
+                        />
+                        {blog.isFeatured && (
+                          <div className="absolute top-2 left-2">
+                            <span className="px-2 py-1 text-xs font-bold bg-yellow-500 text-gray-900 rounded">
+                              Featured
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className={`text-sm font-medium px-2 py-1 rounded ${
+                            theme === 'dark' 
+                              ? 'bg-gray-800 text-gray-300' 
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {blog.category}
+                          </span>
+                          <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {formatDate(blog.blogDate)}
+                          </span>
+                        </div>
+                        <h3 className={`text-lg font-semibold mb-2 ${
+                          theme === 'dark' ? 'text-white' : 'text-text-primary'
+                        }`}>
+                          {blog.title}
+                        </h3>
+                        <p className={`text-base mb-3 ${
+                          theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                        }`}>
+                          {blog.description.length > 120 
+                            ? `${blog.description.substring(0, 120)}...` 
+                            : blog.description}
+                        </p>
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center">
+                            <div 
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                              style={{ backgroundColor: getAuthorAvatarColor(blog.createdBy._id) }}
+                            >
+                              {getAuthorInitials(blog.createdBy)}
+                            </div>
+                            <span className={`ml-2 text-sm ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              {blog.createdBy.firstName} {blog.createdBy.lastName}
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className={`text-sm ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                            }`}>
+                              {blog.readingTime} min read
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            )}
             <div className="text-center mt-12">
               <Link
                 href="/blog"
                 className="inline-flex items-center px-6 py-3 border-2 border-primary hover:bg-primary text-primary hover:text-white rounded-lg font-medium transition-colors duration-300 text-base"
               >
-                Read More Blog Posts
+                View All Blog Posts
                 <span className="ml-2">→</span>
               </Link>
             </div>

@@ -30,9 +30,9 @@ const aboutImages = {
 const sections = [
   {
     id: 'about',
-    title: 'About INSA',
+    title: 'About Tepi Giby Gubaye',
     content:
-      'The Information Network Security Agency (INSA) is Ethiopia\'s national institution responsible for safeguarding the country\'s cybersecurity and information infrastructure. Established in 2006, INSA plays a vital role in protecting national digital assets, preventing cyber threats, and ensuring secure communication systems. The agency operates under the Office of the Prime Minister and focuses on cybersecurity operations, cyber intelligence, policy development, digital forensics, and capacity building.',
+      'Tepi Giby Gubaye is a leading organization in Ethiopia focused on cybersecurity and information protection. Established in 2006, it plays a vital role in safeguarding national digital assets, preventing cyber threats, and ensuring secure communication systems. The organization operates under the Office of the Prime Minister and focuses on cybersecurity operations, cyber intelligence, policy development, digital forensics, and capacity building.',
     image: aboutImages.insa1,
   },
   {

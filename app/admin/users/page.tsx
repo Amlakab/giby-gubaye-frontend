@@ -26,13 +26,14 @@ import {
   Church, Female, Male, Cake, Work,
   Translate, Language, AccessTime, Business,
   Home, Call, PersonPin, Description,
-  SupervisorAccount, Search
+  SupervisorAccount, Search, Fingerprint // Added for student ID
 } from '@mui/icons-material';
 import api from '@/app/utils/api';
 
 // Types
 interface Student {
   _id: string;
+  gibyGubayeId?: string; // Made optional for safety
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -68,6 +69,7 @@ interface Student {
 
 interface User {
   _id: string;
+  gibyGubayeId?: string; // Made optional for safety
   name: string;
   email: string;
   phone: string;
@@ -578,14 +580,50 @@ const UsersPage = () => {
     return age;
   };
 
-  // Filter students based on search
+  // Filter students based on search - UPDATED WITH SAFETY CHECK
   const filteredStudents = students.filter(student => {
     const fullName = getStudentFullName(student).toLowerCase();
     const searchTerm = studentSearch.toLowerCase();
     return fullName.includes(searchTerm) || 
-           student.email.toLowerCase().includes(searchTerm) ||
-           student.phone.includes(searchTerm);
+           (student.email && student.email.toLowerCase().includes(searchTerm)) ||
+           student.phone.includes(searchTerm) ||
+           (student.gibyGubayeId && student.gibyGubayeId.toLowerCase().includes(searchTerm));
   });
+
+  // Helper function to get photo URL
+  const getPhotoUrl = (photoPath?: string): string | null => {
+    if (!photoPath) return null;
+    if (photoPath.startsWith('http')) return photoPath;
+    
+    const serverUrl = 'http://localhost:3001';
+    let cleanPath = photoPath;
+    
+    if (!cleanPath.startsWith('/uploads')) {
+      if (cleanPath.startsWith('uploads')) {
+        cleanPath = '/' + cleanPath;
+      } else {
+        cleanPath = `/uploads/students/${cleanPath}`;
+      }
+    }
+    
+    return `${serverUrl}${cleanPath}`;
+  };
+
+  // Safe display function for gibyGubayeId
+  const displayStudentId = (student: Student | undefined): string => {
+    if (!student || !student.gibyGubayeId || student.gibyGubayeId.trim() === '') {
+      return 'N/A';
+    }
+    return student.gibyGubayeId;
+  };
+
+  // Safe display function for user's gibyGubayeId
+  const displayUserId = (user: User | undefined): string => {
+    if (!user || !user.gibyGubayeId || user.gibyGubayeId.trim() === '') {
+      return 'N/A';
+    }
+    return user.gibyGubayeId;
+  };
 
   // Render form section
   const renderFormSection = (title: string, icon: React.ReactNode, content: React.ReactNode) => (
@@ -806,7 +844,7 @@ const UsersPage = () => {
                 </Box>
               </Box>
               
-              {/* Filter Controls */}
+              {/* Filter Controls - UPDATED SEARCH PLACEHOLDER */}
               <Box sx={{ 
                 display: 'grid',
                 gridTemplateColumns: {
@@ -822,7 +860,15 @@ const UsersPage = () => {
                   label="Search Users"
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
-                  placeholder="Name, email, or phone..."
+                  placeholder="Name, email, phone, or student ID..."
+                  InputProps={{
+                    startAdornment: (
+                      <Search sx={{ 
+                        color: theme === 'dark' ? '#a8b2d1' : '#666666',
+                        mr: 1 
+                      }} />
+                    ),
+                  }}
                   sx={textFieldStyle}
                 />
                 
@@ -903,7 +949,7 @@ const UsersPage = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            {/* Mobile View - Cards */}
+            {/* Mobile View - Cards - UPDATED WITH STUDENT ID */}
             {isMobile ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {users.map((user) => {
@@ -939,6 +985,13 @@ const UsersPage = () => {
                             }}>
                               {user.name}
                             </Typography>
+                            {/* Student ID Display */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                              <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                              <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                {displayUserId(user)}
+                              </Typography>
+                            </Box>
                             <Chip
                               label={user.role}
                               color={getRoleColor(user.role)}
@@ -1132,7 +1185,7 @@ const UsersPage = () => {
                 })}
               </Box>
             ) : (
-              /* Desktop/Tablet View - Table */
+              /* Desktop/Tablet View - Table - UPDATED WITH STUDENT ID COLUMN */
               <Card sx={{ 
                 borderRadius: 2,
                 boxShadow: theme === 'dark' 
@@ -1159,6 +1212,15 @@ const UsersPage = () => {
                           py: 2
                         }}>
                           Name
+                        </TableCell>
+                        {/* Added Student ID Column */}
+                        <TableCell sx={{ 
+                          color: 'white', 
+                          fontWeight: 'bold',
+                          fontSize: '0.875rem',
+                          py: 2
+                        }}>
+                          Student ID
                         </TableCell>
                         <TableCell sx={{ 
                           color: 'white', 
@@ -1228,6 +1290,19 @@ const UsersPage = () => {
                             }}>
                               {user.name}
                             </Typography>
+                          </TableCell>
+                          {/* Student ID Cell */}
+                          <TableCell sx={{ py: 2.5 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                              <Typography variant="body2" sx={{ 
+                                fontWeight: 'medium', 
+                                color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                fontFamily: 'monospace'
+                              }}>
+                                {displayUserId(user)}
+                              </Typography>
+                            </Box>
                           </TableCell>
                           <TableCell sx={{ py: 2.5 }}>
                             <Box>
@@ -1412,7 +1487,7 @@ const UsersPage = () => {
           </motion.div>
         )}
 
-        {/* Add User Dialog - UPDATED WITH STUDENT SEARCH */}
+        {/* Add User Dialog - UPDATED WITH STUDENT SEARCH INCLUDING gibyGubayeId */}
         <Dialog 
           open={openAddDialog} 
           onClose={() => setOpenAddDialog(false)} 
@@ -1438,7 +1513,7 @@ const UsersPage = () => {
           </DialogTitle>
           <DialogContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Student Selection with Search */}
+              {/* Student Selection with Search - UPDATED */}
               {renderFormSection(
                 "Select Student",
                 <Search />,
@@ -1449,7 +1524,7 @@ const UsersPage = () => {
                     label="Search Student"
                     value={studentSearch}
                     onChange={(e) => setStudentSearch(e.target.value)}
-                    placeholder="Search by name, email, or phone..."
+                    placeholder="Search by name, email, phone, or student ID..."
                     sx={textFieldStyle}
                   />
                   
@@ -1473,12 +1548,15 @@ const UsersPage = () => {
                             <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
                               {getStudentFullName(student)}
                             </Typography>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                  ID: {student.gibyGubayeId || 'N/A'}
+                                </Typography>
+                              </Box>
                               <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
                                 {student.phone}
-                              </Typography>
-                              <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                {student.college}
                               </Typography>
                             </Box>
                           </Box>
@@ -1642,7 +1720,7 @@ const UsersPage = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Edit User Dialog - UPDATED WITH STUDENT SEARCH */}
+        {/* Edit User Dialog - UPDATED WITH STUDENT SEARCH INCLUDING gibyGubayeId */}
         <Dialog 
           open={openEditDialog} 
           onClose={() => setOpenEditDialog(false)} 
@@ -1668,7 +1746,7 @@ const UsersPage = () => {
           </DialogTitle>
           <DialogContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {/* Student Selection with Search */}
+              {/* Student Selection with Search - UPDATED */}
               {renderFormSection(
                 "Select Student",
                 <Search />,
@@ -1679,7 +1757,7 @@ const UsersPage = () => {
                     label="Search Student"
                     value={studentSearch}
                     onChange={(e) => setStudentSearch(e.target.value)}
-                    placeholder="Search by name, email, or phone..."
+                    placeholder="Search by name, email, phone, or student ID..."
                     sx={textFieldStyle}
                   />
                   
@@ -1703,12 +1781,15 @@ const UsersPage = () => {
                             <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
                               {getStudentFullName(student)}
                             </Typography>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                  ID: {student.gibyGubayeId || 'N/A'}
+                                </Typography>
+                              </Box>
                               <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
                                 {student.phone}
-                              </Typography>
-                              <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                {student.college}
                               </Typography>
                             </Box>
                           </Box>
@@ -1945,7 +2026,7 @@ const UsersPage = () => {
           </DialogActions>
         </Dialog>
 
-        {/* View User Dialog - UPDATED WITH BETTER LAYOUT */}
+        {/* View User Dialog - UPDATED WITH gibyGubayeId */}
         <Dialog 
           open={openViewDialog} 
           onClose={() => setOpenViewDialog(false)} 
@@ -1987,9 +2068,13 @@ const UsersPage = () => {
                     <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                       {selectedUser.name}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                      User Profile
-                    </Typography>
+                    {/* Updated to show gibyGubayeId */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Fingerprint fontSize="small" sx={{ color: 'rgba(255,255,255,0.8)' }} />
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                        Student ID: {displayUserId(selectedUser)}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </DialogTitle>
@@ -2041,9 +2126,13 @@ const UsersPage = () => {
                                 size="small"
                               />
                             </Box>
-                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              User ID: {selectedUser._id.substring(0, 8)}...
-                            </Typography>
+                            {/* Updated to show gibyGubayeId */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                              <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                Student ID: {displayUserId(selectedUser)}
+                              </Typography>
+                            </Box>
                           </Box>
 
                           <Box sx={{ flex: 2 }}>
@@ -2134,7 +2223,7 @@ const UsersPage = () => {
                       </CardContent>
                     </Card>
 
-                    {/* Student Information - UPDATED WITH BETTER LAYOUT */}
+                    {/* Student Information - UPDATED WITH gibyGubayeId */}
                     <Card sx={{ 
                       mb: 3, 
                       borderRadius: 2, 
@@ -2155,6 +2244,26 @@ const UsersPage = () => {
                           <School /> Associated Student Information
                         </Typography>
                         
+                        {/* Student ID Display */}
+                        <Box sx={{ mb: 3 }}>
+                          <Typography variant="subtitle1" sx={{ 
+                            mb: 1, 
+                            fontWeight: 'bold',
+                            color: theme === 'dark' ? '#00ffff' : '#007bff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <Fingerprint /> Student ID
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 2, bgcolor: theme === 'dark' ? '#1e293b' : '#f8f9fa', borderRadius: 1 }}>
+                            <Fingerprint sx={{ color: theme === 'dark' ? '#00ffff' : '#007bff' }} />
+                            <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333', fontFamily: 'monospace' }}>
+                              {displayStudentId(selectedUser.studentId)}
+                            </Typography>
+                          </Box>
+                        </Box>
+
                         {/* Personal Information */}
                         <Box sx={{ mb: 3 }}>
                           <Typography variant="subtitle1" sx={{ 

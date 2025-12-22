@@ -28,7 +28,8 @@ import {
   AdminPanelSettings, SupervisorAccount, Description,
   Translate, Language, AccountBalance,
   LocationOn,
-  Person
+  Person,
+  Fingerprint // Add this icon for student ID
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -38,6 +39,7 @@ import { format } from 'date-fns';
 
 interface Student {
   _id: string;
+  gibyGubayeId: string; // Added this field
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -73,6 +75,7 @@ interface Student {
   age?: number;
 }
 
+// ... (rest of the interfaces remain the same)
 interface StudentStats {
   totalStudents: number;
   activeStudents: number;
@@ -1123,7 +1126,7 @@ const StudentsPage = () => {
                     label="Search Students"
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
-                    placeholder="Name, phone, or email..."
+                    placeholder="Name, phone, email, or student ID..."
                     InputProps={{
                       startAdornment: (
                         <Search sx={{ 
@@ -1481,6 +1484,12 @@ const StudentsPage = () => {
                               }}>
                                 {student.firstName} {student.lastName}
                               </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                  {student.gibyGubayeId}
+                                </Typography>
+                              </Box>
                               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                                 <Chip
                                   label={student.university}
@@ -1715,6 +1724,14 @@ const StudentsPage = () => {
                             fontSize: '0.875rem',
                             py: 2
                           }}>
+                            Student ID
+                          </TableCell>
+                          <TableCell sx={{ 
+                            color: 'white', 
+                            fontWeight: 'bold',
+                            fontSize: '0.875rem',
+                            py: 2
+                          }}>
                             University/College
                           </TableCell>
                           <TableCell sx={{ 
@@ -1798,6 +1815,18 @@ const StudentsPage = () => {
                                       {student.motherName}
                                     </Typography>
                                   </Box>
+                                </Box>
+                              </TableCell>
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                  <Typography variant="body2" sx={{ 
+                                    fontWeight: 'medium', 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontFamily: 'monospace'
+                                  }}>
+                                    {student.gibyGubayeId}
+                                  </Typography>
                                 </Box>
                               </TableCell>
                               <TableCell sx={{ py: 2.5 }}>
@@ -2618,7 +2647,7 @@ const StudentsPage = () => {
             </DialogActions>
           </Dialog>
 
-          {/* View Student Dialog - COMPLETE VERSION with all content */}
+          {/* View Student Dialog - UPDATED with gibyGubayeId */}
           <Dialog 
             open={openViewDialog} 
             onClose={() => setOpenViewDialog(false)} 
@@ -2659,9 +2688,12 @@ const StudentsPage = () => {
                       <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                         {selectedStudent.firstName} {selectedStudent.middleName} {selectedStudent.lastName}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                        Student Profile
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Fingerprint fontSize="small" sx={{ color: 'rgba(255,255,255,0.8)' }} />
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                          Student ID: {selectedStudent.gibyGubayeId}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 </DialogTitle>
@@ -2716,9 +2748,12 @@ const StudentsPage = () => {
                               size="medium"
                             />
                           </Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Student ID: {selectedStudent._id.substring(0, 8)}...
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                              Student ID: {selectedStudent.gibyGubayeId}
+                            </Typography>
+                          </Box>
                         </Box>
 
                         <Box sx={{ flex: 2 }}>

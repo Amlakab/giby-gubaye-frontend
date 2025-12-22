@@ -24,7 +24,8 @@ import {
   CalendarToday, Call, Business, Badge as BadgeIcon,
   Refresh, Block, CheckCircle, People, ExpandMore, ExpandLess,
   Translate, Language, AccountBalance, Home, Flag, LocationCity,
-  Apartment, Translate as TranslateIcon, MenuBook, Language as LanguageIcon
+  Apartment, Translate as TranslateIcon, MenuBook, Language as LanguageIcon,
+  Fingerprint // Added for student ID
 } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -36,6 +37,7 @@ import api from '@/app/utils/api';
 // Types
 interface Student {
   _id: string;
+  gibyGubayeId: string; // Added this field
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -779,7 +781,7 @@ const JobAssignmentPage = () => {
                     label="Search Assignments"
                     value={filters.search}
                     onChange={(e) => handleFilterChange('search', e.target.value)}
-                    placeholder="Search by student name, phone, or email..."
+                    placeholder="Search by student name, phone, email, or student ID..."
                     InputProps={{
                       startAdornment: (
                         <Search sx={{ 
@@ -982,6 +984,13 @@ const JobAssignmentPage = () => {
                               }}>
                                 {student.firstName} {student.lastName}
                               </Typography>
+                              {/* Student ID Display */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                  {student.gibyGubayeId}
+                                </Typography>
+                              </Box>
                               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                                 <Chip
                                   label={job.class}
@@ -1183,6 +1192,15 @@ const JobAssignmentPage = () => {
                           }}>
                             Student
                           </TableCell>
+                          {/* Student ID Column */}
+                          <TableCell sx={{ 
+                            color: 'white', 
+                            fontWeight: 'bold',
+                            fontSize: '0.875rem',
+                            py: 2
+                          }}>
+                            Student ID
+                          </TableCell>
                           <TableCell sx={{ 
                             color: 'white', 
                             fontWeight: 'bold',
@@ -1281,6 +1299,19 @@ const JobAssignmentPage = () => {
                                       {student.phone}
                                     </Typography>
                                   </Box>
+                                </Box>
+                              </TableCell>
+                              {/* Student ID Cell */}
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                  <Typography variant="body2" sx={{ 
+                                    fontWeight: 'medium', 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontFamily: 'monospace'
+                                  }}>
+                                    {student.gibyGubayeId}
+                                  </Typography>
                                 </Box>
                               </TableCell>
                               <TableCell sx={{ py: 2.5 }}>
@@ -1504,7 +1535,7 @@ const JobAssignmentPage = () => {
                     setEligibleSearch(e.target.value);
                     fetchEligibleStudents(e.target.value);
                   }}
-                  placeholder="Search by name, phone, or email..."
+                  placeholder="Search by name, phone, email, or student ID..."
                   InputProps={{
                     startAdornment: (
                       <Search sx={{ 
@@ -1577,6 +1608,12 @@ const JobAssignmentPage = () => {
                                 <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
                                   {student.firstName} {student.middleName} {student.lastName}
                                 </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                  <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                    {student.gibyGubayeId}
+                                  </Typography>
+                                </Box>
                                 <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
                                   {student.phone} • {student.email}
                                 </Typography>
@@ -1706,6 +1743,12 @@ const JobAssignmentPage = () => {
                           <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
                             {selectedJob.studentId.firstName} {selectedJob.studentId.lastName}
                           </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                              ID: {selectedJob.studentId.gibyGubayeId}
+                            </Typography>
+                          </Box>
                           <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
                             {selectedJob.studentId.phone} • {selectedJob.studentId.email}
                           </Typography>
@@ -1940,7 +1983,7 @@ const JobAssignmentPage = () => {
             </DialogActions>
           </Dialog>
 
-          {/* View Student Dialog - COMPLETE VERSION with all student attributes */}
+          {/* View Student Dialog - UPDATED with gibyGubayeId */}
           <Dialog 
             open={openViewStudentDialog} 
             onClose={() => setOpenViewStudentDialog(false)} 
@@ -1981,9 +2024,13 @@ const JobAssignmentPage = () => {
                       <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                         {selectedStudent.firstName} {selectedStudent.middleName} {selectedStudent.lastName}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                        Student Profile
-                      </Typography>
+                      {/* Updated to show gibyGubayeId */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Fingerprint fontSize="small" sx={{ color: 'rgba(255,255,255,0.8)' }} />
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
+                          Student ID: {selectedStudent.gibyGubayeId}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 </DialogTitle>
@@ -2038,9 +2085,13 @@ const JobAssignmentPage = () => {
                               size="medium"
                             />
                           </Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Student ID: {selectedStudent._id.substring(0, 8)}...
-                          </Typography>
+                          {/* Updated to show gibyGubayeId */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                              Student ID: {selectedStudent.gibyGubayeId}
+                            </Typography>
+                          </Box>
                         </Box>
 
                         <Box sx={{ flex: 2 }}>
