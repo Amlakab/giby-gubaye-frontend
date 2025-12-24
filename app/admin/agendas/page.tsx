@@ -9,49 +9,47 @@ import {
   useMediaQuery, Pagination,
   MenuItem, Select, FormControl, InputLabel,
   IconButton, Dialog, DialogTitle, DialogContent,
-  DialogActions, Button, Avatar,
-  FormControlLabel, Autocomplete, Divider,
-  Stack, Tooltip, Switch,
+  DialogActions, Button,
+  Autocomplete, Stack, Tooltip,
   Accordion, AccordionSummary, AccordionDetails,
-  List, ListItem, ListItemText, ListItemAvatar,
-  Paper
+  Paper, Collapse, TableHead as MuiTableHead,
+  TableRow as MuiTableRow, TableBody as MuiTableBody
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/lib/theme-context';
 import {
   Event, Edit, Delete, Visibility,
   CalendarToday, Person, LocationOn,
-  TrendingUp, ExpandMore, Add,
+  ExpandMore, Add,
   Search, Refresh, CheckCircle,
-  Cancel, HourglassEmpty, AssignmentTurnedIn,
-  People, Title, Notes, Chat,
+  HourglassEmpty, AssignmentTurnedIn,
   Save, Close, ArrowForward,
-  PlayCircle, StopCircle,
-  Check, Clear
+  Check, Clear, KeyboardArrowDown,
+  KeyboardArrowUp, PersonOutline
 } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import api from '@/app/utils/api';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfDay, endOfDay } from 'date-fns';
+import { useAuth } from '@/lib/auth';
 
 interface Student {
   _id: string;
   firstName: string;
+  middleName?: string;
   lastName: string;
-  email: string;
-  phone: string;
-  college: string;
-  department: string;
+  gender: 'male' | 'female';
   gibyGubayeId?: string;
+  phone: string;
+  email: string;
 }
 
+// To:
 interface User {
   _id: string;
-  firstName: string;
-  lastName: string;
+  name: string;       // Add this - matches backend User model
   email: string;
-  avatar?: string;
   role: string;
 }
 
@@ -71,10 +69,10 @@ interface Agenda {
   _id: string;
   meetingClass: string;
   location: string;
-  draftContributors: User[];
+  draftContributors: Student[];
   agendaTitles: AgendaTitle[];
   generalMeetingSummary?: string;
-  meetingContributors: User[];
+  meetingContributors: Student[];
   status: 'draft' | 'pending' | 'approved' | 'completed';
   draftDate: string;
   meetingDate?: string;
@@ -108,32 +106,13 @@ interface FilterOptions {
   meetingClasses: string[];
   locations: string[];
   creators: User[];
-  allUsers: User[];
+  allStudents: Student[];
 }
-
-interface AgendaFormData {
-  meetingClass: string;
-  location: string;
-  draftContributors: string[]; // Array of student IDs
-  agendaTitles: { title: string }[];
-}
-
-const meetingClasses = [
-  'Class A',
-  'Class B', 
-  'Class C',
-  'Class D',
-  'Class E',
-  'General Meeting',
-  'Special Session',
-  'Emergency Meeting',
-  'Weekly Review',
-  'Monthly Planning'
-];
 
 const AgendaManagementPage = () => {
   const { theme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const { user } = useAuth();
   
   const [agendas, setAgendas] = useState<Agenda[]>([]);
   const [stats, setStats] = useState<AgendaStats | null>(null);
@@ -141,7 +120,7 @@ const AgendaManagementPage = () => {
     meetingClasses: [],
     locations: [],
     creators: [],
-    allUsers: []
+    allStudents: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -156,10 +135,12 @@ const AgendaManagementPage = () => {
 
   const [filters, setFilters] = useState({
     search: '',
-    meetingClass: '',
+    meetingClass: user?.role || '',
     location: '',
     status: '',
     createdBy: '',
+    fromDate: null as Date | null,
+    toDate: null as Date | null,
     sortBy: 'draftDate',
     sortOrder: 'desc',
     page: 1,
@@ -173,8 +154,13 @@ const AgendaManagementPage = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedAgenda, setSelectedAgenda] = useState<Agenda | null>(null);
   
-  const [formData, setFormData] = useState<AgendaFormData>({
-    meetingClass: '',
+  const [formData, setFormData] = useState<{
+    meetingClass: string;
+    location: string;
+    draftContributors: string[];
+    agendaTitles: { title: string }[];
+  }>({
+    meetingClass: user?.role || '',
     location: '',
     draftContributors: [],
     agendaTitles: [{ title: '' }]
@@ -192,6 +178,9 @@ const AgendaManagementPage = () => {
     status: 'approved'
   });
 
+  // Expanded rows for contributor lists
+  const [expandedRows, setExpandedRows] = useState<{ [key: string]: boolean }>({});
+  
   // Students for dropdown
   const [students, setStudents] = useState<Student[]>([]);
   const [studentsLoading, setStudentsLoading] = useState(false);
@@ -277,14 +266,25 @@ const AgendaManagementPage = () => {
     }
   ];
 
+  // Fetch data functions
   const fetchAgendas = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       
       Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== '') {
-          params.append(key, value.toString());
+        if (value && value !== '' && value !== null) {
+          if (key === 'fromDate' || key === 'toDate') {
+            if (value instanceof Date) {
+              if (key === 'fromDate') {
+                params.append('fromDate', startOfDay(value).toISOString());
+              } else {
+                params.append('toDate', endOfDay(value).toISOString());
+              }
+            }
+          } else {
+            params.append(key, value.toString());
+          }
         }
       });
 
@@ -309,51 +309,272 @@ const AgendaManagementPage = () => {
 
   const fetchStats = useCallback(async () => {
     try {
-      const response = await api.get('/agendas/stats');
+      const params = new URLSearchParams();
+      if (user?.role) {
+        params.append('meetingClass', user.role);
+      }
+      const response = await api.get(`/agendas/stats?${params}`);
       setStats(response.data.data);
     } catch (error: any) {
       console.error('Failed to fetch stats:', error);
     }
-  }, []);
+  }, [user]);
 
   const fetchFilterOptions = useCallback(async () => {
     try {
-      const response = await api.get('/agendas/filter-options');
+      const params = new URLSearchParams();
+      if (user?.role) {
+        params.append('meetingClass', user.role);
+      }
+      const response = await api.get(`/agendas/filter-options?${params}`);
       setFilterOptions(response.data.data);
+      setStudents(response.data.data.allStudents || []);
     } catch (error: any) {
       console.error('Failed to fetch filter options:', error);
     }
-  }, []);
+  }, [user]);
 
-  const fetchStudents = useCallback(async () => {
+  // Toggle row expansion
+  const toggleRowExpansion = (agendaId: string, type: 'draft' | 'meeting') => {
+    const key = `${agendaId}-${type}`;
+    setExpandedRows(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Get creator/approver name - FIXED
+  const getUserName = (user: User | undefined) => {
+  if (!user) return 'N/A';
+  return user.name || 'N/A';  // User model has a single 'name' field
+};
+
+  // Get student full name
+  const getStudentFullName = (student: Student) => {
+    return `${student.firstName} ${student.middleName || ''} ${student.lastName}`.trim();
+  };
+
+  // Get student display name for dropdown
+  const getStudentDisplayName = (student: Student) => {
+    const fullName = getStudentFullName(student);
+    const gibyId = student.gibyGubayeId ? ` (${student.gibyGubayeId})` : '';
+    return `${fullName}${gibyId}`;
+  };
+
+  // Format date
+  const formatDate = (dateString: string) => {
     try {
-      setStudentsLoading(true);
-      const response = await api.get('/students?limit=100');
-      setStudents(response.data.data.students || []);
-    } catch (error: any) {
-      console.error('Failed to fetch students:', error);
-    } finally {
-      setStudentsLoading(false);
+      return format(parseISO(dateString), 'MMM dd, yyyy HH:mm');
+    } catch {
+      return 'Invalid date';
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    fetchAgendas();
-  }, [fetchAgendas]);
-
-  useEffect(() => {
-    fetchStats();
-    fetchFilterOptions();
-  }, [fetchStats, fetchFilterOptions]);
-
-  useEffect(() => {
-    if (openCreateDialog || openEditDialog || openContinueDialog) {
-      fetchStudents();
+  // Get status color
+  const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'info' | 'default' => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'approved': return 'info';
+      case 'pending': return 'warning';
+      case 'draft': return 'default';
+      default: return 'default';
     }
-  }, [openCreateDialog, openEditDialog, openContinueDialog, fetchStudents]);
+  };
 
+  // Get status icon
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle fontSize="small" />;
+      case 'approved': return <Check fontSize="small" />;
+      case 'pending': return <HourglassEmpty fontSize="small" />;
+      case 'draft': return <Edit fontSize="small" />;
+      default: return <Event fontSize="small" />;
+    }
+  };
+
+  // Get status text
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'completed': return 'Completed';
+      case 'approved': return 'Approved';
+      case 'pending': return 'Pending Review';
+      case 'draft': return 'Draft';
+      default: return status;
+    }
+  };
+
+  // Render contributors with view icon toggle
+  const renderContributors = (contributors: Student[], agendaId: string, type: 'draft' | 'meeting') => {
+    const isExpanded = expandedRows[`${agendaId}-${type}`];
+    
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+            {contributors.length} {type === 'draft' ? 'draft' : 'meeting'} contributor(s)
+          </Typography>
+          <Tooltip title={isExpanded ? "Hide contributors" : "View contributors"}>
+            <IconButton 
+              size="small" 
+              onClick={() => toggleRowExpansion(agendaId, type)}
+              sx={{ 
+                p: 0.5,
+                color: theme === 'dark' ? '#00ffff' : '#007bff'
+              }}
+            >
+              <Visibility fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+        
+        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+          <Box sx={{ 
+            mt: 1, 
+            p: 2, 
+            backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa', 
+            borderRadius: 1,
+            border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
+          }}>
+            <Typography variant="subtitle2" sx={{ 
+              mb: 1, 
+              color: theme === 'dark' ? '#ccd6f6' : '#333333',
+              fontWeight: 'bold'
+            }}>
+              {type === 'draft' ? 'Draft Contributors' : 'Meeting Contributors'}
+            </Typography>
+            
+            <TableContainer component={Paper} elevation={0} sx={{ 
+              backgroundColor: 'transparent',
+              border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
+            }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ 
+                    backgroundColor: theme === 'dark' ? '#0f172a' : '#e5e7eb'
+                  }}>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>#</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>First Name</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>Middle Name</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>Last Name</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>Gender</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>Student ID</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>Phone</TableCell>
+                    <TableCell sx={{ 
+                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                      fontWeight: 'bold',
+                      py: 1
+                    }}>Email</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {contributors.map((student, index) => (
+                    <TableRow 
+                      key={student._id}
+                      sx={{ 
+                        '&:hover': {
+                          backgroundColor: theme === 'dark' ? '#1e293b' : '#f5f5f5'
+                        }
+                      }}
+                    >
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#a8b2d1' : '#666666',
+                        py: 1
+                      }}>{index + 1}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.firstName || 'N/A'}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.middleName || 'N/A'}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.lastName || 'N/A'}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.gender || 'N/A'}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.gibyGubayeId || 'N/A'}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.phone || 'N/A'}</TableCell>
+                      <TableCell sx={{ 
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                        py: 1
+                      }}>{student.email || 'N/A'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        </Collapse>
+      </Box>
+    );
+  };
+
+  // Initialize data
+  useEffect(() => {
+    if (user) {
+      fetchAgendas();
+      fetchStats();
+      fetchFilterOptions();
+    }
+  }, [fetchAgendas, fetchStats, fetchFilterOptions, user]);
+
+  // Filter students based on search
+  const filteredStudents = students.filter(student => {
+    const fullName = getStudentFullName(student).toLowerCase();
+    const searchTerm = studentSearch.toLowerCase();
+    return fullName.includes(searchTerm) || 
+           (student.email && student.email.toLowerCase().includes(searchTerm)) ||
+           student.phone.includes(searchTerm) ||
+           (student.gibyGubayeId && student.gibyGubayeId.toLowerCase().includes(searchTerm));
+  });
+
+  // Dialog handlers
   const handleOpenCreateDialog = () => {
-    resetForm();
+    setFormData({
+      meetingClass: user?.role || '',
+      location: '',
+      draftContributors: [],
+      agendaTitles: [{ title: '' }]
+    });
+    setSelectedContributors([]);
     setOpenCreateDialog(true);
   };
 
@@ -364,27 +585,13 @@ const AgendaManagementPage = () => {
     }
     
     setSelectedAgenda(agenda);
-    
-    // Set form data with student IDs
     setFormData({
       meetingClass: agenda.meetingClass,
       location: agenda.location,
-      draftContributors: agenda.draftContributors.map(user => user._id),
+      draftContributors: agenda.draftContributors.map(student => student._id),
       agendaTitles: agenda.agendaTitles.map(title => ({ title: title.title }))
     });
-    
-    // Set selected contributors for display
-    const contributors = agenda.draftContributors.map(user => ({
-      _id: user._id,
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      email: user.email || '',
-      phone: '',
-      college: '',
-      department: ''
-    }));
-    setSelectedContributors(contributors);
-    
+    setSelectedContributors(agenda.draftContributors);
     setOpenEditDialog(true);
   };
 
@@ -406,33 +613,25 @@ const AgendaManagementPage = () => {
         discussions: title.discussions || []
       })),
       generalMeetingSummary: agenda.generalMeetingSummary || '',
-      meetingContributors: agenda.meetingContributors.map(user => user._id),
-      status: agenda.status
+      meetingContributors: agenda.meetingContributors.map(student => student._id),
+      status: agenda.status as 'approved' | 'completed'
     });
-    
-    // Set selected meeting contributors for display
-    const meetingContributors = agenda.meetingContributors.map(user => ({
-      _id: user._id,
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      email: user.email || '',
-      phone: '',
-      college: '',
-      department: ''
-    }));
-    setSelectedMeetingContributors(meetingContributors);
-    
+    setSelectedMeetingContributors(agenda.meetingContributors);
     setOpenContinueDialog(true);
   };
 
   const handleOpenDeleteDialog = (agenda: Agenda) => {
+    if (agenda.status !== 'pending') {
+      setError('Only pending agendas can be deleted');
+      return;
+    }
     setSelectedAgenda(agenda);
     setOpenDeleteDialog(true);
   };
 
+  // Action handlers
   const handleCreateAgenda = async () => {
     try {
-      // Validate form
       if (!formData.meetingClass.trim() || !formData.location.trim()) {
         setError('Meeting class and location are required');
         return;
@@ -446,7 +645,7 @@ const AgendaManagementPage = () => {
       const payload = {
         meetingClass: formData.meetingClass.trim(),
         location: formData.location.trim(),
-        draftContributors: formData.draftContributors, // Already student IDs
+        draftContributors: formData.draftContributors,
         agendaTitles: formData.agendaTitles
           .filter(item => item.title.trim())
           .map(item => ({ title: item.title.trim() }))
@@ -456,7 +655,6 @@ const AgendaManagementPage = () => {
       
       setSuccess('Agenda created successfully');
       setOpenCreateDialog(false);
-      resetForm();
       fetchAgendas();
       fetchStats();
     } catch (error: any) {
@@ -471,7 +669,7 @@ const AgendaManagementPage = () => {
       const payload = {
         meetingClass: formData.meetingClass.trim(),
         location: formData.location.trim(),
-        draftContributors: formData.draftContributors, // Already student IDs
+        draftContributors: formData.draftContributors,
         agendaTitles: formData.agendaTitles
           .filter(item => item.title.trim())
           .map(item => ({ title: item.title.trim() }))
@@ -481,7 +679,6 @@ const AgendaManagementPage = () => {
       
       setSuccess('Agenda updated successfully');
       setOpenEditDialog(false);
-      resetForm();
       fetchAgendas();
       fetchStats();
     } catch (error: any) {
@@ -499,7 +696,7 @@ const AgendaManagementPage = () => {
           discussions: title.discussions
         })),
         generalMeetingSummary: continueFormData.generalMeetingSummary.trim(),
-        meetingContributors: continueFormData.meetingContributors, // Already student IDs
+        meetingContributors: continueFormData.meetingContributors,
         status: continueFormData.status
       };
 
@@ -529,7 +726,8 @@ const AgendaManagementPage = () => {
     }
   };
 
-  const handleFilterChange = (field: string, value: string | number) => {
+  // Form handlers
+  const handleFilterChange = (field: string, value: any) => {
     setFilters(prev => ({
       ...prev,
       [field]: value,
@@ -541,7 +739,7 @@ const AgendaManagementPage = () => {
     handleFilterChange('page', value);
   };
 
-  const handleFormChange = (field: keyof AgendaFormData, value: any) => {
+  const handleFormChange = (field: keyof typeof formData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -551,14 +749,18 @@ const AgendaManagementPage = () => {
 
   const handleContributorsChange = (selectedStudents: Student[]) => {
     setSelectedContributors(selectedStudents);
-    const studentIds = selectedStudents.map(student => student._id);
-    setFormData(prev => ({ ...prev, draftContributors: studentIds }));
+    setFormData(prev => ({ 
+      ...prev, 
+      draftContributors: selectedStudents.map(student => student._id) 
+    }));
   };
 
   const handleMeetingContributorsChange = (selectedStudents: Student[]) => {
     setSelectedMeetingContributors(selectedStudents);
-    const studentIds = selectedStudents.map(student => student._id);
-    setContinueFormData(prev => ({ ...prev, meetingContributors: studentIds }));
+    setContinueFormData(prev => ({ 
+      ...prev, 
+      meetingContributors: selectedStudents.map(student => student._id) 
+    }));
   };
 
   const addAgendaTitle = () => {
@@ -570,7 +772,6 @@ const AgendaManagementPage = () => {
 
   const removeAgendaTitle = (index: number) => {
     if (formData.agendaTitles.length <= 1) return;
-    
     setFormData(prev => ({
       ...prev,
       agendaTitles: prev.agendaTitles.filter((_, i) => i !== index)
@@ -610,23 +811,15 @@ const AgendaManagementPage = () => {
     handleContinueFormChange('agendaTitles', newTitles);
   };
 
-  const resetForm = () => {
-    setFormData({
-      meetingClass: '',
-      location: '',
-      draftContributors: [],
-      agendaTitles: [{ title: '' }]
-    });
-    setSelectedContributors([]);
-  };
-
   const resetFilters = () => {
     setFilters({
       search: '',
-      meetingClass: '',
+      meetingClass: user?.role || '',
       location: '',
       status: '',
       createdBy: '',
+      fromDate: null,
+      toDate: null,
       sortBy: 'draftDate',
       sortOrder: 'desc',
       page: 1,
@@ -634,79 +827,13 @@ const AgendaManagementPage = () => {
     });
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return format(parseISO(dateString), 'MMM dd, yyyy HH:mm');
-    } catch {
-      return 'Invalid date';
-    }
-  };
-
-  const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'info' | 'default' => {
-    switch (status) {
-      case 'completed': return 'success';
-      case 'approved': return 'info';
-      case 'pending': return 'warning';
-      case 'draft': return 'default';
-      default: return 'default';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed': return <CheckCircle fontSize="small" />;
-      case 'approved': return <Check fontSize="small" />;
-      case 'pending': return <HourglassEmpty fontSize="small" />;
-      case 'draft': return <Edit fontSize="small" />;
-      default: return <Event fontSize="small" />;
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'completed': return 'Completed';
-      case 'approved': return 'Approved';
-      case 'pending': return 'Pending Review';
-      case 'draft': return 'Draft';
-      default: return status;
-    }
-  };
-
-  const getContributorInitials = (contributor: User) => {
-    const first = contributor?.firstName?.charAt(0) || '';
-    const last = contributor?.lastName?.charAt(0) || '';
-    return `${first}${last}`.toUpperCase() || '?';
-  };
-
-  const getContributorName = (contributor: User) => {
-    return `${contributor.firstName || ''} ${contributor.lastName || ''}`.trim() || 'Unknown';
-  };
-
-  const getAuthorAvatarColor = (userId: string): string => {
-    const colors = ['#1976d2', '#2e7d32', '#ed6c02', '#d32f2f', '#7b1fa2', '#00796b', '#388e3c', '#f57c00', '#0288d1', '#c2185b'];
-    const index = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-    return colors[index];
-  };
-
-  const getStudentFullName = (student: Student) => {
-    return `${student.firstName} ${student.lastName}`.trim();
-  };
-
-  const getStudentDisplayName = (student: Student) => {
-    const fullName = getStudentFullName(student);
-    const gibyId = student.gibyGubayeId ? ` (${student.gibyGubayeId})` : '';
-    return `${fullName}${gibyId}`;
-  };
-
-  // Filter students based on search
-  const filteredStudents = students.filter(student => {
-    const fullName = getStudentFullName(student).toLowerCase();
-    const searchTerm = studentSearch.toLowerCase();
-    return fullName.includes(searchTerm) || 
-           (student.email && student.email.toLowerCase().includes(searchTerm)) ||
-           student.phone.includes(searchTerm) ||
-           (student.gibyGubayeId && student.gibyGubayeId.toLowerCase().includes(searchTerm));
-  });
+  if (!user) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -734,8 +861,20 @@ const AgendaManagementPage = () => {
                 Agenda Management
               </Typography>
               <Typography variant={isMobile ? "body2" : "body1"} color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                Create, edit, and manage meeting agendas
+                Create, edit, and manage meeting agendas for {user.role}
               </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                <Chip 
+                  label={`Class: ${user?.role || 'N/A'}`} 
+                  sx={{ 
+                    backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff20',
+                    color: theme === 'dark' ? '#00ffff' : '#007bff',
+                    fontWeight: 'medium',
+                    fontSize: '0.75rem'
+                  }}
+                  icon={<Event sx={{ fontSize: 16 }} />}
+                />
+              </Box>
             </Box>
           </motion.div>
 
@@ -837,7 +976,7 @@ const AgendaManagementPage = () => {
                     alignItems: 'center',
                     gap: 1
                   }}>
-                    <Event /> All Agendas
+                    <Event /> All Agendas for {user.role}
                   </Typography>
                   
                   <Box sx={{ 
@@ -913,48 +1052,9 @@ const AgendaManagementPage = () => {
                     }}
                     sx={{
                       flex: { xs: '1 1 100%', md: '1 1 300px' },
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 1,
-                        backgroundColor: theme === 'dark' ? '#1e293b' : 'white',
-                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                        '& fieldset': {
-                          borderColor: theme === 'dark' ? '#334155' : '#e5e7eb',
-                        },
-                        '&:hover fieldset': {
-                          borderColor: theme === 'dark' ? '#00ffff' : '#007bff',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: theme === 'dark' ? '#00ffff' : '#007bff',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: theme === 'dark' ? '#a8b2d1' : '#666666',
-                      }
+                      ...textFieldStyle
                     }}
                   />
-                  
-                  <FormControl size="small" sx={{ flex: { xs: '1 1 100%', md: '1 1 200px' } }}>
-                    <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Meeting Class</InputLabel>
-                    <Select
-                      value={filters.meetingClass}
-                      label="Meeting Class"
-                      onChange={(e) => handleFilterChange('meetingClass', e.target.value)}
-                      sx={selectStyle}
-                    >
-                      <MenuItem value="">
-                        <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                          All Classes
-                        </Typography>
-                      </MenuItem>
-                      {filterOptions.meetingClasses.map((meetingClass) => (
-                        <MenuItem key={meetingClass} value={meetingClass}>
-                          <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
-                            {meetingClass}
-                          </Typography>
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
                   
                   <FormControl size="small" sx={{ flex: { xs: '1 1 100%', md: '1 1 200px' } }}>
                     <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Status</InputLabel>
@@ -984,12 +1084,46 @@ const AgendaManagementPage = () => {
                       {filterOptions.creators.map((creator) => (
                         <MenuItem key={creator._id} value={creator._id}>
                           <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
-                            {creator.firstName} {creator.lastName}
+                            {creator.name}
                           </Typography>
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
+                </Box>
+
+                {/* Date Range Filters */}
+                <Box sx={{ 
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  gap: 2,
+                  mt: 2
+                }}>
+                  <DatePicker
+                    label="From Date"
+                    value={filters.fromDate}
+                    onChange={(newValue) => handleFilterChange('fromDate', newValue)}
+                    slotProps={{
+                      textField: {
+                        size: 'small',
+                        fullWidth: true,
+                        sx: textFieldStyle
+                      }
+                    }}
+                  />
+                  
+                  <DatePicker
+                    label="To Date"
+                    value={filters.toDate}
+                    onChange={(newValue) => handleFilterChange('toDate', newValue)}
+                    slotProps={{
+                      textField: {
+                        size: 'small',
+                        fullWidth: true,
+                        sx: textFieldStyle
+                      }
+                    }}
+                  />
                 </Box>
               </CardContent>
             </Card>
@@ -1022,7 +1156,7 @@ const AgendaManagementPage = () => {
                 backgroundColor: theme === 'dark' ? '#0f172a80' : 'white',
                 backdropFilter: theme === 'dark' ? 'blur(10px)' : 'none'
               }}>
-                <TableContainer>
+                <TableContainer sx={{ maxWidth: '100%', overflowX: 'auto' }}>
                   <Table>
                     <TableHead>
                       <TableRow sx={{ 
@@ -1030,46 +1164,74 @@ const AgendaManagementPage = () => {
                           ? 'linear-gradient(135deg, #00ffff, #00b3b3)'
                           : 'linear-gradient(135deg, #007bff, #0056b3)'
                       }}>
-                        <TableCell sx={{ 
-                          color: 'white', 
-                          fontWeight: 'bold',
-                          fontSize: '0.875rem',
-                          py: 2
-                        }}>
-                          Meeting Details
-                        </TableCell>
-                        <TableCell sx={{ 
-                          color: 'white', 
-                          fontWeight: 'bold',
-                          fontSize: '0.875rem',
-                          py: 2
-                        }}>
-                          Contributors
-                        </TableCell>
-                        <TableCell sx={{ 
-                          color: 'white', 
-                          fontWeight: 'bold',
-                          fontSize: '0.875rem',
-                          py: 2
-                        }}>
-                          Agenda Titles
-                        </TableCell>
-                        <TableCell sx={{ 
-                          color: 'white', 
-                          fontWeight: 'bold',
-                          fontSize: '0.875rem',
-                          py: 2
-                        }}>
-                          Status & Dates
-                        </TableCell>
-                        <TableCell sx={{ 
-                          color: 'white', 
-                          fontWeight: 'bold',
-                          fontSize: '0.875rem',
-                          py: 2
-                        }}>
-                          Actions
-                        </TableCell>
+                        {isMobile ? (
+                          <>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2
+                            }}>
+                              Meeting Details
+                            </TableCell>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2
+                            }}>
+                              Actions
+                            </TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2,
+                              minWidth: '200px'
+                            }}>
+                              Meeting Details
+                            </TableCell>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2,
+                              minWidth: '150px'
+                            }}>
+                              Contributors
+                            </TableCell>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2,
+                              minWidth: '150px'
+                            }}>
+                              Agenda Titles
+                            </TableCell>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2,
+                              minWidth: '150px'
+                            }}>
+                              Status & Dates
+                            </TableCell>
+                            <TableCell sx={{ 
+                              color: 'white', 
+                              fontWeight: 'bold',
+                              fontSize: '0.875rem',
+                              py: 2,
+                              minWidth: '120px'
+                            }}>
+                              Actions
+                            </TableCell>
+                          </>
+                        )}
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1083,165 +1245,256 @@ const AgendaManagementPage = () => {
                             }
                           }}
                         >
-                          <TableCell sx={{ py: 2.5 }}>
-                            <Box>
-                              <Typography variant="subtitle1" sx={{ 
-                                fontWeight: 'bold',
-                                color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                                mb: 0.5
-                              }}>
-                                {agenda.meetingClass}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <LocationOn fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                          {isMobile ? (
+                            <>
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box>
+                                  <Typography variant="subtitle1" sx={{ 
+                                    fontWeight: 'bold',
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    mb: 0.5
+                                  }}>
+                                    {agenda.meetingClass}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                    <LocationOn fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                    <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                      {agenda.location}
+                                    </Typography>
+                                  </Box>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                    <Person fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                    <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
+                                      Created by: {getUserName(agenda.createdBy)}
+                                    </Typography>
+                                  </Box>
+                                  <Box sx={{ mb: 1 }}>
+                                    <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                      {agenda.draftContributors.length} draft contributor(s)
+                                    </Typography>
+                                  </Box>
+                                  <Chip
+                                    label={getStatusText(agenda.status)}
+                                    size="small"
+                                    icon={getStatusIcon(agenda.status)}
+                                    color={getStatusColor(agenda.status)}
+                                    sx={{ height: 24, fontSize: '0.7rem', mb: 1 }}
+                                  />
+                                  <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
+                                    Draft: {formatDate(agenda.draftDate)}
+                                  </Typography>
+                                </Box>
+                              </TableCell>
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                  <Tooltip title="View">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleOpenViewDialog(agenda)}
+                                      sx={{ 
+                                        color: theme === 'dark' ? '#00ffff' : '#007bff',
+                                        '&:hover': {
+                                          backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
+                                        }
+                                      }}
+                                    >
+                                      <Visibility fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  
+                                  {agenda.status === 'pending' && (
+                                    <Tooltip title="Edit">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenEditDialog(agenda)}
+                                        sx={{ 
+                                          color: theme === 'dark' ? '#00ff00' : '#28a745',
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#00ff0020' : '#28a74510'
+                                          }
+                                        }}
+                                      >
+                                        <Edit fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                  
+                                  {agenda.status === 'approved' && (
+                                    <Tooltip title="Continue">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenContinueDialog(agenda)}
+                                        sx={{ 
+                                          color: theme === 'dark' ? '#ff9900' : '#ff9900',
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#ff990020' : '#ff990010'
+                                          }
+                                        }}
+                                      >
+                                        <ArrowForward fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                  
+                                  {agenda.status === 'pending' && (
+                                    <Tooltip title="Delete">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenDeleteDialog(agenda)}
+                                        sx={{ 
+                                          color: theme === 'dark' ? '#ff0000' : '#dc3545',
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
+                                          }
+                                        }}
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                </Box>
+                              </TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box>
+                                  <Typography variant="subtitle1" sx={{ 
+                                    fontWeight: 'bold',
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    mb: 0.5
+                                  }}>
+                                    {agenda.meetingClass}
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                    <LocationOn fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                    <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                      {agenda.location}
+                                    </Typography>
+                                  </Box>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Person fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                    <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
+                                      Created by: {getUserName(agenda.createdBy)}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              </TableCell>
+                              
+                              <TableCell sx={{ py: 2.5 }}>
                                 <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                  {agenda.location}
+                                  {agenda.draftContributors.length} draft contributor(s)
                                 </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Person fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
-                                <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
-                                  Created by {agenda.createdBy.firstName} {agenda.createdBy.lastName}
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </TableCell>
-                          
-                          <TableCell sx={{ py: 2.5 }}>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: '200px' }}>
-                              {agenda.draftContributors.slice(0, 3).map((contributor) => (
-                                <Chip
-                                  key={contributor._id}
-                                  label={getContributorInitials(contributor)}
-                                  size="small"
-                                  sx={{
-                                    height: 24,
-                                    fontSize: '0.7rem',
-                                    backgroundColor: getAuthorAvatarColor(contributor._id),
-                                    color: 'white'
-                                  }}
-                                />
-                              ))}
-                              {agenda.draftContributors.length > 3 && (
-                                <Chip
-                                  label={`+${agenda.draftContributors.length - 3}`}
-                                  size="small"
-                                  sx={{
-                                    height: 24,
-                                    fontSize: '0.7rem',
-                                    backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb'
-                                  }}
-                                />
-                              )}
-                            </Box>
-                          </TableCell>
-                          
-                          <TableCell sx={{ py: 2.5 }}>
-                            <Box>
-                              <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ mb: 0.5 }}>
-                                {agenda.agendaTitles.length} title(s)
-                              </Typography>
-                              <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'} sx={{ 
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                              }}>
-                                {agenda.agendaTitles.map(t => t.title).join(', ')}
-                              </Typography>
-                            </Box>
-                          </TableCell>
-                          
-                          <TableCell sx={{ py: 2.5 }}>
-                            <Stack spacing={1}>
-                              <Chip
-                                label={getStatusText(agenda.status)}
-                                size="small"
-                                icon={getStatusIcon(agenda.status)}
-                                color={getStatusColor(agenda.status)}
-                                sx={{ height: 24, fontSize: '0.7rem' }}
-                              />
-                              <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
-                                Draft: {formatDate(agenda.draftDate)}
-                              </Typography>
-                              {agenda.meetingDate && (
-                                <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
-                                  Meeting: {formatDate(agenda.meetingDate)}
-                                </Typography>
-                              )}
-                            </Stack>
-                          </TableCell>
-                          
-                          <TableCell sx={{ py: 2.5 }}>
-                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                              <Tooltip title="View">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleOpenViewDialog(agenda)}
-                                  sx={{ 
-                                    color: theme === 'dark' ? '#00ffff' : '#007bff',
-                                    '&:hover': {
-                                      backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
-                                    }
-                                  }}
-                                >
-                                  <Visibility fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
+                              </TableCell>
                               
-                              {/* Edit button - only for pending agendas */}
-                              {agenda.status === 'pending' && (
-                                <Tooltip title="Edit">
-                                  <IconButton
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box>
+                                  <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ mb: 0.5 }}>
+                                    {agenda.agendaTitles.length} title(s)
+                                  </Typography>
+                                  <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'} sx={{ 
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis'
+                                  }}>
+                                    {agenda.agendaTitles.map(t => t.title).join(', ')}
+                                  </Typography>
+                                </Box>
+                              </TableCell>
+                              
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Stack spacing={1}>
+                                  <Chip
+                                    label={getStatusText(agenda.status)}
                                     size="small"
-                                    onClick={() => handleOpenEditDialog(agenda)}
-                                    sx={{ 
-                                      color: theme === 'dark' ? '#00ff00' : '#28a745',
-                                      '&:hover': {
-                                        backgroundColor: theme === 'dark' ? '#00ff0020' : '#28a74510'
-                                      }
-                                    }}
-                                  >
-                                    <Edit fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
+                                    icon={getStatusIcon(agenda.status)}
+                                    color={getStatusColor(agenda.status)}
+                                    sx={{ height: 24, fontSize: '0.7rem' }}
+                                  />
+                                  <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
+                                    Draft: {formatDate(agenda.draftDate)}
+                                  </Typography>
+                                  {agenda.meetingDate && (
+                                    <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
+                                      Meeting: {formatDate(agenda.meetingDate)}
+                                    </Typography>
+                                  )}
+                                </Stack>
+                              </TableCell>
                               
-                              {/* Continue button - only for approved agendas */}
-                              {agenda.status === 'approved' && (
-                                <Tooltip title="Continue">
-                                  <IconButton
-                                    size="small"
-                                    onClick={() => handleOpenContinueDialog(agenda)}
-                                    sx={{ 
-                                      color: theme === 'dark' ? '#ff9900' : '#ff9900',
-                                      '&:hover': {
-                                        backgroundColor: theme === 'dark' ? '#ff990020' : '#ff990010'
-                                      }
-                                    }}
-                                  >
-                                    <ArrowForward fontSize="small" />
-                                  </IconButton>
-                                </Tooltip>
-                              )}
-                              
-                              <Tooltip title="Delete">
-                                <IconButton
-                                  size="small"
-                                  onClick={() => handleOpenDeleteDialog(agenda)}
-                                  sx={{ 
-                                    color: theme === 'dark' ? '#ff0000' : '#dc3545',
-                                    '&:hover': {
-                                      backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
-                                    }
-                                  }}
-                                >
-                                  <Delete fontSize="small" />
-                                </IconButton>
-                              </Tooltip>
-                            </Box>
-                          </TableCell>
+                              <TableCell sx={{ py: 2.5 }}>
+                                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                  <Tooltip title="View">
+                                    <IconButton
+                                      size="small"
+                                      onClick={() => handleOpenViewDialog(agenda)}
+                                      sx={{ 
+                                        color: theme === 'dark' ? '#00ffff' : '#007bff',
+                                        '&:hover': {
+                                          backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
+                                        }
+                                      }}
+                                    >
+                                      <Visibility fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                  
+                                  {agenda.status === 'pending' && (
+                                    <Tooltip title="Edit">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenEditDialog(agenda)}
+                                        sx={{ 
+                                          color: theme === 'dark' ? '#00ff00' : '#28a745',
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#00ff0020' : '#28a74510'
+                                          }
+                                        }}
+                                      >
+                                        <Edit fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                  
+                                  {agenda.status === 'approved' && (
+                                    <Tooltip title="Continue">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenContinueDialog(agenda)}
+                                        sx={{ 
+                                          color: theme === 'dark' ? '#ff9900' : '#ff9900',
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#ff990020' : '#ff990010'
+                                          }
+                                        }}
+                                      >
+                                        <ArrowForward fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                  
+                                  {agenda.status === 'pending' && (
+                                    <Tooltip title="Delete">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleOpenDeleteDialog(agenda)}
+                                        sx={{ 
+                                          color: theme === 'dark' ? '#ff0000' : '#dc3545',
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
+                                          }
+                                        }}
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
+                                </Box>
+                              </TableCell>
+                            </>
+                          )}
                         </TableRow>
                       ))}
                     </TableBody>
@@ -1310,13 +1563,511 @@ const AgendaManagementPage = () => {
             </motion.div>
           )}
 
+          {/* View Agenda Dialog */}
+          <Dialog 
+            open={openViewDialog} 
+            onClose={() => setOpenViewDialog(false)} 
+            maxWidth="lg" 
+            fullWidth
+            fullScreen={isMobile}
+            PaperProps={{
+              sx: { 
+                borderRadius: 2,
+                backgroundColor: theme === 'dark' ? '#0f172a' : 'white',
+                color: theme === 'dark' ? '#ccd6f6' : '#333333'
+              }
+            }}
+          >
+            {selectedAgenda && (
+              <>
+                <DialogTitle sx={{ 
+                  backgroundColor: theme === 'dark' ? '#0f172a' : 'white',
+                  borderBottom: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
+                  py: 3
+                }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                        Agenda Details
+                      </Typography>
+                      <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                        {selectedAgenda.meetingClass} - {selectedAgenda.location}
+                      </Typography>
+                    </Box>
+                    <Chip
+                      label={getStatusText(selectedAgenda.status)}
+                      color={getStatusColor(selectedAgenda.status)}
+                      icon={getStatusIcon(selectedAgenda.status)}
+                    />
+                  </Box>
+                </DialogTitle>
+                <DialogContent sx={{ p: 3, overflowY: 'auto' }}>
+                  {/* Meeting Details */}
+                  <Card sx={{ 
+                    mb: 3,
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
+                    border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
+                  }}>
+                    <CardContent>
+                      <Typography variant="subtitle1" sx={{ 
+                        mb: 2,
+                        color: theme === 'dark' ? '#ccd6f6' : '#333333'
+                      }}>
+                        📋 Meeting Details
+                      </Typography>
+                      
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3, mb: 2 }}>
+                        <Box>
+                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                            Meeting Class
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                            {selectedAgenda.meetingClass}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                            Location
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                            {selectedAgenda.location}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                            Draft Date
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                            {formatDate(selectedAgenda.draftDate)}
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                            Created By
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                            {getUserName(selectedAgenda.createdBy)}
+                          </Typography>
+                        </Box>
+                        {selectedAgenda.approvedBy && (
+                          <Box>
+                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                              Approved By
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                              {getUserName(selectedAgenda.approvedBy)}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+                      
+                      {/* Draft Contributors */}
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" sx={{ 
+                          color: theme === 'dark' ? '#ccd6f6' : '#333333', 
+                          mb: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}>
+                          <PersonOutline /> Draft Contributors ({selectedAgenda.draftContributors.length})
+                          <IconButton 
+                            size="small" 
+                            onClick={() => toggleRowExpansion(selectedAgenda._id, 'draft')}
+                            sx={{ p: 0, ml: 1 }}
+                          >
+                            <Visibility fontSize="small" />
+                          </IconButton>
+                        </Typography>
+                        
+                        <Collapse in={expandedRows[`${selectedAgenda._id}-draft`]} timeout="auto" unmountOnExit>
+                          <TableContainer component={Paper} elevation={0} sx={{ 
+                            backgroundColor: 'transparent',
+                            border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
+                            mb: 2
+                          }}>
+                            <Table size="small">
+                              <TableHead>
+                                <TableRow sx={{ 
+                                  backgroundColor: theme === 'dark' ? '#0f172a' : '#e5e7eb'
+                                }}>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>#</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>First Name</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>Middle Name</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>Last Name</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>Gender</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>Student ID</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>Phone</TableCell>
+                                  <TableCell sx={{ 
+                                    color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                    fontWeight: 'bold',
+                                    py: 1
+                                  }}>Email</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {selectedAgenda.draftContributors.map((student, index) => (
+                                  <TableRow 
+                                    key={student._id}
+                                    sx={{ 
+                                      '&:hover': {
+                                        backgroundColor: theme === 'dark' ? '#1e293b' : '#f5f5f5'
+                                      }
+                                    }}
+                                  >
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#a8b2d1' : '#666666',
+                                      py: 1
+                                    }}>{index + 1}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.firstName || 'N/A'}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.middleName || 'N/A'}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.lastName || 'N/A'}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.gender || 'N/A'}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.gibyGubayeId || 'N/A'}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.phone || 'N/A'}</TableCell>
+                                    <TableCell sx={{ 
+                                      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                      py: 1
+                                    }}>{student.email || 'N/A'}</TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+                        </Collapse>
+                      </Box>
+                    </CardContent>
+                  </Card>
+
+                  {/* Agenda Titles */}
+                  <Typography variant="h6" sx={{ 
+                    mb: 2,
+                    color: theme === 'dark' ? '#ccd6f6' : '#333333'
+                  }}>
+                    Agenda Titles
+                  </Typography>
+                  
+                  {selectedAgenda.agendaTitles.map((title, titleIndex) => (
+                    <Accordion 
+                      key={titleIndex}
+                      sx={{
+                        mb: 2,
+                        backgroundColor: theme === 'dark' ? '#1e293b' : 'white',
+                        border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
+                        '&:before': { display: 'none' }
+                      }}
+                    >
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                          {title.title}
+                        </Typography>
+                        {title.discussions.length > 0 && (
+                          <Chip
+                            label={`${title.discussions.length} discussion(s)`}
+                            size="small"
+                            sx={{ ml: 2, height: 20, fontSize: '0.6rem' }}
+                          />
+                        )}
+                      </AccordionSummary>
+                      
+                      {title.discussions.length > 0 ? (
+                        <AccordionDetails>
+                          {title.discussions.map((discussion, discIndex) => (
+                            <Paper 
+                              key={discIndex}
+                              sx={{ 
+                                p: 2, 
+                                mb: 2,
+                                backgroundColor: theme === 'dark' ? '#0f172a' : '#f8f9fa',
+                                border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
+                              }}
+                            >
+                              <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
+                                Discussion {discIndex + 1} • {formatDate(discussion.discussedAt)}
+                              </Typography>
+                              
+                              <Stack spacing={2} sx={{ mt: 1 }}>
+                                <Box>
+                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                    Question
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                                    {discussion.question}
+                                  </Typography>
+                                </Box>
+                                
+                                <Box>
+                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                    Answer
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                                    {discussion.answer}
+                                  </Typography>
+                                </Box>
+                                
+                                <Box>
+                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                    Summary
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                                    {discussion.summary}
+                                  </Typography>
+                                </Box>
+                              </Stack>
+                            </Paper>
+                          ))}
+                        </AccordionDetails>
+                      ) : (
+                        <AccordionDetails>
+                          <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ textAlign: 'center', py: 2 }}>
+                            No discussions recorded for this title.
+                          </Typography>
+                        </AccordionDetails>
+                      )}
+                    </Accordion>
+                  ))}
+
+                  {/* Day 2 Data (if exists) */}
+                  {(selectedAgenda.generalMeetingSummary || selectedAgenda.meetingDate || selectedAgenda.meetingContributors.length > 0) && (
+                    <Card sx={{ 
+                      mt: 4,
+                      backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
+                      border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
+                    }}>
+                      <CardContent>
+                        <Typography variant="subtitle1" sx={{ 
+                          mb: 2,
+                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}>
+                          📝 Meeting Summary
+                        </Typography>
+                        
+                        {selectedAgenda.meetingDate && (
+                          <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                              Meeting Date
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                              {formatDate(selectedAgenda.meetingDate)}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {selectedAgenda.generalMeetingSummary && (
+                          <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                              General Meeting Summary
+                            </Typography>
+                            <Typography variant="body2" sx={{ 
+                              color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                              whiteSpace: 'pre-wrap'
+                            }}>
+                              {selectedAgenda.generalMeetingSummary}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {selectedAgenda.meetingContributors.length > 0 && (
+                          <Box>
+                            <Typography variant="subtitle2" sx={{ 
+                              color: theme === 'dark' ? '#ccd6f6' : '#333333', 
+                              mb: 1,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 1
+                            }}>
+                              <PersonOutline /> Meeting Contributors ({selectedAgenda.meetingContributors.length})
+                              <IconButton 
+                                size="small" 
+                                onClick={() => toggleRowExpansion(selectedAgenda._id, 'meeting')}
+                                sx={{ p: 0, ml: 1 }}
+                              >
+                                <Visibility fontSize="small" />
+                              </IconButton>
+                            </Typography>
+                            
+                            <Collapse in={expandedRows[`${selectedAgenda._id}-meeting`]} timeout="auto" unmountOnExit>
+                              <TableContainer component={Paper} elevation={0} sx={{ 
+                                backgroundColor: 'transparent',
+                                border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
+                              }}>
+                                <Table size="small">
+                                  <TableHead>
+                                    <TableRow sx={{ 
+                                      backgroundColor: theme === 'dark' ? '#0f172a' : '#e5e7eb'
+                                    }}>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>#</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>First Name</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>Middle Name</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>Last Name</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>Gender</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>Student ID</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>Phone</TableCell>
+                                      <TableCell sx={{ 
+                                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                        fontWeight: 'bold',
+                                        py: 1
+                                      }}>Email</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {selectedAgenda.meetingContributors.map((student, index) => (
+                                      <TableRow 
+                                        key={student._id}
+                                        sx={{ 
+                                          '&:hover': {
+                                            backgroundColor: theme === 'dark' ? '#1e293b' : '#f5f5f5'
+                                          }
+                                        }}
+                                      >
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#a8b2d1' : '#666666',
+                                          py: 1
+                                        }}>{index + 1}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.firstName || 'N/A'}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.middleName || 'N/A'}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.lastName || 'N/A'}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.gender || 'N/A'}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.gibyGubayeId || 'N/A'}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.phone || 'N/A'}</TableCell>
+                                        <TableCell sx={{ 
+                                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                          py: 1
+                                        }}>{student.email || 'N/A'}</TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </TableContainer>
+                            </Collapse>
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </DialogContent>
+                <DialogActions sx={{ 
+                  p: 3,
+                  borderTop: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
+                  backgroundColor: theme === 'dark' ? '#0f172a' : 'white'
+                }}>
+                  <Button 
+                    onClick={() => setOpenViewDialog(false)}
+                    sx={{
+                      color: theme === 'dark' ? '#00ffff' : '#007bff',
+                      '&:hover': {
+                        backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
+                      }
+                    }}
+                  >
+                    Close
+                  </Button>
+                </DialogActions>
+              </>
+            )}
+          </Dialog>
+
           {/* Create/Edit Agenda Dialog */}
           <Dialog 
             open={openCreateDialog || openEditDialog} 
             onClose={() => {
               setOpenCreateDialog(false);
               setOpenEditDialog(false);
-              resetForm();
             }} 
             maxWidth="md" 
             fullWidth
@@ -1344,29 +2095,16 @@ const AgendaManagementPage = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 {/* Meeting Class and Location */}
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                  <FormControl fullWidth size="small">
-                    <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Meeting Class *</InputLabel>
-                    <Select
-                      value={formData.meetingClass}
-                      label="Meeting Class *"
-                      onChange={(e) => handleFormChange('meetingClass', e.target.value)}
-                      sx={selectStyle}
-                      required
-                    >
-                      <MenuItem value="">
-                        <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                          Select Class
-                        </Typography>
-                      </MenuItem>
-                      {meetingClasses.map((meetingClass) => (
-                        <MenuItem key={meetingClass} value={meetingClass}>
-                          <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
-                            {meetingClass}
-                          </Typography>
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Meeting Class"
+                    value={formData.meetingClass}
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    sx={textFieldStyle}
+                  />
                   
                   <TextField
                     fullWidth
@@ -1380,7 +2118,7 @@ const AgendaManagementPage = () => {
                   />
                 </Box>
 
-                {/* Draft Contributors - Updated to use Student selection */}
+                {/* Draft Contributors */}
                 <Box>
                   <Typography variant="subtitle2" sx={{ 
                     mb: 1,
@@ -1388,21 +2126,10 @@ const AgendaManagementPage = () => {
                   }}>
                     Draft Contributors (Select Students)
                   </Typography>
-                  <Box sx={{ mb: 2 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Search Students"
-                      value={studentSearch}
-                      onChange={(e) => setStudentSearch(e.target.value)}
-                      placeholder="Search by name, email, phone, or student ID..."
-                      sx={textFieldStyle}
-                    />
-                  </Box>
                   
                   <Autocomplete
                     multiple
-                    options={filteredStudents}
+                    options={students}
                     getOptionLabel={(option) => getStudentDisplayName(option)}
                     value={selectedContributors}
                     onChange={(event, newValue) => {
@@ -1425,8 +2152,8 @@ const AgendaManagementPage = () => {
                           sx={{
                             height: 24,
                             fontSize: '0.75rem',
-                            backgroundColor: getAuthorAvatarColor(option._id),
-                            color: 'white'
+                            backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff20',
+                            color: theme === 'dark' ? '#00ffff' : '#007bff'
                           }}
                         />
                       ))
@@ -1506,7 +2233,6 @@ const AgendaManagementPage = () => {
                 onClick={() => {
                   setOpenCreateDialog(false);
                   setOpenEditDialog(false);
-                  resetForm();
                 }}
                 sx={{
                   color: theme === 'dark' ? '#00ffff' : '#007bff',
@@ -1520,7 +2246,7 @@ const AgendaManagementPage = () => {
               <Button 
                 onClick={openEditDialog ? handleUpdateAgenda : handleCreateAgenda}
                 variant="contained"
-                disabled={!formData.meetingClass || !formData.location || !formData.agendaTitles[0]?.title}
+                disabled={!formData.location || !formData.agendaTitles[0]?.title}
                 sx={{
                   background: theme === 'dark'
                     ? 'linear-gradient(135deg, #00ffff, #00b3b3)'
@@ -1574,73 +2300,6 @@ const AgendaManagementPage = () => {
                   </Typography>
                 </DialogTitle>
                 <DialogContent sx={{ p: 3, overflowY: 'auto' }}>
-                  {/* Read-only Day 1 Data */}
-                  <Card sx={{ 
-                    mb: 3,
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
-                    border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
-                  }}>
-                    <CardContent>
-                      <Typography variant="subtitle1" sx={{ 
-                        mb: 2,
-                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1
-                      }}>
-                        📋 Day 1 Agenda Details (Read-only)
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, mb: 2 }}>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Meeting Class
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {selectedAgenda.meetingClass}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Location
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {selectedAgenda.location}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Draft Date
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {formatDate(selectedAgenda.draftDate)}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                          Draft Contributors
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                          {selectedAgenda.draftContributors.map((contributor) => (
-                            <Chip
-                              key={contributor._id}
-                              label={getContributorName(contributor)}
-                              size="small"
-                              sx={{
-                                height: 24,
-                                fontSize: '0.7rem',
-                                backgroundColor: getAuthorAvatarColor(contributor._id),
-                                color: 'white'
-                              }}
-                            />
-                          ))}
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-
                   {/* Agenda Titles with Discussions */}
                   <Typography variant="h6" sx={{ 
                     mb: 3,
@@ -1788,7 +2447,7 @@ const AgendaManagementPage = () => {
                     />
                   </Box>
 
-                  {/* Meeting Contributors - Updated to use Student selection */}
+                  {/* Meeting Contributors */}
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="subtitle1" sx={{ 
                       mb: 2,
@@ -1796,21 +2455,10 @@ const AgendaManagementPage = () => {
                     }}>
                       Meeting Contributors (Select Students)
                     </Typography>
-                    <Box sx={{ mb: 2 }}>
-                      <TextField
-                        fullWidth
-                        size="small"
-                        label="Search Students"
-                        value={studentSearch}
-                        onChange={(e) => setStudentSearch(e.target.value)}
-                        placeholder="Search by name, email, phone, or student ID..."
-                        sx={textFieldStyle}
-                      />
-                    </Box>
                     
                     <Autocomplete
                       multiple
-                      options={filteredStudents}
+                      options={students}
                       getOptionLabel={(option) => getStudentDisplayName(option)}
                       value={selectedMeetingContributors}
                       onChange={(event, newValue) => {
@@ -1833,8 +2481,8 @@ const AgendaManagementPage = () => {
                             sx={{
                               height: 24,
                               fontSize: '0.75rem',
-                              backgroundColor: getAuthorAvatarColor(option._id),
-                              color: 'white'
+                              backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff20',
+                              color: theme === 'dark' ? '#00ffff' : '#007bff'
                             }}
                           />
                         ))
@@ -1904,308 +2552,6 @@ const AgendaManagementPage = () => {
                     }}
                   >
                     {continueFormData.status === 'completed' ? 'Finish Meeting' : 'Save Draft'}
-                  </Button>
-                </DialogActions>
-              </>
-            )}
-          </Dialog>
-
-          {/* View Agenda Dialog */}
-          <Dialog 
-            open={openViewDialog} 
-            onClose={() => setOpenViewDialog(false)} 
-            maxWidth="lg" 
-            fullWidth
-            fullScreen={isMobile}
-            PaperProps={{
-              sx: { 
-                borderRadius: 2,
-                backgroundColor: theme === 'dark' ? '#0f172a' : 'white',
-                color: theme === 'dark' ? '#ccd6f6' : '#333333'
-              }
-            }}
-          >
-            {selectedAgenda && (
-              <>
-                <DialogTitle sx={{ 
-                  backgroundColor: theme === 'dark' ? '#0f172a' : 'white',
-                  borderBottom: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
-                  py: 3
-                }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                        Agenda Details
-                      </Typography>
-                      <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                        {selectedAgenda.meetingClass} - {selectedAgenda.location}
-                      </Typography>
-                    </Box>
-                    <Chip
-                      label={getStatusText(selectedAgenda.status)}
-                      color={getStatusColor(selectedAgenda.status)}
-                      icon={getStatusIcon(selectedAgenda.status)}
-                    />
-                  </Box>
-                </DialogTitle>
-                <DialogContent sx={{ p: 3, overflowY: 'auto' }}>
-                  {/* Day 1 Data */}
-                  <Card sx={{ 
-                    mb: 3,
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
-                    border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
-                  }}>
-                    <CardContent>
-                      <Typography variant="subtitle1" sx={{ 
-                        mb: 2,
-                        color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1
-                      }}>
-                        📋 Day 1 Agenda Details
-                      </Typography>
-                      
-                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3, mb: 2 }}>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Meeting Class
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {selectedAgenda.meetingClass}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Location
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {selectedAgenda.location}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Draft Date
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {formatDate(selectedAgenda.draftDate)}
-                          </Typography>
-                        </Box>
-                        <Box>
-                          <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            Created By
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {selectedAgenda.createdBy.firstName} {selectedAgenda.createdBy.lastName}
-                          </Typography>
-                        </Box>
-                        {selectedAgenda.approvedBy && (
-                          <Box>
-                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              Approved By
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                              {selectedAgenda.approvedBy.firstName} {selectedAgenda.approvedBy.lastName}
-                            </Typography>
-                          </Box>
-                        )}
-                      </Box>
-                      
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                          Draft Contributors
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                          {selectedAgenda.draftContributors.map((contributor) => (
-                            <Chip
-                              key={contributor._id}
-                              label={getContributorName(contributor)}
-                              size="small"
-                              sx={{
-                                height: 24,
-                                fontSize: '0.7rem',
-                                backgroundColor: getAuthorAvatarColor(contributor._id),
-                                color: 'white'
-                              }}
-                            />
-                          ))}
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-
-                  {/* Agenda Titles */}
-                  <Typography variant="h6" sx={{ 
-                    mb: 2,
-                    color: theme === 'dark' ? '#ccd6f6' : '#333333'
-                  }}>
-                    Agenda Titles
-                  </Typography>
-                  
-                  {selectedAgenda.agendaTitles.map((title, titleIndex) => (
-                    <Accordion 
-                      key={titleIndex}
-                      sx={{
-                        mb: 2,
-                        backgroundColor: theme === 'dark' ? '#1e293b' : 'white',
-                        border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
-                        '&:before': { display: 'none' }
-                      }}
-                    >
-                      <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                          {title.title}
-                        </Typography>
-                        {title.discussions.length > 0 && (
-                          <Chip
-                            label={`${title.discussions.length} discussion(s)`}
-                            size="small"
-                            sx={{ ml: 2, height: 20, fontSize: '0.6rem' }}
-                          />
-                        )}
-                      </AccordionSummary>
-                      
-                      {title.discussions.length > 0 ? (
-                        <AccordionDetails>
-                          {title.discussions.map((discussion, discIndex) => (
-                            <Paper 
-                              key={discIndex}
-                              sx={{ 
-                                p: 2, 
-                                mb: 2,
-                                backgroundColor: theme === 'dark' ? '#0f172a' : '#f8f9fa',
-                                border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
-                              }}
-                            >
-                              <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
-                                Discussion {discIndex + 1} • {formatDate(discussion.discussedAt)}
-                              </Typography>
-                              
-                              <Stack spacing={2} sx={{ mt: 1 }}>
-                                <Box>
-                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                    Question
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                    {discussion.question}
-                                  </Typography>
-                                </Box>
-                                
-                                <Box>
-                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                    Answer
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                    {discussion.answer}
-                                  </Typography>
-                                </Box>
-                                
-                                <Box>
-                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                    Summary
-                                  </Typography>
-                                  <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                    {discussion.summary}
-                                  </Typography>
-                                </Box>
-                              </Stack>
-                            </Paper>
-                          ))}
-                        </AccordionDetails>
-                      ) : (
-                        <AccordionDetails>
-                          <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ textAlign: 'center', py: 2 }}>
-                            No discussions recorded for this title.
-                          </Typography>
-                        </AccordionDetails>
-                      )}
-                    </Accordion>
-                  ))}
-
-                  {/* Day 2 Data (if exists) */}
-                  {(selectedAgenda.generalMeetingSummary || selectedAgenda.meetingDate) && (
-                    <Card sx={{ 
-                      mt: 4,
-                      backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
-                      border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
-                    }}>
-                      <CardContent>
-                        <Typography variant="subtitle1" sx={{ 
-                          mb: 2,
-                          color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1
-                        }}>
-                          📝 Day 2 Meeting Details
-                        </Typography>
-                        
-                        {selectedAgenda.meetingDate && (
-                          <Box sx={{ mb: 2 }}>
-                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              Meeting Date
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                              {formatDate(selectedAgenda.meetingDate)}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {selectedAgenda.generalMeetingSummary && (
-                          <Box sx={{ mb: 2 }}>
-                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              General Meeting Summary
-                            </Typography>
-                            <Typography variant="body2" sx={{ 
-                              color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                              whiteSpace: 'pre-wrap'
-                            }}>
-                              {selectedAgenda.generalMeetingSummary}
-                            </Typography>
-                          </Box>
-                        )}
-                        
-                        {selectedAgenda.meetingContributors.length > 0 && (
-                          <Box>
-                            <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              Meeting Contributors
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
-                              {selectedAgenda.meetingContributors.map((contributor) => (
-                                <Chip
-                                  key={contributor._id}
-                                  label={getContributorName(contributor)}
-                                  size="small"
-                                  sx={{
-                                    height: 24,
-                                    fontSize: '0.7rem',
-                                    backgroundColor: getAuthorAvatarColor(contributor._id),
-                                    color: 'white'
-                                  }}
-                                />
-                              ))}
-                            </Box>
-                          </Box>
-                        )}
-                      </CardContent>
-                    </Card>
-                  )}
-                </DialogContent>
-                <DialogActions sx={{ 
-                  p: 3,
-                  borderTop: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
-                  backgroundColor: theme === 'dark' ? '#0f172a' : 'white'
-                }}>
-                  <Button 
-                    onClick={() => setOpenViewDialog(false)}
-                    sx={{
-                      color: theme === 'dark' ? '#00ffff' : '#007bff',
-                      '&:hover': {
-                        backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
-                      }
-                    }}
-                  >
-                    Close
                   </Button>
                 </DialogActions>
               </>
