@@ -748,7 +748,7 @@ const BlogsPage = () => {
       }`}>
         <Box sx={{ 
           py: 3,
-          px: { xs: 2, sm: 3, md: 4 }
+          px: 2
         }}>
           {/* Header */}
           <motion.div
