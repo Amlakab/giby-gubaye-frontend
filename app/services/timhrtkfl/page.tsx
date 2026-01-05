@@ -128,7 +128,7 @@ export default function AbalateGudayPage() {
                     <span className="font-bold">የአብነት ትምህርት ማጠናከር፦</span> የግቢ ጉባኤ ተማሪዎች ከዘመናዊ ትምህርታቸው ጎን ለጎን የግዕዝ ቋንቋን፣ ዜማንና ቅዳሴን እንዲማሩ በማድረግ ለድቁና እና ለክህነት ዝግጅት እንዲያደርጉ ይረዳል።
                   </p>
                   
-                  <h2 className={`text-xl font-bold mt-6 mb-2 ${
+                  {/* <h2 className={`text-xl font-bold mt-6 mb-2 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
                     የትምህርት ክፍል ንዑሳን ክፍሎች (Sub-classes)
@@ -146,7 +146,7 @@ export default function AbalateGudayPage() {
                     <li><span className="font-bold">የመምህራን ምደባ ንዑስ ክፍል፦</span> ለመደበኛ ኮርሶች፣ ለጉዞ መርሐ ግብራት እና ለልዩ ጉባኤያት መምህራንን የመለየት እና የመመደብ ኃላፊነት አለበት።</li>
                     <li><span className="font-bold">የሥርዓተ ትምህርት እና ክትትል ንዑስ ክፍል፦</span> ትምህርቶች በታቀደላቸው መርሃ ግብር መሠረት መሰጠታቸውን፣ የአባላትን መገኘት (Attendance) እና የትምህርቱን ጥራት ይከታተላል።</li>
                     <li><span className="font-bold">የአብነት ትምህርት ንዑስ ክፍል፦</span> በግቢ ጉባኤው ውስጥ የሚሰጡ የዜማ፣ የቅዳሴ እና የግዕዝ ትምህርቶችን በበላይነት ያስተባብራል፤ የአብነት መምህራንንም ይደግፋል።</li>
-                  </ol>
+                  </ol> */}
                 </div>
               </motion.div>
 
@@ -172,123 +172,124 @@ export default function AbalateGudayPage() {
             </div>
 
             {/* Additional Details Section */}
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              transition={{ duration: 1 }}
-              viewport={{ once: true }}
-              className="mt-16"
-            >
-              <h2 className={`text-2xl md:text-3xl font-bold mb-8 ${
-                theme === 'dark' ? 'text-primary' : 'text-primary'
-              }`}>
-                በትምህርት ክፍል ክፍል ውስጥ የሚካተቱ ንውስ ክፍላት
-              </h2>
-              
-              <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${
-                theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
-              }`}>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">1</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Data Protection & Privacy
-                      </h3>
-                      <p className="text-sm">
-                        Developing comprehensive data protection laws and privacy regulations for both public and private sectors.
-                      </p>
-                    </div>
-                  </div>
+            {/* Additional Details Section */}
+<motion.div
+  initial={{ y: 50, opacity: 0 }}
+  whileInView={{ y: 0, opacity: 1 }}
+  transition={{ duration: 1 }}
+  viewport={{ once: true }}
+  className="mt-16"
+>
+  <h2 className={`text-2xl md:text-3xl font-bold mb-8 ${
+    theme === 'dark' ? 'text-primary' : 'text-primary'
+  }`}>
+    የትምህርት ክፍል ተጨማሪ ንዑሳን ክፍሎች
+  </h2>
+  
+  <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${
+    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+  }`}>
+    <div className="space-y-4">
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+          <span className="text-primary text-sm">4</span>
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-1 ${
+            theme === 'dark' ? 'text-white' : 'text-text-primary'
+          }`}>
+            የማስተማሪያ ቁሳቁሶች እና የክትትል ንዑስ ክፍል
+          </h3>
+          <p className="text-sm">
+            የተለያዩ የትምህርት ቁሳቁሶችን አዘጋጅቶ፣ ከአባላት መገኘት (አቴንዳንስ) ጋር የተያያዘ የመረጃ ስርዓት አዘጋጅቶ የአገልግሎቱን ውጤታማነት ይከታተላል።
+          </p>
+        </div>
+      </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">2</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Critical Infrastructure Protection
-                      </h3>
-                      <p className="text-sm">
-                        Establishing security standards for protecting Ethiopia's critical digital infrastructure.
-                      </p>
-                    </div>
-                  </div>
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+          <span className="text-primary text-sm">5</span>
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-1 ${
+            theme === 'dark' ? 'text-white' : 'text-text-primary'
+          }`}>
+            የጉዞና የስብከት አሰራር ንዑስ ክፍል
+          </h3>
+          <p className="text-sm">
+            ወደ ከተሞችና ገጠሮች የሚደረጉ የሐዋርያዊ ጉዞዎችን ማደራጀት፣ የአገልግሎት መርሃዎችን አዘጋጅቶ የመንፈሳዊ አገልግሎትን የሚያቀርብ ክፍል ነው።
+          </p>
+        </div>
+      </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">3</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Incident Response Framework
-                      </h3>
-                      <p className="text-sm">
-                        Creating standardized procedures for reporting and responding to cybersecurity incidents.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+          <span className="text-primary text-sm">6</span>
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-1 ${
+            theme === 'dark' ? 'text-white' : 'text-text-primary'
+          }`}>
+            የጥናትና ምርምር ንዑስ ክፍል
+          </h3>
+          <p className="text-sm">
+            የቤተክርስቲያን ታሪክ፣ ትምህርትና ትምህርታዊ ይዘቶችን በመርምር አዳዲስ የትምህርት ቁሳቁሶችን ለማዘጋጀት የሚሠራ ክፍል ነው።
+          </p>
+        </div>
+      </div>
+    </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">4</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Compliance & Certification
-                      </h3>
-                      <p className="text-sm">
-                        Implementing compliance frameworks and certification programs for organizations.
-                      </p>
-                    </div>
-                  </div>
+    <div className="space-y-4">
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+          <span className="text-primary text-sm">7</span>
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-1 ${
+            theme === 'dark' ? 'text-white' : 'text-text-primary'
+          }`}>
+            የየበዓላት አገልግሎት ንዑስ ክፍል
+          </h3>
+          <p className="text-sm">
+            በየበዓላቱ የሚሰጡ ልዩ ልዩ የመንፈሳዊ ትምህርቶችን፣ የዕረፍት ጊዜ እንቅስቃሴዎችን እና የልዩ አገልግሎት መርሃዎችን የሚያዘጋጅ ክፍል ነው።
+          </p>
+        </div>
+      </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">5</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Public Awareness Guidelines
-                      </h3>
-                      <p className="text-sm">
-                        Developing policies for public cybersecurity education and awareness campaigns.
-                      </p>
-                    </div>
-                  </div>
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+          <span className="text-primary text-sm">8</span>
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-1 ${
+            theme === 'dark' ? 'text-white' : 'text-text-primary'
+          }`}>
+            የአዲስ አባላት ስልጠና ንዑስ ክፍል
+          </h3>
+          <p className="text-sm">
+            ለአዲስ የሚገቡ አባላት የመሠረታዊ እምነት ትምህርት፣ የቤተክርስቲያን ሥርዓት እና የግቢ ጉባኤ ሥራ አሰጣጥ ስልጠና የሚያቀርብ ክፍል ነው።
+          </p>
+        </div>
+      </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">6</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        International Cooperation
-                      </h3>
-                      <p className="text-sm">
-                        Creating frameworks for international cybersecurity cooperation and information sharing.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+      <div className="flex items-start space-x-3">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+          <span className="text-primary text-sm">9</span>
+        </div>
+        <div>
+          <h3 className={`font-semibold mb-1 ${
+            theme === 'dark' ? 'text-white' : 'text-text-primary'
+          }`}>
+            የመማር-መማር ምዘና ንዑስ ክፍል
+          </h3>
+          <p className="text-sm">
+            የትምህርት ውጤታማነትን በመመዝገብ፣ የተማሪዎችን እድገት በመከታተል እና የትምህርት ዘዴዎችን በመሻሻል ላይ የሚሠራ ክፍል ነው።
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</motion.div>
           </div>
         </section>
       </div>
