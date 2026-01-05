@@ -8,8 +8,8 @@ import { AuthProvider } from "@/lib/auth";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "INSA - Information Network Security Agency",
-  description: "Official website of the Information Network Security Agency",
+  title: "Tepi Giby Gubaye",
+  description: "Official website of Tepi Giby Gubaye",
 };
 export default function RootLayout({
   children,
