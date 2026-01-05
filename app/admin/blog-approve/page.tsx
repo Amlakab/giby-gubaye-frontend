@@ -2559,38 +2559,48 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
                       />
                     </FormRow>
 
+                    {/* Search for this in your code and apply the same fix */}
                     <FormRow columns={1}>
                       <Autocomplete
                         multiple
-                        options={tagsOptions}
                         freeSolo
-                        value={formData.tags}
+                        options={[]}
+                        value={formData.metaKeywords}
                         onChange={(event, newValue) => {
-                          handleFormChange('tags', newValue);
+                          handleFormChange('metaKeywords', newValue);
                         }}
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label="Tags"
+                            label="Meta Keywords"
                             size="small"
-                            placeholder="Add tags..."
-                            helperText="Press Enter to add new tags"
+                            placeholder="Add keywords for SEO..."
+                            helperText="Press Enter to add keywords"
                             sx={textFieldStyle}
                           />
                         )}
                         renderTags={(value, getTagProps) =>
-                          value.map((option, index) => (
-                            <Chip
-                              label={option}
-                              size="small"
-                              {...getTagProps({ index })}
-                              sx={{
-                                height: 24,
-                                fontSize: '0.75rem',
-                                backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb'
-                              }}
-                            />
-                          ))
+                          value.map((option, index) => {
+                            // Apply the same fix here
+                            const { key, ...otherProps } = getTagProps({ index });
+                            return (
+                              <Chip
+                                key={key} // ✅ Pass key directly
+                                label={option}
+                                size="small"
+                                {...otherProps} // ✅ Spread the rest of props
+                                sx={{
+                                  height: 24,
+                                  fontSize: '0.75rem',
+                                  backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                                  '& .MuiChip-deleteIcon': {
+                                    fontSize: '0.875rem',
+                                    color: theme === 'dark' ? '#94a3b8' : '#6b7280'
+                                  }
+                                }}
+                              />
+                            );
+                          })
                         }
                       />
                     </FormRow>

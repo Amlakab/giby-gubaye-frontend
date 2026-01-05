@@ -1912,41 +1912,50 @@ const BlogsPage = () => {
                       />
                     </FormRow>
 
-                    <FormRow columns={1}>
-                      <Autocomplete
-                        multiple
-                        options={tagsOptions}
-                        freeSolo
-                        value={formData.tags}
-                        onChange={(event, newValue) => {
-                          handleFormChange('tags', newValue);
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Tags"
-                            size="small"
-                            placeholder="Add tags..."
-                            helperText="Press Enter to add new tags"
-                            sx={textFieldStyle}
-                          />
-                        )}
-                        renderTags={(value, getTagProps) =>
-                          value.map((option, index) => (
+                   <FormRow columns={1}>
+                    <Autocomplete
+                      multiple
+                      options={tagsOptions}
+                      freeSolo
+                      value={formData.tags}
+                      onChange={(event, newValue) => {
+                        handleFormChange('tags', newValue);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Tags"
+                          size="small"
+                          placeholder="Add tags..."
+                          helperText="Press Enter to add new tags"
+                          sx={textFieldStyle}
+                        />
+                      )}
+                      renderTags={(value, getTagProps) =>
+                        value.map((option, index) => {
+                          // Extract key from getTagProps and pass it explicitly
+                          const { key, ...otherProps } = getTagProps({ index });
+                          return (
                             <Chip
+                              key={key} // ✅ Pass key directly
                               label={option}
                               size="small"
-                              {...getTagProps({ index })}
+                              {...otherProps} // ✅ Spread the rest of props
                               sx={{
                                 height: 24,
                                 fontSize: '0.75rem',
-                                backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb'
+                                backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                                '& .MuiChip-deleteIcon': {
+                                  fontSize: '0.875rem',
+                                  color: theme === 'dark' ? '#94a3b8' : '#6b7280'
+                                }
                               }}
                             />
-                          ))
-                        }
-                      />
-                    </FormRow>
+                          );
+                        })
+                      }
+                    />
+                  </FormRow>
                   </>
                 )}
 

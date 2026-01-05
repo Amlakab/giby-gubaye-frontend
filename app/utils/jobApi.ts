@@ -28,7 +28,7 @@ export const jobApi = {
     sub_class?: string; 
     type?: string; 
     background?: string 
-  }) => api.put(`/jobs/${jobId}`, data),
+  }) => api.patch(`/jobs/${jobId}`, data),
 
   // Delete job assignment
   deleteJob: (jobId: string) => api.delete(`/jobs/${jobId}`),
