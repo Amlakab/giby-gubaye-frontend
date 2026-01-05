@@ -68,7 +68,6 @@ export default function AbalateGudayPage() {
         }`}>
           <div className="container mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              {/* Content Column */}
               <motion.div
                 initial={{ x: -100, opacity: 0 }}
                 whileInView={{ x: 0, opacity: 1 }}
@@ -84,34 +83,70 @@ export default function AbalateGudayPage() {
                   <p className={`text-base leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    The Information Network Security Agency (INSA) plays a critical role in developing and implementing 
-                    national cybersecurity policies in Ethiopia. As the primary regulatory body, INSA is responsible for 
-                    establishing legal frameworks that govern cybersecurity practices, ensuring that individuals, businesses, 
-                    and government institutions adhere to secure digital operations. The agency formulates policies that 
-                    focus on data protection, risk management, and the prevention of cyber threats, ensuring that national 
-                    security is safeguarded in an increasingly digital world.
+                    1 Timhrt Kifl በቴፒ ግቢ ጉባኤ የትምህርት እና ሐዋርያዊ አገልግሎት ክፍል (ትምህርት ክፍል) አባላትን በነገረ መለኮት፣ በስነ-ምግባር እና በቤተክርስቲያን ትምህርቶች ለማነጽ የሚሰጣቸው ዝርዝር አገልግሎቶች እና ንዑሳን ክፍሎች የሚከተሉት ናቸው፦
                   </p>
+                  
+                  <h2 className={`text-xl font-bold mt-4 mb-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    የትምህርት ክፍል ዋና ዋና አገልግሎቶች
+                  </h2>
+                  
                   <p className={`text-base leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By developing clear legal standards, INSA provides guidelines for organizations on how to collect, store, 
-                    and process sensitive information while ensuring compliance with international cybersecurity regulations.
+                    <span className="font-bold">የመንፈሳዊ ትምህርት ዝግጅት እና አሰጣጥ፦</span> ለአባላት በየደረጃቸው (ለአዲስ ገቢ፣ ለነባር እና ለአገልጋዮች) ተከታታይነት ያላቸውን የቤተክርስቲያን ኮርሶች በአማርኛ እና በኦሮምኛ ቋንቋዎች ያዘጋጃል፤ መምህራንንም ይመድባል።
                   </p>
+                  
                   <p className={`text-base leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    Furthermore, INSA's cybersecurity policies define protocols for responding to cyber incidents, setting 
-                    procedures for reporting breaches, mitigating cyber risks, and implementing recovery measures. These 
-                    policies ensure that Ethiopia has a structured approach to handling cyber threats, reducing 
-                    vulnerabilities in critical digital infrastructures such as financial systems, healthcare services, and 
-                    government databases.
+                    <span className="font-bold">የተተኪ መምህራን ማፍራት አገልግሎት፦</span> የግቢ ጉባኤውን አገልግሎት ቀጣይነት ለማረጋገጥ አባላትን በደረጃ 1 እና ደረጃ 2 የተተኪ መምህርነት ሥልጠና በመስጠትና በማስመረቅ ወደ ማስተማር አገልግሎት እንዲገቡ ያደርጋል።
                   </p>
+                  
                   <p className={`text-base leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By aligning national regulations with global cybersecurity standards, INSA promotes collaboration with 
-                    international entities, fostering partnerships that enhance Ethiopia's cybersecurity resilience.
+                    <span className="font-bold">የሐዋርያዊ ጉዞ እና ስብከተ ወንጌል፦</span> ወደ ተለያዩ አጥቢያ አብያተ ክርስቲያናት (በተለይም ገጠር ላይ ላሉት) የሐዋርያዊ አገልግሎት ጉዞዎችን በማደራጀት የወንጌል ብርሃን እንዲሰራጭ ያደርጋል።
                   </p>
+                  
+                  <p className={`text-base leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <span className="font-bold">የዕቅበተ እምነት እና የምክክር አገልግሎት፦</span> አባላት ከሌሎች እምነቶች ለሚነሱባቸው ጥያቄዎች ምላሽ እንዲሰጡ ማስተማር፣ የጠፉትን መመለስ እና አባላት ለሚያነሷቸው የግል መንፈሳዊ ጥያቄዎች በሊቃውንት ምላሽ እንዲያገኙ ያደርጋል።
+                  </p>
+                  
+                  <p className={`text-base leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <span className="font-bold">የምርምርና ህትመት አገልግሎት፦</span> በየበዓላቱ ትምህርታዊ ጽሑፎችን ማዘጋጀት፣ የጥያቄና መልስ ውድድሮችን ማካሄድ እና መንፈሳዊ መጽሔቶችንና በራሪ ጽሑፎችን ለአባላት ያሰራጫል።
+                  </p>
+                  
+                  <p className={`text-base leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <span className="font-bold">የአብነት ትምህርት ማጠናከር፦</span> የግቢ ጉባኤ ተማሪዎች ከዘመናዊ ትምህርታቸው ጎን ለጎን የግዕዝ ቋንቋን፣ ዜማንና ቅዳሴን እንዲማሩ በማድረግ ለድቁና እና ለክህነት ዝግጅት እንዲያደርጉ ይረዳል።
+                  </p>
+                  
+                  <h2 className={`text-xl font-bold mt-6 mb-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    የትምህርት ክፍል ንዑሳን ክፍሎች (Sub-classes)
+                  </h2>
+                  
+                  <p className={`text-base leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    አገልግሎቱን በተደራጀ መልኩ ለመምራት ክፍሉ በሚከተሉት ንዑሳን ክፍሎች ተዋቅሯል፦
+                  </p>
+                  
+                  <ol className={`list-decimal pl-5 space-y-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <li><span className="font-bold">የመምህራን ምደባ ንዑስ ክፍል፦</span> ለመደበኛ ኮርሶች፣ ለጉዞ መርሐ ግብራት እና ለልዩ ጉባኤያት መምህራንን የመለየት እና የመመደብ ኃላፊነት አለበት።</li>
+                    <li><span className="font-bold">የሥርዓተ ትምህርት እና ክትትል ንዑስ ክፍል፦</span> ትምህርቶች በታቀደላቸው መርሃ ግብር መሠረት መሰጠታቸውን፣ የአባላትን መገኘት (Attendance) እና የትምህርቱን ጥራት ይከታተላል።</li>
+                    <li><span className="font-bold">የአብነት ትምህርት ንዑስ ክፍል፦</span> በግቢ ጉባኤው ውስጥ የሚሰጡ የዜማ፣ የቅዳሴ እና የግዕዝ ትምህርቶችን በበላይነት ያስተባብራል፤ የአብነት መምህራንንም ይደግፋል።</li>
+                  </ol>
                 </div>
               </motion.div>
 
