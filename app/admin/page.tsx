@@ -121,7 +121,7 @@ export default function Dashboard() {
       // Only admin can fetch user and student lists
       if (user?.role === 'admin') {
         const [usersRes, studentsRes] = await Promise.all([
-          api.get('/users?limit=1000'),
+          api.get('/user?limit=1000'),
           api.get('/students?limit=1000')
         ]);
 
