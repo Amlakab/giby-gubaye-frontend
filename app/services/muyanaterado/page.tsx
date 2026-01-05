@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 
-export default function AbalateGudayPage() {
+export default function MuyanaTeradoPage() {
   const { theme } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
@@ -78,40 +78,50 @@ export default function AbalateGudayPage() {
                 <h1 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-6 ${
                   theme === 'dark' ? 'text-primary' : 'text-primary'
                 }`}>
-                  ሙያና ተራዲኦ ክፍል አገልግሎቶች
+                  ሙያና ተራድኦ ክፍል አገልግሎቶች
                 </h1>
-                <div className="space-y-4">
-                  <p className={`text-base leading-relaxed ${
+                <div className="space-y-6">
+                  <p className={`text-lg leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    The Information Network Security Agency (INSA) plays a critical role in developing and implementing 
-                    national cybersecurity policies in Ethiopia. As the primary regulatory body, INSA is responsible for 
-                    establishing legal frameworks that govern cybersecurity practices, ensuring that individuals, businesses, 
-                    and government institutions adhere to secure digital operations. The agency formulates policies that 
-                    focus on data protection, risk management, and the prevention of cyber threats, ensuring that national 
-                    security is safeguarded in an increasingly digital world.
+                    6 Muyana terado በቴፒ ግቢ ጉባኤ የሙያና ተራድኦ አገልግሎት ክፍል አባላት ያላቸውን ልዩ ልዩ ሙያ ለቤተክርስቲያን አገልግሎት እንዲያውሉ የሚያስችል፣ የአባላትን የእርስ በእርስ መረዳዳት የሚያጠናክር እና ለግቢ ጉባኤው ገቢ የሚያስገኙ የፈጠራ ሥራዎችን የሚሠራ ክፍል ነው ። በክፍሉ የሚሰጡ ዝርዝር አገልግሎቶችና ንዑሳን ክፍሎች የሚከተሉት ናቸው፦
                   </p>
-                  <p className={`text-base leading-relaxed ${
+                  
+                  <h2 className={`text-2xl font-bold mt-4 mb-4 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By developing clear legal standards, INSA provides guidelines for organizations on how to collect, store, 
-                    and process sensitive information while ensuring compliance with international cybersecurity regulations.
-                  </p>
-                  <p className={`text-base leading-relaxed ${
+                    የሙያና ተራድኦ ክፍል ዋና ዋና አገልግሎቶች
+                  </h2>
+                  
+                  <ul className={`list-disc pl-6 space-y-4 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    Furthermore, INSA's cybersecurity policies define protocols for responding to cyber incidents, setting 
-                    procedures for reporting breaches, mitigating cyber risks, and implementing recovery measures. These 
-                    policies ensure that Ethiopia has a structured approach to handling cyber threats, reducing 
-                    vulnerabilities in critical digital infrastructures such as financial systems, healthcare services, and 
-                    government databases.
-                  </p>
-                  <p className={`text-base leading-relaxed ${
+                    <li className="text-lg"><span className="font-bold">የአባላት የሙያ ድጋፍ እና ልውውጥ፦</span> አባላት ያላቸውን የተለያየ የዓለማዊ ትምህርትና የልምድ ሙያ (ለምሳሌ፦ ሕክምና፣ ኢንጂነሪንግ፣ ግብርና ወዘተ) ለቤተክርስቲያንና ለግቢ ጉባኤው አገልግሎት እንዲያውሉ ያስተባብራል ።</li>
+                    <li className="text-lg"><span className="font-bold">የተራድኦ እና የበጎ አድራጎት አገልግሎት፦</span> በኢኮኖሚ ለተቸገሩ የግቢ ጉባኤ አባላት የገንዘብ፣ የቁሳቁስና የትምህርት መርጃ መሣሪያዎች ድጋፍ እንዲያገኙ ያደርጋል ።</li>
+                    <li className="text-lg"><span className="font-bold">የእጅ ሥራ ውጤቶች ዝግጅት፦</span> ለቤተክርስቲያን አገልግሎት የሚውሉና ለግቢ ጉባኤው ገቢ የሚያስገኙ እንደ ጧፍ፣ ማኅደር፣ ሞሰበ ቲሸርት እና ሌሎች ጥበብ ነክ ሥራዎችን ያመርታል ።</li>
+                    <li className="text-lg"><span className="font-bold">የቤተ መጽሐፍት አገልግሎት፦</span> የግቢ ጉባኤውን ቤተ መጽሐፍት በማደራጀት አባላት ለመንፈሳዊና ለዓለማዊ ትምህርታቸው የሚረዱ መጽሐፍትን እንዲያገኙና እንዲጠቀሙ ያመቻቻል ።</li>
+                    <li className="text-lg"><span className="font-bold">የጤና እና የአካባቢ ጥበቃ አገልግሎት፦</span> ለአባላት ስለ ጤና አጠባበቅ ግንዛቤ መስጠትና በግቢ ጉባኤው አካባቢ የጽዳትና የአካባቢ ጥበቃ ሥራዎችን ያስተባብራል ።</li>
+                  </ul>
+                  
+                  <h2 className={`text-2xl font-bold mt-8 mb-4 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By aligning national regulations with global cybersecurity standards, INSA promotes collaboration with 
-                    international entities, fostering partnerships that enhance Ethiopia's cybersecurity resilience.
+                    የሙያና ተራድኦ ክፍል ንዑሳን ክፍሎች (Sub-classes)
+                  </h2>
+                  
+                  <p className={`text-lg leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    አገልግሎቱን በሥርዓት ለመምራት ክፍሉ በሚከተሉት ንዑሳን ክፍሎች ተዋቅሯል፦
                   </p>
+                  
+                  <ol className={`list-decimal pl-6 space-y-4 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <li className="text-lg"><span className="font-bold">የእጅ ሥራ ንዑስ ክፍል፦</span> ጧፍ ማምረት፣ መጻሕፍትን መደጐስ (ባይንዲንግ)፣ ማኅደር በክር መስራትና ሌሎች የጥበብ ሥራዎችን የሚያከናውን ንዑስ ክፍል ነው ።</li>
+                    <li className="text-lg"><span className="font-bold">የተራድኦ ንዑስ ክፍል፦</span> የተቸገሩ አባላትን የመለየት፣ የመደገፍና የአባላትን የጋራ መረዳጃ ፈንድ (ካፒታል) የማደራጀት ኃላፊነት አለበት ።</li>
+                    <li className="text-lg"><span className="font-bold">የቤተ መጽሐፍት ንዑስ ክፍል፦</span> መጽሐፍትን የመመዝገብ፣ ለአንባቢዎች የማሰራጨትና የንባብ ባህልን የማሳደግ ሥራ ይሠራል ።</li>
+                  </ol>
                 </div>
               </motion.div>
 
@@ -126,7 +136,7 @@ export default function AbalateGudayPage() {
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
                     src="/images/insa8.png"
-                    alt="Cybersecurity Policy Development"
+                    alt="ሙያና ተራድኦ አገልግሎት"
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -147,111 +157,119 @@ export default function AbalateGudayPage() {
               <h2 className={`text-2xl md:text-3xl font-bold mb-8 ${
                 theme === 'dark' ? 'text-primary' : 'text-primary'
               }`}>
-                በሙያና ተራዲኦ ክፍል ውስጥ የሚካተቱ ንውስ ክፍላት
+                በሙያና ተራድኦ ክፍል ውስጥ የሚካተቱ ተጨማሪ ንዑሳን ክፍሎች
               </h2>
               
               <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
               }`}>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">1</span>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">4</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`text-xl font-bold mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Data Protection & Privacy
+                        የጤናና ሙያ አገልግሎት ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Developing comprehensive data protection laws and privacy regulations for both public and private sectors.
+                      <p className="text-lg">
+                        አባላት በሙያቸው እንዲያገለግሉ የሚያስተባብርና የጤና ነክ መረጃዎችን ለአባላት የሚያደርስ ነው ።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">2</span>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">5</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`text-xl font-bold mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Critical Infrastructure Protection
+                        የሥራ አፈጻጸም ክትትል ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Establishing security standards for protecting Ethiopia's critical digital infrastructure.
+                      <p className="text-lg">
+                        የክፍሉ ዕቅዶች በተቀመጠላቸው ጊዜ መከናወናቸውንና የሪፖርት ሥራዎችን ይከታተላል ።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">3</span>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">6</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`text-xl font-bold mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Incident Response Framework
+                        የሙያ ስልጠና እና አቅም ግንባታ ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Creating standardized procedures for reporting and responding to cybersecurity incidents.
+                      <p className="text-lg">
+                        አባላት ያላቸውን ሙያዊ ክህሎቶች ለማሻሻል የሙያ ስልጠናዎችን በማዘጋጀት በተግባር ላይ እንዲውሉ ያስተባብራል።
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">4</span>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">7</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`text-xl font-bold mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Compliance & Certification
+                        የምርት ማምረቻና ሽያጭ ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Implementing compliance frameworks and certification programs for organizations.
+                      <p className="text-lg">
+                        የአባላት የሙያ ምርቶችን ለመሸጥ የሸቀጦችን ገበያ እና የሽያጭ ሰንሰለት በመፍጠር የግቢ ጉባኤውን ገቢ የሚጨምር ነው።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">5</span>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">8</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`text-xl font-bold mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Public Awareness Guidelines
+                        የጋራ ፕሮጀክት ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Developing policies for public cybersecurity education and awareness campaigns.
+                      <p className="text-lg">
+                        አባላት በጋራ የሚሰሩ የሙያ ፕሮጀክቶችን በማዘጋጀት የእርስ በእርስ መረዳዳትን የሚያጠናክር ሲሆን፣ የጋራ ፈንዶችን ያስተዳድራል።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">6</span>
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">9</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`text-xl font-bold mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        International Cooperation
+                        የግንኙነት እና የማህበራዊ አውታረመረብ ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Creating frameworks for international cybersecurity cooperation and information sharing.
+                      <p className="text-lg">
+                        አባላት ከውጭ የሙያ ልምድ ባለቤቶች ጋር የግንኙነት መድረክ በመፍጠር የሙያ ልምድ ልውውጥን ያስተባብራል።
                       </p>
                     </div>
                   </div>
                 </div>
+              </div>
+              
+              <div className="mt-12 p-6 rounded-xl bg-primary/5 border border-primary/10">
+                <p className={`text-xl leading-relaxed text-center ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                }`}>
+                  <span className="font-bold italic">"ማገልገልም መማር ነው"</span> - ይህ ክፍል አባላት ያላቸውን ዕውቀትና ጥበብ ለቤተክርስቲያን በማበርከት የሚለውን መርህ በተግባር የሚተረጉሙበት ዘርፍ ነው ።
+                </p>
               </div>
             </motion.div>
           </div>

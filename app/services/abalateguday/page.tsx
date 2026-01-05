@@ -81,37 +81,49 @@ export default function AbalateGudayPage() {
                   አባላት ጉዳይ ክፍል አገልግሎቶች
                 </h1>
                 <div className="space-y-4">
-                  <p className={`text-base leading-relaxed ${
+                  <p className={`text-lg leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    The Information Network Security Agency (INSA) plays a critical role in developing and implementing 
-                    national cybersecurity policies in Ethiopia. As the primary regulatory body, INSA is responsible for 
-                    establishing legal frameworks that govern cybersecurity practices, ensuring that individuals, businesses, 
-                    and government institutions adhere to secure digital operations. The agency formulates policies that 
-                    focus on data protection, risk management, and the prevention of cyber threats, ensuring that national 
-                    security is safeguarded in an increasingly digital world.
+                    3 Abalat Guday Kifl በቴፒ ግቢ ጉባኤ የአባላት ጉዳይ አገልግሎት ክፍል ተማሪዎች በግቢ ቆይታቸው በመንፈሳዊ ሕይወታቸው እንዲበረቱ፣ በማኅበራዊ ሕይወታቸው እንዲደጋገፉ እና የአገልግሎት ተሳትፎአቸው እንዲያድግ የሚያደርግ የቁልፍ አገልግሎቶች ማዕከል ነው።
                   </p>
-                  <p className={`text-base leading-relaxed ${
+                  
+                  <h2 className={`text-2xl font-bold mt-8 mb-4 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By developing clear legal standards, INSA provides guidelines for organizations on how to collect, store, 
-                    and process sensitive information while ensuring compliance with international cybersecurity regulations.
-                  </p>
-                  <p className={`text-base leading-relaxed ${
+                    የአባላት ጉዳይ ክፍል ዋና ዋና አገልግሎቶች
+                  </h2>
+                  
+                  <p className={`text-lg leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    Furthermore, INSA's cybersecurity policies define protocols for responding to cyber incidents, setting 
-                    procedures for reporting breaches, mitigating cyber risks, and implementing recovery measures. These 
-                    policies ensure that Ethiopia has a structured approach to handling cyber threats, reducing 
-                    vulnerabilities in critical digital infrastructures such as financial systems, healthcare services, and 
-                    government databases.
+                    ክፍሉ የሚሰጣቸው ዝርዝር አገልግሎቶችና የንዑሳን ክፍላት መዋቅር በዝርዝር እንደሚከተለው ቀርቧል፦
                   </p>
-                  <p className={`text-base leading-relaxed ${
+                  
+                  <h2 className={`text-2xl font-bold mt-8 mb-4 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By aligning national regulations with global cybersecurity standards, INSA promotes collaboration with 
-                    international entities, fostering partnerships that enhance Ethiopia's cybersecurity resilience.
+                    የአባላት ጉዳይ ክፍል ንዑሳን ክፍላት (Sub-classes)
+                  </h2>
+                  
+                  <p className={`text-lg leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    ክፍሉ እነዚህን ሰፋፊ ተግባራት ለማከናወን በሚከተሉት ንዑሳን ክፍሎች ተዋቅሯል፦
                   </p>
+                  
+                  <ol className={`list-decimal pl-6 space-y-3 text-lg leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <li className="pb-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="font-bold text-primary">የባች እና ዲፓርትመንት ማስተባበሪያ ንዑስ ክፍል፦</span> ተማሪዎችን በየባቻቸው (የመግቢያ ዘመን) እና በየዲፓርትመንታቸው በማደራጀት መረጃዎችን የሚያደርስ፣ አባላትን የሚያቀናጅ እና የኮርስ አቴንዳንስ የሚከታተል ክፍል ነው።
+                    </li>
+                    <li className="pb-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="font-bold text-primary">የሥልጠና እና ምክክር ንዑስ ክፍል፦</span> ለአባላት መንፈሳዊና አካዳሚያዊ ሥልጠናዎችን የሚያዘጋጅ፣ መርሐ ግብር መሪዎችን የሚያሰለጥን እንዲሁም በተለያዩ ችግሮች ውስጥ ላሉ አባላት የምክር አገልግሎት እንዲያገኙ የሚያደርግ ነው።
+                    </li>
+                    <li className="pb-2 border-b border-gray-200 dark:border-gray-700">
+                      <span className="font-bold text-primary">የጽዋ እና ማኅበራዊ አገልግሎት ንዑስ ክፍል፦</span> የጽዋ መርሐ ግብራትን፣ የፍቅር ማዕድን እና የአባላት እርስ በእርስ መጠያየቅን (ጎብኝቶ ማጽናናትን) በበላይነት ይመራል።
+                    </li>
+                  </ol>
                 </div>
               </motion.div>
 
@@ -126,7 +138,7 @@ export default function AbalateGudayPage() {
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
                     src="/images/insa8.png"
-                    alt="Cybersecurity Policy Development"
+                    alt="አባላት ጉዳይ አገልግሎት"
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -144,114 +156,122 @@ export default function AbalateGudayPage() {
               viewport={{ once: true }}
               className="mt-16"
             >
-              <h2 className={`text-2xl md:text-3xl font-bold mb-8 ${
+              <h2 className={`text-2xl md:text-3xl font-bold mb-10 ${
                 theme === 'dark' ? 'text-primary' : 'text-primary'
               }`}>
-                በአባላት ጉዳይ ክፍል ውስጥ የሚካተቱ ንውስ ክፍላት
+                በአባላት ጉዳይ ክፍል ውስጥ የሚካተቱ ተጨማሪ ንዑሳን ክፍሎች
               </h2>
               
-              <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-10 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
               }`}>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">1</span>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">4</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`font-bold text-lg mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Data Protection & Privacy
+                        የአባላት መረጃ እና ምዝገባ ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Developing comprehensive data protection laws and privacy regulations for both public and private sectors.
+                      <p className="text-base leading-relaxed">
+                        የአዳዲስና የነባር አባላትን መረጃ የመመዝገብ፣ የመታወቂያ አገልግሎት የመስጠትና የአባላትን ቁጥር የመመዝገብ ኃላፊነት አለበት።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">2</span>
+                  <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">5</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`font-bold text-lg mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Critical Infrastructure Protection
+                        የእህቶች ጉባኤ ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Establishing security standards for protecting Ethiopia's critical digital infrastructure.
+                      <p className="text-base leading-relaxed">
+                        እህቶች በመንፈሳዊ ሕይወታቸው የሚጠነክሩበትን ልዩ መርሐ ግብራት የሚያዘጋጅና ለእነርሱ ብቻ የሚመለከቱ ምክክሮችን የሚያደርግ ንዑስ ክፍል ነው።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">3</span>
+                  <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">6</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`font-bold text-lg mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Incident Response Framework
+                        የመንፈሳዊ እንክብካቤ እና የምክክር አገልግሎት
                       </h3>
-                      <p className="text-sm">
-                        Creating standardized procedures for reporting and responding to cybersecurity incidents.
+                      <p className="text-base leading-relaxed">
+                        አባላት በመንፈሳዊ ሕይወታቸው የሚያጋጥሟቸውን ችግሮች በማወቅ ምክር በመስጠት እና በማኅበራዊ ሕይወታቸው የሚደግፉ አገልግሎቶችን ያቀርባል።
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">4</span>
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">7</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`font-bold text-lg mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Compliance & Certification
+                        የአባላት ጤና እና ደህንነት ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Implementing compliance frameworks and certification programs for organizations.
+                      <p className="text-base leading-relaxed">
+                        በግቢ ቆይታቸው የአባላትን ጤናማ ኑሮ እና ደህንነት የሚያረጋግጥ ሲሆን፣ የጤና አገልግሎቶችን ያቀርባል።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">5</span>
+                  <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">8</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`font-bold text-lg mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Public Awareness Guidelines
+                        የትምህርት ድጋፍ እና ማሰልጠን ንዑስ ክፍል
                       </h3>
-                      <p className="text-sm">
-                        Developing policies for public cybersecurity education and awareness campaigns.
+                      <p className="text-base leading-relaxed">
+                        ተማሪዎች በአካዳሚያዊ ስኬታቸው እንዲቀጥሉ በመማር እና በመሰልጠን የሚደግፍ ሲሆን፣ የትምህርት ማበረታቻ እንቅስቃሴዎችን ያዘጋጃል።
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">6</span>
+                  <div className="flex items-start space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary font-bold">9</span>
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${
+                      <h3 className={`font-bold text-lg mb-2 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        International Cooperation
+                        የአባላት አገልግሎት እና ተሳትፎ ክትትል
                       </h3>
-                      <p className="text-sm">
-                        Creating frameworks for international cybersecurity cooperation and information sharing.
+                      <p className="text-base leading-relaxed">
+                        አባላት በቤተክርስቲያን አገልግሎቶች እና በማኅበራዊ እንቅስቃሴዎች ውስጥ በምን ደረጃ እንደሚሳተፉ በመከታተል በግቢ ሕይወታቸው እንዲያበቁ ያደርጋል።
                       </p>
                     </div>
                   </div>
                 </div>
+              </div>
+              
+              <div className="mt-12 p-6 rounded-xl bg-primary/5 border-l-4 border-primary">
+                <p className={`text-lg leading-relaxed italic ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                }`}>
+                  ይህ ክፍል የግቢ ጉባኤው የጀርባ አጥንት ሆኖ የሚያገለግል ሲሆን፣ አባላት በግቢ ቆይታቸው እንዳይጠፉና በአገልግሎት እንዲጸኑ ትልቅ አስተዋጽኦ ያበረክታል።
+                </p>
               </div>
             </motion.div>
           </div>
@@ -285,14 +305,14 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaEnvelope />
-                    <span>Email</span>
+                    <span className="font-medium">Email</span>
                   </label>
                   <input
                     type="email"
                     placeholder="Enter Email"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -305,14 +325,14 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaKey />
-                    <span>Password</span>
+                    <span className="font-medium">Password</span>
                   </label>
                   <input
                     type="password"
                     placeholder="Password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -322,7 +342,7 @@ export default function AbalateGudayPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium text-base transition-colors duration-300"
+                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white text-lg rounded-lg font-medium transition-colors duration-300"
                 >
                   Login
                 </button>
@@ -336,7 +356,7 @@ export default function AbalateGudayPage() {
                       setShowLogin(false);
                       setShowSignup(true);
                     }}
-                    className="underline hover:text-secondary transition-colors"
+                    className="underline hover:text-secondary transition-colors font-medium"
                   >
                     Signup
                   </button>
@@ -374,14 +394,14 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaUser />
-                    <span>Name</span>
+                    <span className="font-medium">Name</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Enter Name"
                     value={signupName}
                     onChange={(e) => setSignupName(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -394,14 +414,14 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaEnvelope />
-                    <span>Email</span>
+                    <span className="font-medium">Email</span>
                   </label>
                   <input
                     type="email"
                     placeholder="Enter Email"
                     value={signupEmail}
                     onChange={(e) => setSignupEmail(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -414,14 +434,14 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaCity />
-                    <span>City</span>
+                    <span className="font-medium">City</span>
                   </label>
                   <input
                     type="text"
                     placeholder="Enter City"
                     value={signupCity}
                     onChange={(e) => setSignupCity(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -434,14 +454,14 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaKey />
-                    <span>Password</span>
+                    <span className="font-medium">Password</span>
                   </label>
                   <input
                     type="password"
                     placeholder="Password"
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -454,12 +474,12 @@ export default function AbalateGudayPage() {
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     <FaUserTag />
-                    <span>Role</span>
+                    <span className="font-medium">Role</span>
                   </label>
                   <select
                     value={signupRole}
                     onChange={(e) => setSignupRole(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -471,7 +491,7 @@ export default function AbalateGudayPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium text-base transition-colors duration-300"
+                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white text-lg rounded-lg font-medium transition-colors duration-300"
                 >
                   Signup
                 </button>
@@ -504,7 +524,7 @@ export default function AbalateGudayPage() {
             <div className="p-6">
               <form onSubmit={handleOtp} className="space-y-4">
                 <div>
-                  <label className={`block mb-2 ${
+                  <label className={`block mb-2 font-medium ${
                     theme === 'dark' ? 'text-primary' : 'text-primary'
                   }`}>
                     Enter OTP
@@ -514,7 +534,7 @@ export default function AbalateGudayPage() {
                     placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-4 py-3 text-lg rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
                       theme === 'dark' 
                         ? 'bg-surface/50 border-border text-white' 
                         : 'bg-background border-border text-text-primary'
@@ -524,7 +544,7 @@ export default function AbalateGudayPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium text-base transition-colors duration-300"
+                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white text-lg rounded-lg font-medium transition-colors duration-300"
                 >
                   Verify OTP
                 </button>

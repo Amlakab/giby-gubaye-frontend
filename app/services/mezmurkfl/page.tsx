@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fa';
 import Link from 'next/link';
 
-export default function AbalateGudayPage() {
+export default function MezmurKiflePage() {
   const { theme } = useTheme();
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
@@ -78,40 +78,50 @@ export default function AbalateGudayPage() {
                 <h1 className={`text-3xl md:text-4xl lg:text-5xl font-bold mb-6 ${
                   theme === 'dark' ? 'text-primary' : 'text-primary'
                 }`}>
-                  መዝሙር እና ስነ-ጥበባት ክፍል አገልግሎቶች
+                  መዝሙርና ኪነጥበብ ክፍል አገልግሎቶች
                 </h1>
                 <div className="space-y-4">
                   <p className={`text-base leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    The Information Network Security Agency (INSA) plays a critical role in developing and implementing 
-                    national cybersecurity policies in Ethiopia. As the primary regulatory body, INSA is responsible for 
-                    establishing legal frameworks that govern cybersecurity practices, ensuring that individuals, businesses, 
-                    and government institutions adhere to secure digital operations. The agency formulates policies that 
-                    focus on data protection, risk management, and the prevention of cyber threats, ensuring that national 
-                    security is safeguarded in an increasingly digital world.
+                    2 የመዝሙርና ኪነጥበብ በቴፒ ግቢ ጉባኤ የመዝሙርና ኪነጥበብ ክፍል አባላትን በዜማ፣ በማኅሌትና በኪነጥበባዊ አገልግሎቶች ለማነጽና ለቤተክርስቲያን አገልጋይነት ለማዘጋጀት የሚሰጣቸው ዝርዝር አገልግሎቶችና የንዑሳን ክፍላት መዋቅር እንደሚከተለው ቀርቧል፦
                   </p>
+                  
+                  <h2 className={`text-xl font-bold mt-4 mb-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    የመዝሙርና ኪነጥበብ ክፍል ዋና ዋና አገልግሎቶች
+                  </h2>
+                  
+                  <ul className={`list-disc pl-5 space-y-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    <li><span className="font-bold">የዜማና የመዝሙር ትምህርት አገልግሎት፦</span> አባላት የቤተክርስቲያንን ሥርዓተ ዜማ ጠብቀው እንዲዘምሩና ማኅሌት እንዲቆሙ የመዝሙር ጥናትና የዜማ ስልጠናዎችን ይሰጣል።</li>
+                    <li><span className="font-bold">የኪነጥበብና ድራማ ዝግጅት፦</span> መንፈሳዊ መልዕክቶች በኪነጥበብ (በተውኔት፣ በግጥምና በወግ) ለአባላት እንዲደርሱ ያደርጋል፤ በተለይም በትልልቅ ጉባኤያት ላይ ትምህርታዊ ድራማዎችን ያቀርባል።</li>
+                    <li><span className="font-bold">የመዝሙር ግጥምና ዜማ ምርጫ፦</span> የሚጠኑ መዝሙራት ከዶግማና ከቀኖና ውጪ እንዳይሆኑ ጥንቃቄ የተሞላበት የመረጣና የማጣራት አገልግሎት ይሰጣል።</li>
+                    <li><span className="font-bold">የበዓላትና የጉባኤያት ድምቀት፦</span> በግቢ ጉባኤው የምስረታ በዓላት፣ በንግስ በዓላትና በሳምንታዊ መርሐ ግብራት ላይ ያሬዳዊ ዜማዎችንና መዝሙራትን በማቅረብ ጉባኤውን ያስተባብራል።</li>
+                    <li><span className="font-bold">የአልባሳትና የንዋያተ ቅድሳት አያያዝ፦</span> ለአገልግሎት የሚያስፈልጉ የደንብ ልብሶችን (ቃጭል፣ ጸናጽልና ከበሮ) ያደራጃል፣ ለአባላትም ተደራሽ ያደርጋል።</li>
+                  </ul>
+                  
+                  <h2 className={`text-xl font-bold mt-6 mb-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}>
+                    የመዝሙርና ኪነጥበብ ክፍል ንዑሳን ክፍላት (Sub-classes)
+                  </h2>
+                  
                   <p className={`text-base leading-relaxed ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    By developing clear legal standards, INSA provides guidelines for organizations on how to collect, store, 
-                    and process sensitive information while ensuring compliance with international cybersecurity regulations.
+                    ክፍሉ አገልግሎቱን በውጤታማነት ለመምራት በሚከተሉት ንዑሳን ክፍሎች ተዋቅሯል፦
                   </p>
-                  <p className={`text-base leading-relaxed ${
+                  
+                  <ol className={`list-decimal pl-5 space-y-2 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
                   }`}>
-                    Furthermore, INSA's cybersecurity policies define protocols for responding to cyber incidents, setting 
-                    procedures for reporting breaches, mitigating cyber risks, and implementing recovery measures. These 
-                    policies ensure that Ethiopia has a structured approach to handling cyber threats, reducing 
-                    vulnerabilities in critical digital infrastructures such as financial systems, healthcare services, and 
-                    government databases.
-                  </p>
-                  <p className={`text-base leading-relaxed ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
-                  }`}>
-                    By aligning national regulations with global cybersecurity standards, INSA promotes collaboration with 
-                    international entities, fostering partnerships that enhance Ethiopia's cybersecurity resilience.
-                  </p>
+                    <li><span className="font-bold">የመዝሙር ጥናት ንዑስ ክፍል፦</span> አዳዲስና ነባር መዝሙራትን ለአባላት የሚያስጠና፣ የዜማ ስልጠናዎችን የሚያመቻችና የአባላትን ድምፅና ዝማሬ የሚከታተል ክፍል ነው።</li>
+                    <li><span className="font-bold">የኪነጥበብ ንዑስ ክፍል፦</span> መንፈሳዊ ተውኔቶችን (ድራማ)፣ ግጥሞችንና ስነ-ጽሑፎችን የሚያዘጋጅ፣ የሚያሰለጥንና በጉባኤያት ላይ እንዲቀርቡ የሚያደርግ ንዑስ ክፍል ነው።</li>
+                    <li><span className="font-bold">የንብረትና አልባሳት ንዑስ ክፍል፦</span> የመዘምራን ልብሶችን፣ ጸናጽልን፣ ከበሮንና ሌሎች የአገልግሎት ቁሳቁሶችን በኃላፊነት የሚጠብቅና የሚያደራጅ ነው።</li>
+                  </ol>
                 </div>
               </motion.div>
 
@@ -125,8 +135,8 @@ export default function AbalateGudayPage() {
               >
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
-                    src="/images/insa8.png"
-                    alt="Cybersecurity Policy Development"
+                    src="/images/mezmur.jpg"
+                    alt="መዝሙርና ኪነጥበብ አገልግሎት"
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 50vw"
@@ -147,62 +157,12 @@ export default function AbalateGudayPage() {
               <h2 className={`text-2xl md:text-3xl font-bold mb-8 ${
                 theme === 'dark' ? 'text-primary' : 'text-primary'
               }`}>
-                በመዝሙር እና ስነ-ጥበባት ክፍል ውስጥ የሚካተቱ ንውስ ክፍላት
+                በመዝሙርና ኪነጥበብ ክፍል ውስጥ የሚካተቱ ተጨማሪ ንዑሳን ክፍሎች
               </h2>
               
               <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
               }`}>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">1</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Data Protection & Privacy
-                      </h3>
-                      <p className="text-sm">
-                        Developing comprehensive data protection laws and privacy regulations for both public and private sectors.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">2</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Critical Infrastructure Protection
-                      </h3>
-                      <p className="text-sm">
-                        Establishing security standards for protecting Ethiopia's critical digital infrastructure.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
-                      <span className="text-primary text-sm">3</span>
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${
-                        theme === 'dark' ? 'text-white' : 'text-text-primary'
-                      }`}>
-                        Incident Response Framework
-                      </h3>
-                      <p className="text-sm">
-                        Creating standardized procedures for reporting and responding to cybersecurity incidents.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
@@ -212,10 +172,10 @@ export default function AbalateGudayPage() {
                       <h3 className={`font-semibold mb-1 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Compliance & Certification
+                        የሥነ-ሥርዓትና ክትትል ንዑስ ክፍል
                       </h3>
                       <p className="text-sm">
-                        Implementing compliance frameworks and certification programs for organizations.
+                        መዘምራን በአገልግሎትና በጥናት ወቅት ሥርዓተ ቤተክርስቲያንን ጠብቀው እንዲገኙ፣ የአገልግሎት ተረኝነትንና አቴንዳንስን የሚከታተል ክፍል ነው።
                       </p>
                     </div>
                   </div>
@@ -228,10 +188,10 @@ export default function AbalateGudayPage() {
                       <h3 className={`font-semibold mb-1 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        Public Awareness Guidelines
+                        የመዝሙር ግጥምና ዜማ አሳላጭ (ኮሚቴ)
                       </h3>
                       <p className="text-sm">
-                        Developing policies for public cybersecurity education and awareness campaigns.
+                        የሚጠኑ መዝሙራትን ግጥምና ዜማ ከቤተክርስቲያን ትምህርት አንጻር መርምሮ የሚያጸድቅ ንዑስ ክፍል ነው።
                       </p>
                     </div>
                   </div>
@@ -244,15 +204,71 @@ export default function AbalateGudayPage() {
                       <h3 className={`font-semibold mb-1 ${
                         theme === 'dark' ? 'text-white' : 'text-text-primary'
                       }`}>
-                        International Cooperation
+                        የዜማ ማሰልጠኛ እና የድምፅ ክትትል ንዑስ ክፍል
                       </h3>
                       <p className="text-sm">
-                        Creating frameworks for international cybersecurity cooperation and information sharing.
+                        አባላት የዜማ ችሎታቸውን በማሳደግ በማኅሌት የማቆም ብቃት እንዲኖራቸው የሚያግዝ ሲሆን፣ የድምፅ ጥራትን ያሻሽላል።
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary text-sm">7</span>
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-text-primary'
+                      }`}>
+                        የየበዓላት የሙዚቃ አዘጋጅ ንዑስ ክፍል
+                      </h3>
+                      <p className="text-sm">
+                        በተለያዩ የቤተክርስቲያን በዓላት ላይ የሚሰጡ ልዩ ልዩ የሙዚቃ አዘጋጆችን ማዘጋጀት፣ የዜማ መርሃዎችን በትክክለኛ ቅደም ተከተል ማቅረብ የሚያገለግል ክፍል ነው።
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary text-sm">8</span>
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-text-primary'
+                      }`}>
+                        የኪነጥበብ ማሰልጠኛ እና አሠራር ንዑስ ክፍል
+                      </h3>
+                      <p className="text-sm">
+                        ድራማ፣ ግጥምና ሌሎች የኪነጥበብ ዝግጅቶችን ለማዘጋጀት አባላትን በማሰልጠን፣ የአገልግሎት ዘዴዎችን በማሻሻል ላይ የሚሠራ ክፍል ነው።
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center mt-1">
+                      <span className="text-primary text-sm">9</span>
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-text-primary'
+                      }`}>
+                        የመሳሪያ እና ንብረት አስተዳደር ንዑስ ክፍል
+                      </h3>
+                      <p className="text-sm">
+                        የሙዚቃ መሣሪያዎችን፣ የልብሶችን እና የአገልግሎት ቁሳቁሶችን በሥርዓት የሚያስተዳድር፣ የሚጠብቅና የሚያደራጅ ክፍል ነው።
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
+              
+              <p className={`mt-8 text-base leading-relaxed ${
+                theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+              }`}>
+                ይህ ክፍል ከአባላት ጉዳይና ከትምህርት ክፍል ጋር በመቀናጀት፣ አባላት በዕውቀት ብቻ ሳይሆን በዝማሬና በምስጋናም እንዲጎለብቱ ከፍተኛ ድርሻ ይወጣል።
+              </p>
             </motion.div>
           </div>
         </section>
