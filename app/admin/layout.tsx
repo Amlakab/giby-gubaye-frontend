@@ -61,13 +61,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               ? 'bg-gradient-to-br from-[#0a192f] to-[#112240]' 
               : 'bg-gradient-to-br from-[#f0f0f0] to-[#ffffff]'
           }`}>
-            <div className="p-6">
+            <div className="pt-2">
               <div className={`rounded-xl shadow-lg transition-all duration-300 ${
                 theme === 'dark' 
                   ? 'bg-[#0f172a80] backdrop-blur-sm border border-[#00ffff]/20 text-white' 
                   : 'bg-white border border-gray-200 text-gray-900'
               }`}>
-                <div className="p-6">
+                <div className="pt-2">
                   {children}
                 </div>
               </div>
