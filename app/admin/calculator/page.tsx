@@ -1,4 +1,4 @@
-'use client';
+
 
 import Calculator from '@/components/Calculator'
 import type { Metadata } from 'next'

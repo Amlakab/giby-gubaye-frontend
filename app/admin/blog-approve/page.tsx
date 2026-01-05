@@ -49,7 +49,14 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import api from '@/app/utils/api';
 import { format, parseISO } from 'date-fns';
-import ReactQuill from 'react-quill';
+import dynamic from 'next/dynamic';
+
+const ReactQuill = dynamic(() => import('react-quill'), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] bg-gray-100 dark:bg-gray-800 animate-pulse rounded"></div>
+  )
+});
 import 'react-quill/dist/quill.snow.css';
 
 interface Blog {
@@ -419,6 +426,10 @@ const BlogApprovePage = () => {
   };
 
   const getBlogPublicUrl = (blog: Blog): string => {
+
+     if (typeof window === 'undefined') {
+    return '';
+  }
     // Construct the public URL for the blog
     return `${window.location.origin}/blog/${blog.slug}`;
   };
