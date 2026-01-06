@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme-context';
-import { Bell, LogOut, User, Menu, ChevronDown, Globe } from 'lucide-react';
-import { FaSun, FaMoon, FaGlobe, FaChevronDown } from 'react-icons/fa';
+import { Bell, LogOut, User, Menu } from 'lucide-react';
+import { FaSun, FaMoon, FaChevronDown } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 
 export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCollapsed }) {
@@ -23,7 +23,6 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
     router.push('/');
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isLanguageOpen) {
@@ -38,23 +37,22 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
   if (!mounted) return null;
 
   return (
-    <header className={`
-      bg-surface dark:bg-surface border-b border-border dark:border-border 
-      px-6 py-4 flex items-center justify-between transition-colors duration-300
-      ${theme === 'dark' ? 'shadow-[0_4px_12px_rgba(0,255,255,0.1)]' : 'shadow-[0_4px_12px_rgba(0,0,0,0.08)]'}
-    `}>
+    <header className="
+      bg-surface dark:bg-surface 
+      border-b border-border dark:border-border 
+      px-6 py-4 flex items-center justify-between 
+      transition-colors duration-300 shadow-md
+    ">
       <div className="flex items-center">
         {/* Mobile menu button */}
         <button
           onClick={onMenuClick}
-          className={`
-            mr-4 p-2 rounded-md transition-all duration-300 hover:scale-105
-            ${theme === 'dark' 
-              ? 'hover:bg-[#00ffff20] text-white' 
-              : 'hover:bg-gray-100 text-gray-900'
-            }
+          className="
+            mr-4 p-2 rounded-md transition-all duration-300 
+            hover:scale-105 text-text-primary dark:text-text-primary 
+            hover:bg-border dark:hover:bg-border
             lg:hidden
-          `}
+          "
         >
           <Menu className="h-6 w-6" />
         </button>
@@ -62,23 +60,21 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
         {/* Desktop sidebar toggle */}
         <button
           onClick={onSidebarToggle}
-          className={`
-            hidden mr-4 p-2 rounded-md transition-all duration-300 hover:scale-105
-            ${theme === 'dark' 
-              ? 'hover:bg-[#00ffff20] text-white' 
-              : 'hover:bg-gray-100 text-gray-900'
-            }
+          className="
+            hidden mr-4 p-2 rounded-md transition-all duration-300 
+            hover:scale-105 text-text-primary dark:text-text-primary 
+            hover:bg-border dark:hover:bg-border
             lg:flex items-center
-          `}
+          "
           title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <Menu className="h-6 w-6" />
         </button>
 
-        <h1 className={`
+        <h1 className="
           text-xl font-semibold transition-colors duration-300
-          ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-[#333333]'}
-        `}>
+          text-text-primary dark:text-text-primary
+        ">
           Admin Dashboard
         </h1>
       </div>
@@ -87,32 +83,30 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className={`
-            p-2 rounded-lg transition-all duration-300 hover:scale-110
-            ${theme === 'dark' 
-              ? 'hover:bg-[#00ffff20]' 
-              : 'hover:bg-gray-100'
-            }
-          `}
+          className="
+            p-2 rounded-lg transition-all duration-300 
+            hover:scale-110 hover:bg-border dark:hover:bg-border
+          "
           aria-label="Toggle theme"
         >
           {theme === 'dark' ? (
-            <FaSun className="text-[#FFD700] h-5 w-5" />
+            <FaSun className="text-warning h-5 w-5" />
           ) : (
-            <FaMoon className="text-[#333333] h-5 w-5" />
+            <FaMoon className="text-text-primary h-5 w-5" />
           )}
         </button>
 
         {/* Notifications */}
-        <button className={`
-          p-2 rounded-full transition-all duration-300 hover:scale-105 relative
-          ${theme === 'dark' 
-            ? 'hover:bg-[#00ffff20] text-white' 
-            : 'hover:bg-gray-100 text-gray-900'
-          }
-        `}>
+        <button className="
+          p-2 rounded-full transition-all duration-300 
+          hover:scale-105 relative text-text-primary 
+          dark:text-text-primary hover:bg-border dark:hover:bg-border
+        ">
           <Bell className="h-5 w-5" />
-          <span className="absolute top-0 right-0 h-3 w-3 bg-red-500 rounded-full animate-pulse"></span>
+          <span className="
+            absolute top-0 right-0 h-3 w-3 
+            bg-error rounded-full animate-pulse
+          "></span>
         </button>
 
         {/* Language Dropdown */}
@@ -122,15 +116,18 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
               e.stopPropagation();
               setIsLanguageOpen(!isLanguageOpen);
             }}
-            className={`
-              flex items-center space-x-2 p-2 rounded-lg transition-all duration-300 hover:scale-105
-              ${theme === 'dark' 
-                ? 'hover:bg-[#00ffff20] text-white' 
-                : 'hover:bg-gray-100 text-gray-900'
-              }
-            `}
+            className="
+              flex items-center space-x-2 p-2 rounded-lg 
+              transition-all duration-300 hover:scale-105
+              text-text-primary dark:text-text-primary 
+              hover:bg-border dark:hover:bg-border
+            "
           >
-            <Globe className="h-5 w-5" />
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" 
+              />
+            </svg>
             <span className="hidden md:inline">EN</span>
             <FaChevronDown 
               className={`transition-transform duration-300 ${isLanguageOpen ? 'rotate-180' : ''}`} 
@@ -139,31 +136,27 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
           </button>
           {isLanguageOpen && (
             <div 
-              className={`
-                absolute right-0 mt-2 w-40 rounded-lg py-2 animate-fadeIn z-50
-                ${theme === 'dark' 
-                  ? 'bg-[#0a192f] border border-[#00ffff] shadow-[0_4px_12px_rgba(0,255,255,0.2)]' 
-                  : 'bg-white border border-gray-200 shadow-lg'
-                }
-              `}
+              className="
+                absolute right-0 mt-2 w-40 bg-surface dark:bg-surface 
+                border border-border dark:border-border rounded-lg 
+                shadow-lg py-2 animate-fadeIn z-50
+              "
               onClick={(e) => e.stopPropagation()}
             >
-              <button className={`
+              <button className="
                 block w-full px-4 py-2 text-left transition-colors duration-200
-                ${theme === 'dark' 
-                  ? 'text-white hover:text-[#00ffff] hover:bg-[#00ffff20]' 
-                  : 'text-gray-900 hover:text-blue-600 hover:bg-gray-100'
-                }
-              `}>
+                text-text-primary dark:text-text-primary 
+                hover:text-primary dark:hover:text-primary 
+                hover:bg-primary/5 dark:hover:bg-primary/20
+              ">
                 English
               </button>
-              <button className={`
+              <button className="
                 block w-full px-4 py-2 text-left transition-colors duration-200
-                ${theme === 'dark' 
-                  ? 'text-white hover:text-[#00ffff] hover:bg-[#00ffff20]' 
-                  : 'text-gray-900 hover:text-blue-600 hover:bg-gray-100'
-                }
-              `}>
+                text-text-primary dark:text-text-primary 
+                hover:text-primary dark:hover:text-primary 
+                hover:bg-primary/5 dark:hover:bg-primary/20
+              ">
                 Amharic
               </button>
             </div>
@@ -172,29 +165,23 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
 
         {/* User Profile */}
         <div className="flex items-center">
-          <div className={`
-            h-8 w-8 rounded-full flex items-center justify-center transition-all duration-300
-            ${theme === 'dark' 
-              ? 'bg-[#00ffff20]' 
-              : 'bg-blue-100'
-            }
-          `}>
-            <User className={`
-              h-5 w-5 transition-colors duration-300
-              ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}
-            `} />
+          <div className="
+            h-8 w-8 rounded-full flex items-center justify-center 
+            transition-all duration-300 bg-primary/10 dark:bg-primary/20
+          ">
+            <User className="h-5 w-5 text-primary dark:text-primary" />
           </div>
           <div className="ml-2 hidden md:block">
-            <p className={`
+            <p className="
               text-sm font-medium transition-colors duration-300
-              ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
-            `}>
-              {user?.phone || 'Admin User'}
+              text-text-primary dark:text-text-primary
+            ">
+              {user?.name || user?.email || user?.phone || 'Admin User'}
             </p>
-            <p className={`
+            <p className="
               text-xs transition-colors duration-300
-              ${theme === 'dark' ? 'text-[#a8b2d1]' : 'text-gray-500'}
-            `}>
+              text-text-secondary dark:text-text-secondary
+            ">
               {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Administrator'}
             </p>
           </div>
@@ -203,13 +190,11 @@ export default function AdminHeader({ onMenuClick, onSidebarToggle, isSidebarCol
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className={`
-            p-2 rounded-md transition-all duration-300 hover:scale-105
-            ${theme === 'dark' 
-              ? 'hover:bg-[#ff000020] text-red-400 hover:text-red-300' 
-              : 'hover:bg-red-50 text-red-600 hover:text-red-700'
-            }
-          `}
+          className="
+            p-2 rounded-md transition-all duration-300 
+            hover:scale-105 text-error hover:bg-error/10 
+            dark:text-error dark:hover:bg-error/20
+          "
           title="Logout"
         >
           <LogOut className="h-5 w-5" />
