@@ -30,51 +30,51 @@ const aboutImages = {
 const sections = [
   {
     id: 'about',
-    title: 'About Tepi Giby Gubaye',
+    title: 'ስለ ቴፒ ግቢ ጉባኤ',
     content:
-      'Tepi Giby Gubaye is a leading organization in Ethiopia focused on cybersecurity and information protection. Established in 2006, it plays a vital role in safeguarding national digital assets, preventing cyber threats, and ensuring secure communication systems. The organization operates under the Office of the Prime Minister and focuses on cybersecurity operations, cyber intelligence, policy development, digital forensics, and capacity building.',
+      'የቴፒ ግቢ ጉባኤ በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን በሰንበት ትምህርት ቤቶች ማደራጃ መምሪያ ማኅበረ ቅዱሳን አማካይነት በከፍተኛ ትምህርት ተቋማት ውስጥ የሚቋቋም መንፈሳዊ ተቋም ነው። የዚህ ጉባኤ መቋቋም ዋና ዓላማ የከፍተኛ ትምህርት ተቋማት ተማሪዎች መንፈሳዊ አገልግሎታቸውን ወጥነት ባለውና በተቀላጠፈ መልኩ እንዲፈጽሙ ማስቻል ነው። ተማሪዎች በዩኒቨርሲቲ ቆይታቸው ከቤተ ክርስቲያናቸው ጋር ያላቸው ግንኙነት ሳይቋረጥ በኦርቶዶክሳዊ ማንነት እንዲታነጹ ይረዳል። ጉባኤው በአጥቢያ ቤተ ክርስቲያን የሚከናወኑ መንፈሳውያን መርሐ ግብራትን ያቀናጃል እንዲሁም ይመራል። ይህም ተማሪዎች በግቢያቸው ውስጥ ብቻ ሳይወሰኑ በቤተ ክርስቲያን ጥላ ሥር እንዲቆዩ ያደርጋል። በአጠቃላይ ተማሪዎች በቆይታቸው የቤተ ክርስቲያንን ሥርዓትና ትውፊት ጠብቀው እንዲያድጉ ያደርጋል። ግቢ ጉባኤው የተማሪዎችን የእለት ከእለት መንፈሳዊ እንቅስቃሴ በመከታተልና በመምራት ረገድ ከፍተኛ ኃላፊነት አለበት።',
     image: aboutImages.insa1,
   },
   {
     id: 'mission',
-    title: 'Mission',
+    title: 'ተልዕኮ',
     content:
-      'INSA works to strengthen Ethiopia\'s cyber resilience through research, innovation, and collaboration with national and international partners. It also plays a key role in the country\'s Digital Transformation Strategy, aiming to create a secure and technology-driven economy.',
+      'ተልዕኳችን ተማሪዎች በአቅራቢያቸው በሚገኝ አጥቢያ ቤተ ክርስቲያን የሚያደርጓቸውን መንፈሳውያን መርሐ ግብራት ማቀናጀት፣ መምራትና ማስተባበር ነው። ማኅበሩ በቀረጸው ወጥ ሥርዓተ ትምህርት መሠረት ተማሪዎች የቤተ ክርስቲያናቸውን ሥርዓተ እምነት፣ ታሪክ፣ ሥነ ምግባር እና ክርስቲያናዊ ትውፊት በአግባቡ እንዲማሩ እናደርጋለን። ተማሪዎች በገንዘባቸው፣ በዕውቀታቸውና በሙያቸው ቤተ ክርስቲያናቸውን ማገልገል እንዳለባቸው ግንዛቤ በመፍጠር የአገልግሎት ተሳታፊ እንዲሆኑ እናመቻቻለን። በማኅበሩ የሚሰራጩ የሕትመት ውጤቶችን ማለትም መጽሔት፣ ጋዜጣና በራሪ ጽሑፎችን ለተማሪዎች በማድረስ ሃይማኖታዊ ዕውቀታቸው እንዲዳብር እንሠራለን። በተጨማሪም ተማሪዎች በሰንበት ትምህርት ቤት አገልግሎት ላይ ንቁ ተሳትፎ እንዲኖራቸው በማድረግ ተተኪ አገልጋዮችን የማፍራት ተልዕኮ አለን። የግቢ ጉባኤው አባላት በማእከሉ መንፈሳዊ አገልግሎት ላይ እንዲሳተፉና ልምምድ የሚያደርጉበትን ሁኔታ ማመቻቸት ሌላው ተልዕኳችን ነው። ይህም ተማሪዎች ከምረቃ በኋላም ለቤተ ክርስቲያን ጠቃሚ አገልጋይ እንዲሆኑ ያዘጋጃቸዋል።',
     image: aboutImages.about2,
   },
   {
     id: 'vision',
-    title: 'Vision',
+    title: 'ራዕይ',
     content:
-      'With a mission to protect Ethiopia\'s national interests in cyberspace, INSA continuously monitors, detects, and mitigates cyber threats while fostering cybersecurity awareness and strengthening the country\'s digital defense mechanisms.',
+      'የግቢ ጉባኤያችን ራዕይ በከፍተኛ ትምህርት ተቋማት ውስጥ የሚማሩ ኦርቶዶክሳውያን ወጣቶች ሃይማኖታቸውን በአግባቡ ያወቁ፣ መንፈሳውያንና በመልካም ሥነ ምግባር የታነጹ ዜጎች ሆነው ማየት ነው። ተማሪዎች በሚማሩበት የሙያ ዘርፍ ለራሳቸው፣ ለቤተሰቦቻቸው፣ ለማኅበረሰቡ፣ ለቤተ ክርስቲያንና ለሀገራቸው የበኩላቸውን አስተዋጽዖ የሚያበረክቱ ብቁ ምሁራን እንዲሆኑ ማስቻል የራዕያችን አካል ነው። በዩኒቨርሲቲው ውስጥ የሚገኙ ኦርቶዶክሳውያን ተማሪዎች በሙሉ በግቢ ጉባኤው ተሳትፎ እንዲኖራቸውና በሃይማኖት ጥንካሬ እንዲያድጉ እንመኛለን። ራዕያችን ተማሪዎች በሳይንሳዊ ዕውቀታቸውና በመንፈሳዊ ሕይወታቸው የተመጣጠነ ስብዕና እንዲኖራቸው በማድረግ ሀገር ተረካቢ ትውልድ መፍጠር ነው። ተማሪዎች የቤተ ክርስቲያን ምሰሶና የሀገር ተስፋ ሆነው እንዲወጡ በራዕይ እንሠራለን። ይህም ተማሪዎች የቤተ ክርስቲያናቸውን ዶግማና ቀኖና ጠብቀው ዓለማዊውን ትምህርት እንዲያሸንፉ መርዳትን ያካትታል። በመጨረሻም መንፈሳዊነትና ዕውቀት የተዋሃደላቸው ምሁራን በቤተ ክርስቲያን መዋቅር ውስጥ ገብተው እንዲያገለግሉ ማየት ትልቁ ራዕያችን ነው።',
     image: aboutImages.about5,
   },
   {
-    id: 'operations',
-    title: 'Operations',
+    id: 'objectives',
+    title: 'ዓላማዎች',
     content:
-      'INSA\'s Cybersecurity Operations Center (CSOC) monitors, detects, and responds to cyber threats in real-time. The Incident Response Team (IRT) collaborates with government and private entities to mitigate cyber incidents.',
+      'የግቢ ጉባኤው ዋና ዋና ዓላማዎች ተማሪዎች በአጥቢያ ቤተ ክርስቲያን በሚደረጉ መደበኛ መርሐ ግብራት ላይ እንዲሳተፉ ማመቻቸትና መከታተል ነው። ተማሪዎች ማኅበሩ ባዘጋጀው ሥርዓተ ትምህርት መሠረት ትምህርታቸውን በአግባቡ መከታተላቸውን ማረጋገጥ ሌላው ዓላማ ነው። በማኅበሩ የሚታተሙ መጻሕፍት፣ መጽሔቶችና ሌሎች የሕትመት ውጤቶች ለተማሪዎች ተደራሽ እንዲሆኑ በማድረግ መንፈሳዊ ንባብን ማበረታታት እንፈልጋለን። ተማሪዎች በዩኒቨርሲቲው ውስጥም ሆነ በአጥቢያው ሰንበት ትምህርት ቤት በሚሰጡ የአገልግሎት ክፍሎች ተመድበው እንዲያገለግሉ እናደርጋለን። ተማሪዎች በገንዘባቸው፣ በዕውቀታቸውና በሙያቸው ቤተ ክርስቲያናቸውን የማገልገል ግዴታ እንዳለባቸው በማስተማር ለበጎ አድራጎት ሥራዎች እንዲነሳሱ ማድረግ ዓላማችን ነው። የግቢ ጉባኤውን ገንዘብና ንብረት በአግባቡ በመጠበቅና ሪፖርት በማድረግ ግልጽነት ያለው አሠራር መዘርጋት ሌላው ተግባር ነው። ተማሪዎች ከመደበኛው ትምህርት ጎን ለጎን የቤተ ክርስቲያንን ትውፊትና ሥነ ምግባር ጠብቀው እንዲያድጉ ልዩ ክትትል እናደርጋለን።',
     image: aboutImages.about4,
   },
   {
-    id: 'collaboration',
-    title: 'Collaboration',
+    id: 'education',
+    title: 'የትምህርትና ሐዋርያዊ አገልግሎት',
     content:
-      'INSA collaborates with international cybersecurity agencies to share information, resources, and best practices, ensuring a robust global cybersecurity network.',
+      'ይህ ክፍል በግቢ ጉባኤው ውስጥ የሚከናወኑ ማናቸውንም መደበኛና መደበኛ ያልሆኑ የትምህርት መርሐ ግብራትን በበላይነት ያቀናጃል። እንደ አስፈላጊነቱ መምህራን እንዲመደቡና ትምህርቶች በተያዘላቸው ሰዓት መከናወናቸውን ይቆጣጠራል። በግቢ ጉባኤው ውስጥ ተተኪ መምህራንንና መርሐ ግብር መሪዎችን ለማፍራት ስልጠናዎችን ያስተባብራል። ተማሪዎች የአብነት ትምህርትን ማለትም ዜማንና ቅዳሴን እንዲማሩ ይቀሰቅሳል፣ ለትምህርቱም የሚያስፈልጉ ግብዓቶች እንዲሟሉ ይሠራል። አባላት ከመደበኛው ሥርዓተ ትምህርት በተጨማሪ ለመንፈሳዊ ሕይወታቸው አጋዥ የሆኑ የአገልግሎት ኮርሶችን እንዲያገኙ ያመቻቻል። የትምህርት ክፍሉ ሰብሳቢ አገልግሎቱን በበላይነት እየመራ ለሥራ አስፈጻሚው ሪፖርት ያቀርባል። በተጨማሪም ተማሪዎች በአካባቢው ለሚገኙ አብያተ ክርስቲያናትና ገዳማት ልዩ ልዩ አገልግሎቶችን እንዲሰጡ ሁኔታዎችን ያመቻቻል። ተማሪዎች ከምረቃ በኋላም የአብነት ትምህርታቸውን መቀጠል እንዲችሉ ከማእከሉ ጋር ግንኙነት ያደርጋል።',
     image: aboutImages.insa9,
   },
   {
-    id: 'innovation',
-    title: 'Innovation',
+    id: 'care',
+    title: 'የአባላት እንክብካቤ',
     content:
-      'The Research and Development Unit at INSA invests in cutting-edge technologies and strategies to stay ahead of emerging cyber threats.',
+      'ይህ ክፍል የተማሪዎችን መንፈሳዊና ማኅበራዊ ሕይወት በቅርበት በመከታተል አስፈላጊውን እንክብካቤና ድጋፍ ይሰጣል። ተማሪዎች ከቋንቋ ችግር ወይም ከአካባቢ መለወጥ ጋር ተያይዞ የሚገጥማቸውን ፈተና እንዲወጡ የምክክር አገልግሎት ያመቻቻል። የአካል ጉዳተኛ ተማሪዎችና ልዩ ድጋፍ የሚሹ አባላት በጉባኤው ውስጥ እኩል ተሳትፎ እንዲኖራቸው ይረዳል። ተማሪዎች በመንፈሳዊ ሕይወታቸው ሲደክሙ ወይም ከጉባኤ ሲቀሩ በምክክርና በትምህርት ወደ አገልግሎት እንዲመለሱ የማድረግ ኃላፊነት አለበት። የአባላትን ሙሉ መረጃ በመሰብሰብና በማደራጀት የጉባኤውን ተደራሽነት ይገመግማል። ተማሪዎች እርስ በርስ የሚደጋገፉበትንና የሚጠያየቁበትን ሥርዓት በመዘርጋት እንደ አንድ ቤተሰብ እንዲኖሩ ይሠራል። ክፍሉ በየጊዜው የአባላትን ሁኔታ ለሥራ አስፈጻሚው በማሳወቅ የመፍትሔ አቅጣጫዎችን ይጠቁማል። ለተማሪዎች መንፈሳዊ ጥንካሬ የሚረዱ ልዩ ልዩ የውይይት መድረኮችንም ያዘጋጃል።',
     image: aboutImages.about3,
   },
   {
-    id: 'future',
-    title: 'Future Goals',
+    id: 'capacity',
+    title: 'የአቅም ግንባታና ሙያዊ አገልግሎት',
     content:
-      'INSA aims to expand its cybersecurity capabilities, foster public-private partnerships, and drive Ethiopia\'s digital transformation forward.',
+      'ይህ ክፍል ተማሪዎች በሚማሩበት የሙያ ዘርፍ (ጤና፣ ሕግ፣ ግብርና፣ ምህንድስና ወዘተ) ቤተ ክርስቲያናቸውን ማገልገል የሚችሉበትን መንገድ ያመቻቻል። ተማሪዎች ያላቸውን ዕውቀትና ሙያ ለቤተ ክርስቲያንና ለሀገር ዕድገት እንዲጠቀሙበት የሙያ ስልጠናዎችንና ፕሮጀክቶችን ቀርጾ ይተገብራል። የግቢ ጉባኤውን የገቢ ምንጭ ለማጠናከር ልዩ ልዩ የልማትና ገቢ አሰባሰብ ሥራዎችን ከማእከሉ ጋር በመሆን ያከናውናል። ተማሪዎች በዕረፍት ጊዜያቸው በበጎ አድራጎት ሥራዎች ላይ እንዲሳተፉና የሥራ ልምምድ እንዲያገኙ ሁኔታዎችን ያመቻቻል። የአባላትን ልዩ ልዩ ክህሎት በመለየት ለቤተ ክርስቲያን አገልግሎት እንዲውሉ የማስተባበር ኃላፊነት አለበት። ክፍሉ ተማሪዎች ከምረቃ በኋላም በማኅበሩና በቤተ ክርስቲያን መዋቅር ውስጥ በሙያቸው ማገልገል እንዲችሉ ቅድመ ዝግጅት ያደርጋል። ለግቢ ጉባኤው አገልግሎት መነሻ የሚሆኑ መሠረታዊ ቁሳቁሶችን የማደራጀትና የመጠበቅ ሥራንም ይከታተላል።',
     image: aboutImages.about6,
   },
 ];

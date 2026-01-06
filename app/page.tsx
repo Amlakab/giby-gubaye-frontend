@@ -327,12 +327,39 @@ export default function Home() {
                 <h2 className={`text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-text-primary'}`}>
                   About Us
                 </h2>
-                <p className={`mb-6 text-base ${theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'}`}>
-                  The <strong className="text-primary">Information Network Security Agency (INSA)</strong> is Ethiopia's national institution
-                  responsible for safeguarding the country's cybersecurity and information infrastructure. Established in
-                  2006, INSA plays a vital role in protecting national digital assets, preventing cyber threats, and
-                  ensuring secure communication systems.
+                <p
+                  className={`mb-6 text-base ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                  }`}
+                >
+                  የቴፒ ግቢ ጉባኤ በኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን
+                  በሰንበት ትምህርት ቤቶች ማደራጃ መምሪያ ማኅበረ ቅዱሳን
+                  አማካይነት በከፍተኛ ትምህርት ተቋማት ውስጥ የሚቋቋም
+                  መንፈሳዊ ተቋም ነው። የዚህ ጉባኤ መቋቋም ዋና ዓላማ
+                  የከፍተኛ ትምህርት ተቋማት ተማሪዎች መንፈሳዊ
+                  አገልግሎታቸውን ወጥነት ባለውና በተቀላጠፈ
+                  መልኩ እንዲፈጽሙ ማስቻል ነው። ተማሪዎች
+                  በዩኒቨርሲቲ ቆይታቸው ከቤተ ክርስቲያናቸው
+                  ጋር ያላቸው ግንኙነት ሳይቋረጥ በኦርቶዶክሳዊ
+                  ማንነት እንዲታነጹ ይረዳል። ጉባኤው
+                  በአጥቢያ ቤተ ክርስቲያን የሚከናወኑ
+                  መንፈሳዊ መርሐ ግብራትን ያቀናጃል
+                  እንዲሁም ይመራል። ይህም ተማሪዎች
+                  በግቢያቸው ውስጥ ብቻ ሳይወሰኑ
+                  በቤተ ክርስቲያን ጥላ ሥር
+                  እንዲቆዩ ያደርጋል። በአጠቃላይ
+                  ተማሪዎች በቆይታቸው
+                  የቤተ ክርስቲያንን
+                  ሥርዓትና ትውፊት
+                  ጠብቀው እንዲያድጉ
+                  ያደርጋል። ግቢ ጉባኤው
+                  የተማሪዎችን የእለት ከእለት
+                  መንፈሳዊ እንቅስቃሴ
+                  በመከታተልና በመምራት
+                  ረገድ ከፍተኛ ኃላፊነት
+                  አለበት።
                 </p>
+
                 <Link
                   href="/about"
                   className="inline-flex items-center px-6 py-3 border-2 border-primary hover:bg-primary text-primary hover:text-white rounded-lg font-medium transition-colors duration-300 text-base"
@@ -362,11 +389,34 @@ export default function Home() {
                 <h3 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-text-primary'}`}>
                   Our Services
                 </h3>
-                <p className={`mb-6 text-base ${theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'}`}>
-                  The <strong className="text-primary">Information Network Security Agency (INSA)</strong> provides a wide range of cybersecurity
-                  services aimed at protecting Ethiopia's national information infrastructure. Its core services include{' '}
-                  <strong className="text-secondary">cyber threat intelligence, incident response, policy development, cybersecurity research,
-                  capacity building, and public awareness campaigns</strong>.
+                <p
+                  className={`text-lg leading-relaxed mb-10 ${
+                    theme === 'dark' ? 'text-[#ccd6f6]' : 'text-[#333333]'
+                  }`}
+                >
+                  <strong
+                    className={theme === 'dark' ? 'text-[#00ffff]' : 'text-[#007bff]'}
+                  >
+                    የቴፒ ግቢ ጉባኤ
+                  </strong>{' '}
+                  ተማሪዎች በዩኒቨርሲቲ ቆይታቸው በሥነ-ምግባር የታነጹ፣
+                  በሃይማኖታቸው የጸኑና ለቤተክርስቲያን እንዲሁም
+                  ለሀገር የሚጠቅሙ ዜጎች እንዲሆኑ ለማስቻል
+                  ዘርፈ-ብዙ አገልግሎቶችን ይሰጣል።
+
+                  <strong
+                    className={theme === 'dark' ? 'text-[#00b3b3]' : 'text-[#0056b3]'}
+                  >
+                    {' '}
+                    እንደ ግቢ ጉባኤያት መመሪያና መዋቅር፣ አገልግሎቶቹ
+                    በዋና ዋና ዘርፎችና በንዑሳን ክፍላት ተደራጅተው
+                    ይከናወናሉ።
+                  </strong>{' '}
+                  በአጠቃላይ የቴፒ ግቢ ጉባኤ እነዚህን መዋቅሮች
+                  በመጠቀም ተማሪዎች በዩኒቨርሲቲ ቆይታቸው
+                  መንፈሳዊና ዓለማዊ ሕይወታቸው ተመጣጣኝ
+                  ሆኖ እንዲቀጥልና ለቤተክርስቲያን ተተኪ
+                  አገልጋዮች እንዲሆኑ ያደርጋል።
                 </p>
                 <Link
                   href="/services"

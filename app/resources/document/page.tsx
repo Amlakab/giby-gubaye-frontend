@@ -12,38 +12,39 @@ import Image from 'next/image';
 const documents = [
   {
     id: 1,
-    title: 'Secure Website Management Standard',
-    description: 'This document outlines the standards for managing secure websites, ensuring compliance with national cybersecurity guidelines.',
-    downloadLink: '/documents/Document1.pdf',
+    title: 'የግቢ ጉባኤ መመሪያ መጽሐፍ',
+    description: 'ይህ መጽሐፍ የግቢ ጉባኤዎች አቋቋም፣ አደረጃጀት እና አስተዳደር መርሆዎችን በዝርዝር ይዳስሳል። በከፍተኛ ትምህርት ተቋማት ውስጥ የሚገኙ ተማሪዎች መንፈሳዊ አገልግሎታቸውን በሥርዓት እንዲፈጽሙ ይረዳል።',
+    downloadLink: '/documents/gibi-gubae-guideline.pdf',
     image: '/images/image23.jpg',
   },
   {
     id: 2,
-    title: 'Cyber Security Risk Assessment Framework',
-    description: 'A comprehensive framework for assessing cybersecurity risks within organizations, providing a structured approach to risk management.',
-    downloadLink: '/documents/Document2.pdf',
+    title: 'የኦርቶዶክስ ተዋሕዶ ሃይማኖት መሠረቶች',
+    description: 'መጽሐፉ የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን እምነት፣ ትውፊትና ሥርዓት መሠረታዊ ትምህርቶችን ያብራራል። ተማሪዎች በኦርቶዶክሳዊ ማንነት እንዲጸኑ ይረዳል።',
+    downloadLink: '/documents/orthodox-faith-basics.pdf',
   },
   {
     id: 3,
-    title: 'National Cyber Security Framework Development Methodology',
-    description: 'Methodology for developing a national cybersecurity framework, aimed at enhancing the country\'s cybersecurity posture.',
-    downloadLink: '/documents/Document3.pdf',
+    title: 'የሰንበት ትምህርት ቤት አስተዳደር',
+    description: 'ይህ ሰነድ የሰንበት ትምህርት ቤቶች አስተዳደር፣ የትምህርት እቅድና የመምህራን ኃላፊነት ይገልጻል። በግቢ ጉባኤ አገልግሎት ውስጥ ለሚሰሩ አባላት ተጠቃሚ ነው።',
+    downloadLink: '/documents/sunday-school-management.pdf',
     image: '/images/image22.jpg',
   },
   {
     id: 4,
-    title: 'Secure Software Development and Management Standard',
-    description: 'Standards for secure software development and management, ensuring that software systems are developed with security in mind.',
-    downloadLink: '/documents/Document4.pdf',
+    title: 'የተማሪዎች መንፈሳዊ ሕይወት መመሪያ',
+    description: 'መጽሐፉ ተማሪዎች በዩኒቨርሲቲ ቆይታቸው መንፈሳዊ ሕይወታቸውን እንዴት መጠበቅ እንደሚችሉ ይመራል። ከቤተ ክርስቲያን ጋር ያላቸውን ግንኙነት እንዳይቋረጥ ያግዛል።',
+    downloadLink: '/documents/student-spiritual-life.pdf',
   },
   {
     id: 5,
-    title: 'VRC-R (VRC_RJY)++ A(M_ATC)*',
-    description: 'Technical documentation for the VRC-R system, detailing its architecture, components, and operational protocols.',
-    downloadLink: '/documents/Document5.pdf',
-    image: '/images/image22.jpg',
+    title: 'የግቢ ጉባኤ መንፈሳዊ መርሐ ግብራት',
+    description: 'ይህ ሰነድ በግቢ ጉባኤ ውስጥ የሚከናወኑ ጸሎት፣ ትምህርት፣ መንፈሳዊ ውይይትና የአጥቢያ ቤተ ክርስቲያን ግንኙነት መርሐ ግብራትን ይዘርዝራል።',
+    downloadLink: '/documents/gibi-spiritual-programs.pdf',
+    image: '/images/image23.jpg',
   },
 ];
+
 
 export default function DocumentPage() {
   const { theme } = useTheme();
