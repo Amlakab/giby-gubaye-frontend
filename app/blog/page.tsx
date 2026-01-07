@@ -28,6 +28,18 @@ interface Blog {
   description: string;
   content: string;
   image?: string;
+  imageData?: {
+    data: {
+      $binary?: {
+        base64: string;
+        subType: string;
+      };
+      type?: string;
+      data?: number[];
+    } | string;
+    contentType: string;
+    fileName: string;
+  };
   category: string;
   createdBy: {
     _id: string;
@@ -88,6 +100,45 @@ const BlogPage = () => {
   const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
   const [openViewDialog, setOpenViewDialog] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Function to get image URL from blog data
+  const getImageUrl = (blog: Blog): string | null => {
+    try {
+      // Check if imageData exists and has the expected structure
+      if (blog.imageData && blog.imageData.data) {
+        let base64String: string;
+        
+        // Extract base64 string based on the structure
+        if (typeof blog.imageData.data === 'string') {
+          // Already a string
+          base64String = blog.imageData.data;
+        } else if (blog.imageData.data.$binary && blog.imageData.data.$binary.base64) {
+          // MongoDB BSON format
+          base64String = blog.imageData.data.$binary.base64;
+        } else if (blog.imageData.data.data && Array.isArray(blog.imageData.data.data)) {
+          // Buffer format
+          base64String = Buffer.from(blog.imageData.data.data).toString('base64');
+        } else {
+          throw new Error('Unknown image data structure');
+        }
+        
+        // Clean and construct the data URL
+        const cleanBase64 = base64String.replace(/\s/g, '');
+        const contentType = blog.imageData.contentType || 'image/jpeg';
+        return `data:${contentType};base64,${cleanBase64}`;
+      }
+      
+      // Fallback to image field if it's a data URL
+      if (blog.image && blog.image.startsWith('data:image')) {
+        return blog.image;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting image URL:', error);
+      return null;
+    }
+  };
 
   const fetchApprovedBlogs = async () => {
     try {
@@ -161,20 +212,6 @@ const BlogPage = () => {
     }
   };
 
-  const getImageUrl = (imagePath: string | undefined): string => {
-    if (!imagePath) return '/api/placeholder/400/250';
-    
-    if (imagePath.startsWith('http')) return imagePath;
-    
-    const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    
-    if (imagePath.startsWith('/uploads')) {
-      return `${serverUrl}${imagePath}`;
-    }
-    
-    return `${serverUrl}/uploads/blogs/${imagePath}`;
-  };
-
   const getAuthorInitials = (author: { firstName?: string; lastName?: string }): string => {
     const first = author?.firstName?.charAt(0) || '';
     const last = author?.lastName?.charAt(0) || '';
@@ -189,7 +226,6 @@ const BlogPage = () => {
 
   const shareOnFacebook = () => {
     if (selectedBlog) {
-      // For Facebook, we can only share URL, but we can include description
       const url = window.location.href;
       const quote = `${selectedBlog.title}\n\n${selectedBlog.description}`;
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(quote)}`, '_blank');
@@ -198,7 +234,6 @@ const BlogPage = () => {
 
   const shareOnWhatsApp = () => {
     if (selectedBlog) {
-      // WhatsApp supports formatted text with newlines
       const message = `*${selectedBlog.title}*\n\n${selectedBlog.description}\n\nRead more at: ${window.location.href}`;
       window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     }
@@ -206,7 +241,6 @@ const BlogPage = () => {
 
   const shareOnTelegram = () => {
     if (selectedBlog) {
-      // Telegram supports formatted text
       const message = `<b>${selectedBlog.title}</b>\n\n${selectedBlog.description}`;
       window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(message)}`, '_blank');
     }
@@ -254,27 +288,8 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
     }
   };
 
-  const shareViaSMS = () => {
-    if (selectedBlog && 'share' in navigator) {
-      const url = window.location.href;
-      const shareData = {
-        title: selectedBlog.title,
-        text: `${selectedBlog.description}\n\n${selectedBlog.content.replace(/<[^>]*>/g, '').substring(0, 100)}...`,
-        url: url
-      };
-      
-      // Check if Web Share API is available (mobile devices)
-      if (navigator.share) {
-        navigator.share(shareData)
-          .then(() => console.log('Shared successfully'))
-          .catch(err => console.error('Error sharing:', err));
-      }
-    }
-  };
-
   const shareFullBlogContent = () => {
     if (selectedBlog) {
-      // Create a formatted share text with all blog details
       const shareText = `
 📄 *${selectedBlog.title}*
 
@@ -335,7 +350,6 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
       <Navbar />
       
       <div className="pt-16">
-
         {/* Hero Section */}
         <section className={`py-12 px-4 ${
           theme === 'dark' ? 'bg-transparent' : 'bg-transparent'
@@ -363,7 +377,6 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
                   ይህ መድረክ ተማሪዎችን በእምነትና በባህሪ እድገት ለማጠናከር ይረዳል።
                   እንዲሁም ተማሪዎች በአገልግሎት ሕይወት እንዲተግብሩ ያበረታታል።
                 </p>
-
               </motion.div>
 
               <motion.div
@@ -399,8 +412,7 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
           </div>
         </section>
 
-
-        {/* Search and Filter Section - Fixed for mobile view */}
+        {/* Search and Filter Section */}
         <section className={`py-8 px-4 ${
           theme === 'dark' ? 'bg-transparent' : 'bg-transparent'
         }`}>
@@ -523,7 +535,7 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
                             : '0 8px 24px rgba(37, 99, 235, 0.2)'
                         }
                       }}>
-                        {/* Blog Image - Using regular img tag */}
+                        {/* Blog Image - Using getImageUrl function */}
                         <Box sx={{ 
                           position: 'relative',
                           height: 200,
@@ -531,22 +543,38 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
                           borderTopLeftRadius: 8,
                           borderTopRightRadius: 8
                         }}>
-                          <img
-                            src={getImageUrl(blog.image)}
-                            alt={blog.title}
-                            style={{ 
+                          {getImageUrl(blog) ? (
+                            <img
+                              src={getImageUrl(blog) || ''}
+                              alt={blog.title}
+                              style={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                objectFit: 'cover',
+                                transition: 'transform 0.3s'
+                              }}
+                              className="group-hover:scale-105"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/api/placeholder/400/250';
+                              }}
+                            />
+                          ) : (
+                            <Box sx={{ 
                               width: '100%', 
                               height: '100%', 
-                              objectFit: 'cover',
-                              transition: 'transform 0.3s'
-                            }}
-                            className="group-hover:scale-105"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.onerror = null;
-                              target.src = '/api/placeholder/400/250';
-                            }}
-                          />
+                              backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <Article sx={{ 
+                                fontSize: 48, 
+                                color: theme === 'dark' ? '#a8b2d1' : '#94a3b8' 
+                              }} />
+                            </Box>
+                          )}
                           
                           {/* Featured Badge */}
                           {blog.isFeatured && (
@@ -902,27 +930,43 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
             </DialogTitle>
             
             <DialogContent sx={{ p: 0, overflowY: 'auto' }}>
-              {/* Blog Image - Using regular img tag */}
+              {/* Blog Image - Using getImageUrl function */}
               <Box sx={{ 
                 width: '100%',
                 height: { xs: 200, md: 300 },
                 overflow: 'hidden',
                 position: 'relative'
               }}>
-                <img
-                  src={getImageUrl(selectedBlog.image)}
-                  alt={selectedBlog.title}
-                  style={{ 
+                {getImageUrl(selectedBlog) ? (
+                  <img
+                    src={getImageUrl(selectedBlog) || ''}
+                    alt={selectedBlog.title}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      objectFit: 'cover' 
+                    }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = '/api/placeholder/1200/300';
+                    }}
+                  />
+                ) : (
+                  <Box sx={{ 
                     width: '100%', 
                     height: '100%', 
-                    objectFit: 'cover' 
-                  }}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null;
-                    target.src = '/api/placeholder/1200/300';
-                  }}
-                />
+                    backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Article sx={{ 
+                      fontSize: 48, 
+                      color: theme === 'dark' ? '#a8b2d1' : '#94a3b8' 
+                    }} />
+                  </Box>
+                )}
               </Box>
               
               <Box sx={{ p: 3 }}>

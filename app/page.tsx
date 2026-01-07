@@ -33,13 +33,25 @@ const images = {
   logo2: '/images/logo2.png',
 };
 
-// Interface for Blog
+// Interface for Blog - Updated to match BlogPage
 interface Blog {
   _id: string;
   title: string;
   description: string;
   content: string;
   image?: string;
+  imageData?: {
+    data: {
+      $binary?: {
+        base64: string;
+        subType: string;
+      };
+      type?: string;
+      data?: number[];
+    } | string;
+    contentType: string;
+    fileName: string;
+  };
   category: string;
   createdBy: {
     _id: string;
@@ -54,6 +66,9 @@ interface Blog {
   tags: string[];
   isFeatured: boolean;
   viewsCount: number;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaKeywords?: string[];
   readingTime: number;
   createdAt: string;
   updatedAt: string;
@@ -97,19 +112,54 @@ export default function Home() {
   const [loadingBlogs, setLoadingBlogs] = useState(true);
   const { theme } = useTheme();
 
-  // Helper function to get image URL - Same as BlogPage
-  const getImageUrl = (imagePath: string | undefined): string => {
-    if (!imagePath) return '/api/placeholder/400/250';
-    
-    if (imagePath.startsWith('http')) return imagePath;
-    
-    const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    
-    if (imagePath.startsWith('/uploads')) {
-      return `${serverUrl}${imagePath}`;
+  // Function to get image URL from blog data - Same as BlogPage
+  const getImageUrl = (blog: Blog): string | null => {
+    try {
+      // Check if imageData exists and has the expected structure
+      if (blog.imageData && blog.imageData.data) {
+        let base64String: string;
+        
+        // Extract base64 string based on the structure
+        if (typeof blog.imageData.data === 'string') {
+          // Already a string
+          base64String = blog.imageData.data;
+        } else if (blog.imageData.data.$binary && blog.imageData.data.$binary.base64) {
+          // MongoDB BSON format
+          base64String = blog.imageData.data.$binary.base64;
+        } else if (blog.imageData.data.data && Array.isArray(blog.imageData.data.data)) {
+          // Buffer format
+          base64String = Buffer.from(blog.imageData.data.data).toString('base64');
+        } else {
+          throw new Error('Unknown image data structure');
+        }
+        
+        // Clean and construct the data URL
+        const cleanBase64 = base64String.replace(/\s/g, '');
+        const contentType = blog.imageData.contentType || 'image/jpeg';
+        return `data:${contentType};base64,${cleanBase64}`;
+      }
+      
+      // Fallback to image field if it's a data URL
+      if (blog.image && blog.image.startsWith('data:image')) {
+        return blog.image;
+      }
+      
+      // Fallback to server URL if image is a path
+      if (blog.image) {
+        const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        
+        if (blog.image.startsWith('/uploads')) {
+          return `${serverUrl}${blog.image}`;
+        }
+        
+        return `${serverUrl}/uploads/blogs/${blog.image}`;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting image URL:', error);
+      return null;
     }
-    
-    return `${serverUrl}/uploads/blogs/${imagePath}`;
   };
 
   // Format date function - Same as BlogPage
@@ -413,10 +463,10 @@ export default function Home() {
                     ይከናወናሉ።
                   </strong>{' '}
                   በአጠቃላይ የቴፒ ግቢ ጉባኤ እነዚህን መዋቅሮች
-                  በመጠቀም ተማሪዎች በዩኒቨርሲቲ ቆይታቸው
-                  መንፈሳዊና ዓለማዊ ሕይወታቸው ተመጣጣኝ
-                  ሆኖ እንዲቀጥልና ለቤተክርስቲያን ተተኪ
-                  አገልጋዮች እንዲሆኑ ያደርጋል።
+                    በመጠቀም ተማሪዎች በዩኒቨርሲቲ ቆይታቸው
+                    መንፈሳዊና ዓለማዊ ሕይወታቸው ተመጣጣኝ
+                    ሆኖ እንዲቀጥልና ለቤተክርስቲያን ተተኪ
+                    አገልጋዮች እንዲሆኑ ያደርጋል።
                 </p>
                 <Link
                   href="/services"
@@ -445,7 +495,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Blog Section - DYNAMIC - USING <img> TAG LIKE BLOGPAGE */}
+        {/* Blog Section - DYNAMIC - USING DATABASE IMAGES LIKE BLOGPAGE */}
         <section className={`py-16 px-4 ${theme === 'dark' ? 'bg-transparent' : 'bg-background'}`}>
           <div className="container mx-auto">
             <h2 className={`text-3xl font-bold text-center mb-12 ${theme === 'dark' ? 'text-white' : 'text-text-primary'}`}>
@@ -464,96 +514,112 @@ export default function Home() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {topBlogs.map((blog, index) => (
-                  <motion.div
-                    key={blog._id}
-                    initial={{ y: 50, opacity: 0 }}
-                    whileInView={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    whileHover={{ y: -5 }}
-                    className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      theme === 'dark' ? 'bg-surface/30 backdrop-blur-sm' : 'bg-surface'
-                    }`}
-                  >
-                    <Link href={`/blog`} className="block">
-                      {/* Blog Image - Using <img> tag like BlogPage */}
-                      <div className="relative h-48 overflow-hidden">
-                        <img
-                          src={getImageUrl(blog.image)}
-                          alt={blog.title}
-                          style={{ 
-                            width: '100%', 
-                            height: '100%', 
-                            objectFit: 'cover',
-                            transition: 'transform 0.3s'
-                          }}
-                          className="group-hover:scale-105"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = '/api/placeholder/400/250';
-                          }}
-                        />
-                        {blog.isFeatured && (
-                          <div className="absolute top-2 left-2">
-                            <span className="px-2 py-1 text-xs font-bold bg-yellow-500 text-gray-900 rounded">
-                              Featured
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className={`text-sm font-medium px-2 py-1 rounded ${
-                            theme === 'dark' 
-                              ? 'bg-gray-800 text-gray-300' 
-                              : 'bg-gray-100 text-gray-600'
-                          }`}>
-                            {blog.category}
-                          </span>
-                          <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {formatDate(blog.blogDate)}
-                          </span>
-                        </div>
-                        <h3 className={`text-lg font-semibold mb-2 ${
-                          theme === 'dark' ? 'text-white' : 'text-text-primary'
-                        }`}>
-                          {blog.title}
-                        </h3>
-                        <p className={`text-base mb-3 ${
-                          theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
-                        }`}>
-                          {blog.description.length > 120 
-                            ? `${blog.description.substring(0, 120)}...` 
-                            : blog.description}
-                        </p>
-                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                          <div className="flex items-center">
-                            <div 
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                              style={{ backgroundColor: getAuthorAvatarColor(blog.createdBy._id) }}
-                            >
-                              {getAuthorInitials(blog.createdBy)}
+                {topBlogs.map((blog, index) => {
+                  const imageUrl = getImageUrl(blog);
+                  
+                  return (
+                    <motion.div
+                      key={blog._id}
+                      initial={{ y: 50, opacity: 0 }}
+                      whileInView={{ y: 0, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                      whileHover={{ y: -5 }}
+                      className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-surface/30 backdrop-blur-sm' : 'bg-surface'
+                      }`}
+                    >
+                      <Link href={`/blog`} className="block">
+                        {/* Blog Image - Using getImageUrl function like BlogPage */}
+                        <div className="relative h-48 overflow-hidden">
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt={blog.title}
+                              style={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                objectFit: 'cover',
+                                transition: 'transform 0.3s'
+                              }}
+                              className="group-hover:scale-105"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = '/api/placeholder/400/250';
+                              }}
+                            />
+                          ) : (
+                            <div className={`w-full h-full flex items-center justify-center ${
+                              theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'
+                            }`}>
+                              <span className={`text-lg ${
+                                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                              }`}>
+                                No Image
+                              </span>
                             </div>
-                            <span className={`ml-2 text-sm ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          )}
+                          {blog.isFeatured && (
+                            <div className="absolute top-2 left-2">
+                              <span className="px-2 py-1 text-xs font-bold bg-yellow-500 text-gray-900 rounded">
+                                Featured
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className={`text-sm font-medium px-2 py-1 rounded ${
+                              theme === 'dark' 
+                                ? 'bg-gray-800 text-gray-300' 
+                                : 'bg-gray-100 text-gray-600'
                             }`}>
-                              {blog.createdBy.firstName} {blog.createdBy.lastName}
+                              {blog.category}
+                            </span>
+                            <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {formatDate(blog.blogDate)}
                             </span>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <span className={`text-sm ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                            }`}>
-                              {blog.readingTime} min read
-                            </span>
+                          <h3 className={`text-lg font-semibold mb-2 ${
+                            theme === 'dark' ? 'text-white' : 'text-text-primary'
+                          }`}>
+                            {blog.title}
+                          </h3>
+                          <p className={`text-base mb-3 ${
+                            theme === 'dark' ? 'text-gray-300' : 'text-text-secondary'
+                          }`}>
+                            {blog.description.length > 120 
+                              ? `${blog.description.substring(0, 120)}...` 
+                              : blog.description}
+                          </p>
+                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                            <div className="flex items-center">
+                              <div 
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold"
+                                style={{ backgroundColor: getAuthorAvatarColor(blog.createdBy._id) }}
+                              >
+                                {getAuthorInitials(blog.createdBy)}
+                              </div>
+                              <span className={`ml-2 text-sm ${
+                                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                              }`}>
+                                {blog.createdBy.firstName} {blog.createdBy.lastName}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className={`text-sm ${
+                                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                              }`}>
+                                {blog.readingTime} min read
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
             <div className="text-center mt-12">

@@ -57,6 +57,18 @@ interface Blog {
   description: string;
   content: string;
   image?: string;
+  imageData?: {
+    data: {
+      $binary?: {
+        base64: string;
+        subType: string;
+      };
+      type?: string;
+      data?: number[];
+    } | string;
+    contentType: string;
+    fileName: string;
+  };
   category: string;
   createdBy: {
     _id: string;
@@ -398,6 +410,45 @@ const BlogsPage = () => {
     ],
   };
 
+  // Function to get image URL from blog data
+  const getImageUrl = (blog: Blog): string | null => {
+    try {
+      // Check if imageData exists and has the expected structure
+      if (blog.imageData && blog.imageData.data) {
+        let base64String: string;
+        
+        // Extract base64 string based on the structure
+        if (typeof blog.imageData.data === 'string') {
+          // Already a string
+          base64String = blog.imageData.data;
+        } else if (blog.imageData.data.$binary && blog.imageData.data.$binary.base64) {
+          // MongoDB BSON format
+          base64String = blog.imageData.data.$binary.base64;
+        } else if (blog.imageData.data.data && Array.isArray(blog.imageData.data.data)) {
+          // Buffer format
+          base64String = Buffer.from(blog.imageData.data.data).toString('base64');
+        } else {
+          throw new Error('Unknown image data structure');
+        }
+        
+        // Clean and construct the data URL
+        const cleanBase64 = base64String.replace(/\s/g, '');
+        const contentType = blog.imageData.contentType || 'image/jpeg';
+        return `data:${contentType};base64,${cleanBase64}`;
+      }
+      
+      // Fallback to image field if it's a data URL
+      if (blog.image && blog.image.startsWith('data:image')) {
+        return blog.image;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting image URL:', error);
+      return null;
+    }
+  };
+
   const fetchBlogs = useCallback(async () => {
     try {
       setLoading(true);
@@ -482,7 +533,7 @@ const BlogsPage = () => {
       blogDate: blog.blogDate ? parseISO(blog.blogDate) : null
     });
     setContent(blog.content);
-    setImagePreview(blog.image ? getImageUrl(blog.image) : null);
+    setImagePreview(getImageUrl(blog));
     setImageFile(null);
     setOpenEditDialog(true);
   };
@@ -693,22 +744,6 @@ const BlogsPage = () => {
       case 'archived': return 'Archived';
       default: return status;
     }
-  };
-
-  const getImageUrl = (imagePath: string | undefined): string | null => {
-    if (!imagePath) return null;
-    
-    if (imagePath.startsWith('http')) return imagePath;
-    
-    // Check if it's already a full path
-    if (imagePath.startsWith('/uploads')) {
-      const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      return `${serverUrl}${imagePath}`;
-    }
-    
-    // Handle relative paths
-    const serverUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    return `${serverUrl}/uploads/blogs/${imagePath}`;
   };
 
   const getAuthorInitials = (author: { firstName?: string; lastName?: string }): string => {
@@ -1117,7 +1152,7 @@ const BlogsPage = () => {
             </Card>
           </motion.div>
 
-          {/* Blogs List - Removed status update buttons */}
+          {/* Blogs List */}
           {loading ? (
             <Box sx={{ 
               display: 'flex', 
@@ -1146,7 +1181,7 @@ const BlogsPage = () => {
                   gap: 3
                 }}>
                   {blogs.map((blog) => {
-                    const imageUrl = getImageUrl(blog.image);
+                    const imageUrl = getImageUrl(blog);
                     
                     return (
                       <Card 
@@ -1466,7 +1501,7 @@ const BlogsPage = () => {
                       </TableHead>
                       <TableBody>
                         {blogs.map((blog) => {
-                          const imageUrl = getImageUrl(blog.image);
+                          const imageUrl = getImageUrl(blog);
                           
                           return (
                             <TableRow 
@@ -2110,14 +2145,14 @@ const BlogsPage = () => {
                     transition={{ duration: 0.5 }}
                   >
                     {/* Blog Header Image */}
-                    {selectedBlog.image && (
+                    {(selectedBlog.imageData || selectedBlog.image) && (
                       <Box sx={{ 
                         width: '100%',
                         height: { xs: 200, md: 300 },
                         overflow: 'hidden'
                       }}>
                         <img 
-                          src={getImageUrl(selectedBlog.image) || ''} 
+                          src={getImageUrl(selectedBlog) || ''} 
                           alt={selectedBlog.title}
                           style={{ 
                             width: '100%', 
