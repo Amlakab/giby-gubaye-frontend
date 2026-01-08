@@ -68,6 +68,18 @@ interface Student {
   dateOfBirth: string;
   emergencyContact: string;
   photo?: string;
+  photoData?: {
+    data: {
+      $binary?: {
+        base64: string;
+        subType: string;
+      };
+      type?: string;
+      data?: number[];
+    } | string;
+    contentType: string;
+    fileName: string;
+  };
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -75,7 +87,6 @@ interface Student {
   age?: number;
 }
 
-// ... (rest of the interfaces remain the same)
 interface StudentStats {
   totalStudents: number;
   activeStudents: number;
@@ -86,6 +97,7 @@ interface StudentStats {
   batchStats: { _id: string; count: number }[];
   genderStats: { _id: string; count: number }[];
   regionStats: { _id: string; count: number }[];
+  recentStudents: Student[];
 }
 
 interface PaginationData {
@@ -505,6 +517,46 @@ const StudentsPage = () => {
     }
   };
 
+  // Function to get photo URL from student data
+  const getPhotoUrl = (student: Student): string | null => {
+    try {
+      // Check if photoData exists and has the expected structure
+      if (student.photoData && student.photoData.data) {
+        let base64String: string;
+        
+        // Extract base64 string based on the structure
+        if (typeof student.photoData.data === 'string') {
+          // Already a string
+          base64String = student.photoData.data;
+        } else if (student.photoData.data.$binary && student.photoData.data.$binary.base64) {
+          // MongoDB BSON format
+          base64String = student.photoData.data.$binary.base64;
+        } else if (student.photoData.data.data && Array.isArray(student.photoData.data.data)) {
+          // Buffer format
+          base64String = Buffer.from(student.photoData.data.data).toString('base64');
+        } else {
+          console.error('Unknown photo data structure:', student.photoData.data);
+          return null;
+        }
+        
+        // Clean and construct the data URL
+        const cleanBase64 = base64String.replace(/\s/g, '');
+        const contentType = student.photoData.contentType || 'image/jpeg';
+        return `data:${contentType};base64,${cleanBase64}`;
+      }
+      
+      // Fallback to photo field if it's a data URL
+      if (student.photo && student.photo.startsWith('data:image')) {
+        return student.photo;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting photo URL:', error);
+      return null;
+    }
+  };
+
   // Stats cards colors - MATCHING USER PAGE
   const statCards = [
     {
@@ -736,7 +788,8 @@ const StudentsPage = () => {
       courseName: student.courseName || '',
       courseChurch: student.courseChurch || ''
     });
-    setPhotoPreview(student.photo ? getPhotoUrl(student.photo) : null);
+    // Use the new getPhotoUrl function
+    setPhotoPreview(getPhotoUrl(student));
     setPhotoFile(null);
     setOpenDialog(true);
   };
@@ -855,27 +908,6 @@ const StudentsPage = () => {
       age--;
     }
     return age;
-  };
-
-  const getPhotoUrl = (photoPath: string | undefined) => {
-    if (!photoPath) return null;
-    
-    // If it's already a full URL, return it
-    if (photoPath.startsWith('http')) return photoPath;
-    
-    const serverUrl = 'http://localhost:3001';
-    let cleanPath = photoPath;
-    
-    // Ensure correct path formatting
-    if (!cleanPath.startsWith('/uploads')) {
-      if (cleanPath.startsWith('uploads')) {
-        cleanPath = '/' + cleanPath;
-      } else {
-        cleanPath = `/uploads/students/${cleanPath}`;
-      }
-    }
-    
-    return `${serverUrl}${cleanPath}`;
   };
 
   const getStudentInitials = (student: Student) => {
@@ -1458,7 +1490,7 @@ const StudentsPage = () => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {students.map((student) => {
                     const isExpanded = expandedStudent === student._id;
-                    const photoUrl = getPhotoUrl(student.photo);
+                    const photoUrl = getPhotoUrl(student);
                     
                     return (
                       <Card 
@@ -1482,33 +1514,47 @@ const StudentsPage = () => {
                             alignItems: 'flex-start',
                             mb: 2
                           }}>
-                            <Box>
-                              <Typography variant="subtitle1" sx={{ 
-                                fontWeight: 'bold',
-                                color: theme === 'dark' ? '#ccd6f6' : '#333333',
-                                mb: 0.5
-                              }}>
-                                {student.firstName} {student.lastName}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
-                                <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
-                                <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                  {student.gibyGubayeId}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Avatar
+                                src={photoUrl || undefined}
+                                sx={{ 
+                                  width: 50, 
+                                  height: 50,
+                                  bgcolor: getAvatarColor(student._id),
+                                  fontSize: '1rem',
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                {getStudentInitials(student)}
+                              </Avatar>
+                              <Box>
+                                <Typography variant="subtitle1" sx={{ 
+                                  fontWeight: 'bold',
+                                  color: theme === 'dark' ? '#ccd6f6' : '#333333',
+                                  mb: 0.5
+                                }}>
+                                  {student.firstName} {student.lastName}
                                 </Typography>
-                              </Box>
-                              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                                <Chip
-                                  label={student.university}
-                                  size="small"
-                                  icon={<AccountBalance />}
-                                  sx={{ height: 24 }}
-                                />
-                                <Chip
-                                  label={student.gender}
-                                  size="small"
-                                  icon={getGenderIcon(student.gender)}
-                                  sx={{ height: 24 }}
-                                />
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                                  <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
+                                  <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
+                                    {student.gibyGubayeId}
+                                  </Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                  <Chip
+                                    label={student.university}
+                                    size="small"
+                                    icon={<AccountBalance />}
+                                    sx={{ height: 24 }}
+                                  />
+                                  <Chip
+                                    label={student.gender}
+                                    size="small"
+                                    icon={getGenderIcon(student.gender)}
+                                    sx={{ height: 24 }}
+                                  />
+                                </Box>
                               </Box>
                             </Box>
                             <IconButton 
@@ -1784,7 +1830,7 @@ const StudentsPage = () => {
                       </TableHead>
                       <TableBody>
                         {students.map((student) => {
-                          const photoUrl = getPhotoUrl(student.photo);
+                          const photoUrl = getPhotoUrl(student);
                           
                           return (
                             <TableRow 
@@ -2046,7 +2092,7 @@ const StudentsPage = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                   <Box sx={{ position: 'relative' }}>
                     <Avatar
-                      src={photoPreview || undefined}
+                      src={photoPreview || (selectedStudent && getPhotoUrl(selectedStudent)) || undefined}
                       sx={{ 
                         width: 100, 
                         height: 100,
@@ -2056,7 +2102,7 @@ const StudentsPage = () => {
                         border: `2px solid ${theme === 'dark' ? '#00ffff' : '#007bff'}`
                       }}
                     >
-                      {photoPreview ? '' : 'Upload'}
+                      {photoPreview || (selectedStudent && getPhotoUrl(selectedStudent)) ? '' : 'Upload'}
                     </Avatar>
                     <Button
                       component="label"
@@ -2679,7 +2725,7 @@ const StudentsPage = () => {
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
-                      src={getPhotoUrl(selectedStudent.photo) || undefined}
+                      src={getPhotoUrl(selectedStudent) || undefined}
                       sx={{ 
                         width: 50, 
                         height: 50,
@@ -2727,7 +2773,7 @@ const StudentsPage = () => {
                           flex: 1 
                         }}>
                           <Avatar
-                            src={getPhotoUrl(selectedStudent.photo) || undefined}
+                            src={getPhotoUrl(selectedStudent) || undefined}
                             sx={{ 
                               width: 120, 
                               height: 120,

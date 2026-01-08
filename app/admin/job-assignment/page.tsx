@@ -10,7 +10,7 @@ import {
   MenuItem, Select, FormControl, InputLabel,
   IconButton, Dialog, DialogTitle, DialogContent,
   DialogActions, Button, Avatar, Tooltip,
-  InputAdornment
+  InputAdornment, Divider
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/lib/theme-context';
@@ -34,10 +34,10 @@ import { useAuth } from '@/lib/auth';
 import { jobApi } from '@/app/utils/jobApi';
 import api from '@/app/utils/api';
 
-// Types
+// Types - UPDATED TO INCLUDE photoData
 interface Student {
   _id: string;
-  gibyGubayeId: string; // Added this field
+  gibyGubayeId: string;
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -66,6 +66,18 @@ interface Student {
   dateOfBirth: string;
   emergencyContact: string;
   photo?: string;
+  photoData?: {
+    data: {
+      $binary?: {
+        base64: string;
+        subType: string;
+      };
+      type?: string;
+      data?: number[];
+    } | string;
+    contentType: string;
+    fileName: string;
+  };
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -466,23 +478,44 @@ const JobAssignmentPage = () => {
     setExpandedJob(expandedJob === jobId ? null : jobId);
   };
 
-  // Helper functions
-  const getPhotoUrl = (photoPath?: string): string | null => {
-    if (!photoPath) return null;
-    if (photoPath.startsWith('http')) return photoPath;
-    
-    const serverUrl = 'http://localhost:3001';
-    let cleanPath = photoPath;
-    
-    if (!cleanPath.startsWith('/uploads')) {
-      if (cleanPath.startsWith('uploads')) {
-        cleanPath = '/' + cleanPath;
-      } else {
-        cleanPath = `/uploads/students/${cleanPath}`;
+  // UPDATED: Get photo URL from student data (like Students page)
+  const getPhotoUrl = (student: Student): string | null => {
+    try {
+      // Check if photoData exists and has the expected structure
+      if (student.photoData && student.photoData.data) {
+        let base64String: string;
+        
+        // Extract base64 string based on the structure
+        if (typeof student.photoData.data === 'string') {
+          // Already a string
+          base64String = student.photoData.data;
+        } else if (student.photoData.data.$binary && student.photoData.data.$binary.base64) {
+          // MongoDB BSON format
+          base64String = student.photoData.data.$binary.base64;
+        } else if (student.photoData.data.data && Array.isArray(student.photoData.data.data)) {
+          // Buffer format
+          base64String = Buffer.from(student.photoData.data.data).toString('base64');
+        } else {
+          console.error('Unknown photo data structure:', student.photoData.data);
+          return null;
+        }
+        
+        // Clean and construct the data URL
+        const cleanBase64 = base64String.replace(/\s/g, '');
+        const contentType = student.photoData.contentType || 'image/jpeg';
+        return `data:${contentType};base64,${cleanBase64}`;
       }
+      
+      // Fallback to photo field if it's a data URL
+      if (student.photo && student.photo.startsWith('data:image')) {
+        return student.photo;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error getting photo URL:', error);
+      return null;
     }
-    
-    return `${serverUrl}${cleanPath}`;
   };
 
   const getStudentInitials = (student: Student): string => {
@@ -569,10 +602,16 @@ const JobAssignmentPage = () => {
     return isActive ? 'success' : 'error';
   };
 
-  // Safe display function for optional fields
+  // Safe display function for optional fields - FIXED NULL DISPLAY ISSUES
   const safeDisplay = (value: any, defaultValue: string = 'N/A'): string => {
     if (value === null || value === undefined || value === '') return defaultValue;
-    return value;
+    return value.toString();
+  };
+
+  // Safe display for arrays
+  const safeDisplayArray = (array: any[], defaultValue: string = 'None'): string => {
+    if (!array || !Array.isArray(array) || array.length === 0) return defaultValue;
+    return array.filter(item => item && item.trim() !== '').join(', ');
   };
 
   return (
@@ -952,7 +991,7 @@ const JobAssignmentPage = () => {
                   {jobs.map((job) => {
                     const student = job.studentId;
                     const isExpanded = expandedJob === job._id;
-                    const photoUrl = getPhotoUrl(student.photo);
+                    const photoUrl = getPhotoUrl(student);
                     
                     return (
                       <Card 
@@ -982,25 +1021,25 @@ const JobAssignmentPage = () => {
                                 color: theme === 'dark' ? '#ccd6f6' : '#333333',
                                 mb: 0.5
                               }}>
-                                {student.firstName} {student.lastName}
+                                {safeDisplay(student.firstName)} {safeDisplay(student.lastName)}
                               </Typography>
                               {/* Student ID Display */}
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                                 <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
                                 <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                  {student.gibyGubayeId}
+                                  {safeDisplay(student.gibyGubayeId)}
                                 </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                                 <Chip
-                                  label={job.class}
+                                  label={safeDisplay(job.class)}
                                   size="small"
                                   icon={<Assignment />}
                                   sx={{ height: 24 }}
                                 />
                                 {job.sub_class && (
                                   <Chip
-                                    label={job.sub_class}
+                                    label={safeDisplay(job.sub_class)}
                                     size="small"
                                     icon={<AssignmentTurnedIn />}
                                     sx={{ height: 24 }}
@@ -1020,14 +1059,14 @@ const JobAssignmentPage = () => {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                             <Phone fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
                             <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              {student.phone}
+                              {safeDisplay(student.phone)}
                             </Typography>
                           </Box>
                           
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
                             <School fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
                             <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              {student.college}
+                              {safeDisplay(student.college)}
                             </Typography>
                           </Box>
 
@@ -1079,7 +1118,7 @@ const JobAssignmentPage = () => {
                                     Background:
                                   </Typography>
                                   <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                    {job.background}
+                                    {safeDisplay(job.background)}
                                   </Typography>
                                 </Box>
                               )}
@@ -1262,7 +1301,7 @@ const JobAssignmentPage = () => {
                       <TableBody>
                         {jobs.map((job) => {
                           const student = job.studentId;
-                          const photoUrl = getPhotoUrl(student.photo);
+                          const photoUrl = getPhotoUrl(student);
                           
                           return (
                             <TableRow 
@@ -1293,10 +1332,10 @@ const JobAssignmentPage = () => {
                                       fontWeight: 500,
                                       color: theme === 'dark' ? '#ccd6f6' : '#333333'
                                     }}>
-                                      {student.firstName} {student.lastName}
+                                      {safeDisplay(student.firstName)} {safeDisplay(student.lastName)}
                                     </Typography>
                                     <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                      {student.phone}
+                                      {safeDisplay(student.phone)}
                                     </Typography>
                                   </Box>
                                 </Box>
@@ -1310,21 +1349,21 @@ const JobAssignmentPage = () => {
                                     color: theme === 'dark' ? '#ccd6f6' : '#333333',
                                     fontFamily: 'monospace'
                                   }}>
-                                    {student.gibyGubayeId}
+                                    {safeDisplay(student.gibyGubayeId)}
                                   </Typography>
                                 </Box>
                               </TableCell>
                               <TableCell sx={{ py: 2.5 }}>
                                 <Typography variant="body2" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                  {student.college}
+                                  {safeDisplay(student.college)}
                                 </Typography>
                                 <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                  {student.department}
+                                  {safeDisplay(student.department)}
                                 </Typography>
                               </TableCell>
                               <TableCell sx={{ py: 2.5 }}>
                                 <Chip
-                                  label={job.class}
+                                  label={safeDisplay(job.class)}
                                   color="primary"
                                   size="small"
                                   sx={{ height: 24, fontSize: '0.75rem' }}
@@ -1333,7 +1372,7 @@ const JobAssignmentPage = () => {
                               <TableCell sx={{ py: 2.5 }}>
                                 {job.sub_class ? (
                                   <Chip
-                                    label={job.sub_class}
+                                    label={safeDisplay(job.sub_class)}
                                     color="success"
                                     size="small"
                                     sx={{ height: 24, fontSize: '0.75rem' }}
@@ -1595,7 +1634,7 @@ const JobAssignmentPage = () => {
                           <CardContent sx={{ p: 2 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                               <Avatar
-                                src={getPhotoUrl(student.photo) || undefined}
+                                src={getPhotoUrl(student) || undefined}
                                 sx={{ 
                                   bgcolor: getAvatarColor(student._id),
                                   width: 40,
@@ -1606,22 +1645,22 @@ const JobAssignmentPage = () => {
                               </Avatar>
                               <Box sx={{ flex: 1 }}>
                                 <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                  {student.firstName} {student.middleName} {student.lastName}
+                                  {safeDisplay(student.firstName)} {safeDisplay(student.middleName)} {safeDisplay(student.lastName)}
                                 </Typography>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                   <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
                                   <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                    {student.gibyGubayeId}
+                                    {safeDisplay(student.gibyGubayeId)}
                                   </Typography>
                                 </Box>
                                 <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                                  {student.phone} • {student.email}
+                                  {safeDisplay(student.phone)} • {safeDisplay(student.email)}
                                 </Typography>
                                 <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ display: 'block' }}>
-                                  {student.college} • {student.department}
+                                  {safeDisplay(student.college)} • {safeDisplay(student.department)}
                                 </Typography>
                                 <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ display: 'block' }}>
-                                  Current jobs: {student.numberOfJob}/3
+                                  Current jobs: {safeDisplay(student.numberOfJob)}/3
                                 </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', gap: 1 }}>
@@ -1728,7 +1767,7 @@ const JobAssignmentPage = () => {
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                         <Avatar
-                          src={getPhotoUrl(selectedJob.studentId.photo) || undefined}
+                          src={getPhotoUrl(selectedJob.studentId) || undefined}
                           sx={{ 
                             width: 60, 
                             height: 60,
@@ -1741,22 +1780,22 @@ const JobAssignmentPage = () => {
                         </Avatar>
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                            {selectedJob.studentId.firstName} {selectedJob.studentId.lastName}
+                            {safeDisplay(selectedJob.studentId.firstName)} {safeDisplay(selectedJob.studentId.lastName)}
                           </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                             <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
                             <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              ID: {selectedJob.studentId.gibyGubayeId}
+                              ID: {safeDisplay(selectedJob.studentId.gibyGubayeId)}
                             </Typography>
                           </Box>
                           <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                            {selectedJob.studentId.phone} • {selectedJob.studentId.email}
+                            {safeDisplay(selectedJob.studentId.phone)} • {safeDisplay(selectedJob.studentId.email)}
                           </Typography>
                         </Box>
                       </Box>
                       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                         <Chip
-                          label={`Class: ${selectedJob.class}`}
+                          label={`Class: ${safeDisplay(selectedJob.class)}`}
                           color="primary"
                           size="small"
                           sx={{ 
@@ -1765,7 +1804,7 @@ const JobAssignmentPage = () => {
                           }}
                         />
                         <Chip
-                          label={`Jobs: ${selectedJob.studentId.numberOfJob}/3`}
+                          label={`Jobs: ${safeDisplay(selectedJob.studentId.numberOfJob)}/3`}
                           color={selectedJob.studentId.numberOfJob >= 3 ? "error" : "success"}
                           size="small"
                         />
@@ -1928,12 +1967,12 @@ const JobAssignmentPage = () => {
                       color: theme === 'dark' ? '#ccd6f6' : '#333333'
                     }}>
                       <Typography variant="body2">
-                        Current sub-class: <strong style={{color: theme === 'dark' ? '#00ffff' : '#007bff'}}>{selectedJob.sub_class}</strong>
+                        Current sub-class: <strong style={{color: theme === 'dark' ? '#00ffff' : '#007bff'}}>{safeDisplay(selectedJob.sub_class)}</strong>
                         {selectedJob.type && (
                           <div>Current type: <strong style={{color: theme === 'dark' ? '#00ffff' : '#007bff'}}>{getTypeLabel(selectedJob.type)}</strong></div>
                         )}
                         {selectedJob.background && (
-                          <div>Current background: {selectedJob.background}</div>
+                          <div>Current background: {safeDisplay(selectedJob.background)}</div>
                         )}
                       </Typography>
                     </Alert>
@@ -1983,7 +2022,7 @@ const JobAssignmentPage = () => {
             </DialogActions>
           </Dialog>
 
-          {/* View Student Dialog - UPDATED with gibyGubayeId */}
+          {/* View Student Dialog - UPDATED to match Students page with proper null handling */}
           <Dialog 
             open={openViewStudentDialog} 
             onClose={() => setOpenViewStudentDialog(false)} 
@@ -2009,7 +2048,7 @@ const JobAssignmentPage = () => {
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar
-                      src={getPhotoUrl(selectedStudent.photo) || undefined}
+                      src={getPhotoUrl(selectedStudent) || undefined}
                       sx={{ 
                         width: 50, 
                         height: 50,
@@ -2022,13 +2061,12 @@ const JobAssignmentPage = () => {
                     </Avatar>
                     <Box>
                       <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                        {selectedStudent.firstName} {selectedStudent.middleName} {selectedStudent.lastName}
+                        {safeDisplay(selectedStudent.firstName)} {safeDisplay(selectedStudent.middleName)} {safeDisplay(selectedStudent.lastName)}
                       </Typography>
-                      {/* Updated to show gibyGubayeId */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Fingerprint fontSize="small" sx={{ color: 'rgba(255,255,255,0.8)' }} />
                         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                          Student ID: {selectedStudent.gibyGubayeId}
+                          Student ID: {safeDisplay(selectedStudent.gibyGubayeId)}
                         </Typography>
                       </Box>
                     </Box>
@@ -2058,7 +2096,7 @@ const JobAssignmentPage = () => {
                           flex: 1 
                         }}>
                           <Avatar
-                            src={getPhotoUrl(selectedStudent.photo) || undefined}
+                            src={getPhotoUrl(selectedStudent) || undefined}
                             sx={{ 
                               width: 120, 
                               height: 120,
@@ -2079,24 +2117,23 @@ const JobAssignmentPage = () => {
                               size="medium"
                             />
                             <Chip
-                              label={selectedStudent.gender}
+                              label={safeDisplay(selectedStudent.gender)}
                               icon={getGenderIcon(selectedStudent.gender)}
                               variant="outlined"
                               size="medium"
                             />
                           </Box>
-                          {/* Updated to show gibyGubayeId */}
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             <Fingerprint fontSize="small" sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }} />
                             <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              Student ID: {selectedStudent.gibyGubayeId}
+                              Student ID: {safeDisplay(selectedStudent.gibyGubayeId)}
                             </Typography>
                           </Box>
                         </Box>
 
                         <Box sx={{ flex: 2 }}>
                           <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#2c3e50' }}>
-                            {selectedStudent.firstName} {selectedStudent.middleName} {selectedStudent.lastName}
+                            {safeDisplay(selectedStudent.firstName)} {safeDisplay(selectedStudent.middleName)} {safeDisplay(selectedStudent.lastName)}
                           </Typography>
                           
                           <Box sx={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 2, mb: 2 }}>
@@ -2129,7 +2166,7 @@ const JobAssignmentPage = () => {
                                 <BadgeIcon fontSize="small" /> Number of Jobs
                               </Typography>
                               <Chip 
-                                label={`${selectedStudent.numberOfJob}/3`} 
+                                label={`${safeDisplay(selectedStudent.numberOfJob)}/3`} 
                                 color={selectedStudent.numberOfJob >= 3 ? "error" : "success"}
                                 size="medium"
                               />
@@ -2180,7 +2217,7 @@ const JobAssignmentPage = () => {
                                 }}>
                                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                     <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                      Job #{index + 1} - {job.class}
+                                      Job #{index + 1} - {safeDisplay(job.class)}
                                       {selectedJob?._id === job._id && (
                                         <Chip
                                           label="Current"
@@ -2203,7 +2240,7 @@ const JobAssignmentPage = () => {
                                         Class
                                       </Typography>
                                       <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                        {job.class}
+                                        {safeDisplay(job.class)}
                                       </Typography>
                                     </Box>
                                     <Box>
@@ -2211,7 +2248,7 @@ const JobAssignmentPage = () => {
                                         Sub-class
                                       </Typography>
                                       <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                        {job.sub_class || 'Not assigned'}
+                                        {safeDisplay(job.sub_class, 'Not assigned')}
                                       </Typography>
                                     </Box>
                                     <Box>
@@ -2248,7 +2285,7 @@ const JobAssignmentPage = () => {
                                         Background
                                       </Typography>
                                       <Typography variant="body2" sx={{ mt: 0.5, color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>
-                                        {job.background}
+                                        {safeDisplay(job.background)}
                                       </Typography>
                                     </Box>
                                   )}
@@ -2285,7 +2322,7 @@ const JobAssignmentPage = () => {
                                 Phone Number
                               </Typography>
                               <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                {selectedStudent.phone}
+                                {safeDisplay(selectedStudent.phone)}
                               </Typography>
                             </Box>
                             <Box>
@@ -2301,7 +2338,7 @@ const JobAssignmentPage = () => {
                                 Email Address
                               </Typography>
                               <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                {selectedStudent.email}
+                                {safeDisplay(selectedStudent.email)}
                               </Typography>
                             </Box>
                           </Box>
@@ -2472,7 +2509,7 @@ const JobAssignmentPage = () => {
                                 Additional Languages
                               </Typography>
                               <Typography variant="body1" sx={{ fontWeight: 'medium', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
-                                {selectedStudent.additionalLanguages?.join(', ') || 'None'}
+                                {safeDisplayArray(selectedStudent.additionalLanguages || [])}
                               </Typography>
                             </Box>
                           </Box>
@@ -2678,7 +2715,7 @@ const JobAssignmentPage = () => {
               <Typography variant="body1" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
                 Are you sure you want to delete this job assignment for{" "}
                 <strong style={{color: theme === 'dark' ? '#ff0000' : '#dc3545'}}>
-                  {selectedJob?.studentId?.firstName} {selectedJob?.studentId?.lastName}
+                  {safeDisplay(selectedJob?.studentId?.firstName)} {safeDisplay(selectedJob?.studentId?.lastName)}
                 </strong>?
               </Typography>
               <Alert severity="warning" sx={{ 
