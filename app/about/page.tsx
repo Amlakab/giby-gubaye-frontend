@@ -20,11 +20,11 @@ import {
 const aboutImages = {
   insa1: '/images/image1.jpg',
   about2: '/images/image2.jpg',
-  about5: '/images/image1.jpg',
-  about4: '/images/image2.jpg',
-  insa9: '/images/image1.jpg',
-  about3: '/images/image2.jpg',
-  about6: '/images/image1.jpg',
+  about5: '/images/giby2.jpg',
+  about4: '/images/giby3.jpg',
+  insa9: '/images/giby4.jpg',
+  about3: '/images/giby5.jpg',
+  about6: '/images/giby6.jpg',
 };
 
 const sections = [

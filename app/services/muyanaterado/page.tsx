@@ -135,7 +135,7 @@ export default function MuyanaTeradoPage() {
               >
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
-                    src="/images/muya3.jpg"
+                    src="/images/muya4.jpg"
                     alt="ሙያና ተራድኦ አገልግሎት"
                     fill
                     className="object-cover"

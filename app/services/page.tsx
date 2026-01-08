@@ -31,19 +31,19 @@ import {
 const images = {
   logo1: '/images/logo1.png',
   logo2: '/images/logo2.png',
-  logo3: '/images/logo3.png',
-  image2: '/images/image2.jpg',
-  image1: '/images/mezmur.jpg',
+  logo3: '/images/giby4.png',
+  image2: '/images/lmat2.jpg',
+  image1: '/images/giby4.jpg',
   service1: '/images/service1.png',
   service3: '/images/service3.png',
   service5: '/images/service5.png',
   insa1: '/images/insa1.png',
-  insa4: '/images/insa4.png',
-  insa5: '/images/insa5.png',
-  insa8: '/images/insa8.png',
-  insa11: '/images/insa11.png',
+  image4: '/images/timhrt.jpg',
+  image8: '/images/bach.jpg',
+  image7: '/images/giby10.jpg',
+  image11: '/images/giby8.jpg',
   insa13: '/images/insa13.png',
-  image6: '/images/muya2.png',
+  image6: '/images/giby6.jpg',
 };
 
 // Services from HTML
@@ -53,7 +53,7 @@ const services = [
     title: "ትምህርት ክፍል",
     description: "ትምህርት ክፍል በቴፒ ግቢ ጉባኤ የትምህርት እና ሐዋርያዊ አገልግሎት ክፍል (ትምህርት ክፍል) አባላትን በነገረ መለኮት፣ በስነ-ምግባር እና በቤተክርስቲያን ትምህርቶች ለማነጽ የሚሰጣቸው ዝርዝር አገልግሎቶች እና ንዑሳን ክፍሎች የሚከተሉት ናቸው። ዋና አገልግሎቶች የመንፈሳዊ ትምህርት ዝግጅት እና አሰጣጥ፣ የተተኪ መምህራን ማፍራት፣ የሐዋርያዊ ጉዞ፣ የዕቅበተ እምነት፣ የምርምርና ህትመት፣ እና የአብነት ትምህርት ማጠናከር ያካትታሉ። የትምህርት ክፍል ንዑሳን ክፍሎች (Sub-classes) አገልግሎቱን በተደራጀ መልኩ ለመምራት ክፍሉ በሚከተሉት ንዑሳን ክፍሎች ተዋቅሯል፦ የመምህራን ምደባ ንዑስ ክፍል፣ የሥርዓተ ትምህርት እና ክትትል ንዑስ ክፍል፣ የአብነት ትምህርት ንዑስ ክፍል፣ የማስተማሪያ ቁሳቁሶች እና የክትትል ንዑስ ክፍል፣ የጉዞና የስብከት አሰራር ንዑስ ክፍል፣ የጥናትና ምርምር ንዑስ ክፍል።",
     icon: <FaBook />,
-    image: images.image2,
+    image: images.image4,
     link: "/services/timhrtkfl"
   },
   {
@@ -77,7 +77,7 @@ const services = [
     title: "አባላት ጉዳይ ክፍል",
     description: "አባላት ጉዳይ በቴፒ ግቢ ጉባኤ የአባላት ጉዳይ አገልግሎት ክፍል ተማሪዎች በግቢ ቆይታቸው በመንፈሳዊ ሕይወታቸው እንዲበረቱ፣ በማኅበራዊ ሕይወታቸው እንዲደጋገፉ እና የአገልግሎት ተሳትፎአቸው እንዲያድግ የሚያደርግ የቁልፍ አገልግሎቶች ማዕከል ነው። ዋና ንዑሳን ክፍሎች የባችና ዲፓርትመንት ማስተባበሪያ፣ የሥልጠናና ምክክር፣ የጽዋና ማኅበራዊ አገልግሎት፣ የአባላት መረጃና ምዝገባ፣ እና የእህቶች ጉባኤ ያካትታሉ። የባችና ዲፓርትመንት ማስተባበሪያ ተማሪዎችን በየባቻቸው (የመግቢያ ዘመን) እና በየዲፓርትመንታቸው በማደራጀት መረጃዎችን የሚያደርስ፣ አባላትን የሚያቀናጅ እና የኮርስ አቴንዳንስ የሚከታተል ክፍል ነው። ይህ ክፍል የግቢ ጉባኤው የጀርባ አጥንት ሆኖ የሚያገለግል ሲሆን፣ አባላት በግቢ ቆይታቸው እንዳይጠፉና በአገልግሎት እንዲጸኑ ትልቅ አስተዋጽኦ ያበረክታል።",
     icon: <FaUsers />,
-    image: images.image1,
+    image: images.image11,
     link: "/services/abalateguday"
   },
   {
@@ -85,7 +85,7 @@ const services = [
     title: "ባችና ዲፓርትመንት ክፍል",
     description: "የባችና ዲፓርትመንት ክፍል ተማሪዎችን በየባቻቸው (የመግቢያ ዘመን) እና በየዲፓርትመንታቸው በማደራጀት መረጃዎችን የሚያደርስ፣ አባላትን የሚያቀናጅ እና የኮርስ አቴንዳንስ የሚከታተል ክፍል ነው። የክፍሉ ንዑሳን ክፍላት የባች ክትትል፣ የማስታወቂያና ቅስቀሳ፣ የመረጃ አደረጃጀት፣ እና የእህቶች ጉዳይ ማስተባበሪያ ያካትታሉ። የባች ክትትል ንዑስ ክፍል በየባቹ ያሉ ተማሪዎችን የኮርስ አቴንዳንስ የመቆጣጠር፣ በየባቹ ያሉትን ተማሪዎች የመከታተልና መረጃዎችን የማድረስ ኃላፊነት አለበት። የማስታወቂያና ቅስቀሳ ንዑስ ክፍል ለግቢ ጉባኤው አገልግሎት የሚያስፈልጉ ልዩ ልዩ ማስታወቂያዎችን የሚያዘጋጅ፣ የሚለጥፍና መረጃዎች ለአባላት መድረሳቸውን የሚያረጋግጥ ነው።",
     icon: <FaHandsHelping />,
-    image: images.image2,
+    image: images.image8,
     link: "/services/bachnadepartment"
   },
   {
@@ -214,7 +214,7 @@ export default function ServicesPage() {
                     className="relative h-80 rounded-xl overflow-hidden shadow-2xl"
                   >
                     <Image
-                      src={images.image1}
+                      src={images.image7}
                       alt="INSA Services"
                       fill
                       className="object-cover"

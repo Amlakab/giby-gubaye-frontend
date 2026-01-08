@@ -157,7 +157,7 @@ export default function LimatKiflePage() {
               >
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
-                    src="/images/insa8.png"
+                    src="/images/lmat.jpg"
                     alt="ልማት ክፍል አገልግሎት"
                     fill
                     className="object-cover"

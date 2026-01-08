@@ -19,13 +19,18 @@ import api from '@/app/utils/api';
 
 // Import images
 const images = {
-  image1: '/images/image1.jpg',
-  image2: '/images/image2.jpg',
-  insa3: '/images/insa3.png',
-  insa4: '/images/insa4.png',
-  insa5: '/images/insa5.png',
-  insa9: '/images/insa9.png',
-  insa12: '/images/insa12.png',
+  image1: '/images/giby2.jpg',
+  image2: '/images/giby8.jpg',
+  image3: '/images/image2.jpg',
+  image4: '/images/image1.jpg',
+  image5: '/images/giby9.jpg',
+  image6: '/images/insa6.png',
+  image7: '/images/insa7.png',
+  image8: '/images/insa8.png',
+  image9: '/images/insa9.png',
+  image10: '/images/insa10.png',
+  image11: '/images/insa11.png',
+  image12: '/images/insa12.png',
   image21: '/images/image21.jpg',
   image22: '/images/image22.jpg',
   image23: '/images/image23.jpg',
@@ -78,28 +83,28 @@ interface Blog {
 const slides = [
   {
     image: images.image1,
-    title: "Welcome to Tepi Giby Gubaye",
-    description: "Innovative solutions for a smarter tomorrow.",
+    title: "እንኳን ወደ ቴፒ ግቢ ጉባኤ በሰላም መጣችሁ",
+    description: "በከፍተኛ ትምህርት ተቋማት የሚገኙ ኦርቶዶክሳውያን ተማሪዎች በሃይማኖታቸውና በሥነ ምግባራቸው ታንጸው ለቤተ ክርስቲያንና ለሀገር እንዲበቁ እንሠራለን።",
   },
   {
     image: images.image2,
-    title: "Explore Our Services",
-    description: "We provide cutting-edge solutions tailored to your needs.",
+    title: "መንፈሳዊ አገልግሎቶቻችንን ይወቁ",
+    description: "ማኅበረ ቅዱሳን ባዘጋጀው ወጥ ሥርዓተ ትምህርት መሠረት የቤተ ክርስቲያናችንን እምነት፣ ታሪክና ትውፊት ለተማሪዎች በተቀላጠፈ መልኩ እናስተምራለን።",
   },
   {
-    image: images.image1,
-    title: "Meet Our Team",
-    description: "A team of experts dedicated to your success.",
+    image: images.image5,
+    title: "አገልጋዮቻችንን ይተዋወቁ",
+    description: "ተማሪዎች በቆይታቸው በመንፈሳዊ ዕውቀት እንዲበስሉና ከመመረቃቸው በፊት በሙያቸው ቤተ ክርስቲያናቸውን ለማገልገል ዝግጁ እንዲሆኑ የሚያግዙ አገልጋዮች ያሉበት ጉባኤ ነው።",
   },
   {
-    image: images.image2,
-    title: "Contact Us Today",
-    description: "Let's build something amazing together.",
+    image: images.image4,
+    title: "ዛሬውኑ የአገልግሎቱ ተሳታፊ ይሁኑ",
+    description: "በገንዘብዎ፣ በዕውቀትዎና በሙያዎ ለቅድስት ቤተ ክርስቲያን አገልግሎት የበኩሎን አስተዋጽዖ በማበርከት የበረከቱ ተካፋይ እንዲሆኑ ጥሪያችንን እናቀርባለን።",
   },
   {
-    image: images.image1,
-    title: "Join Our Community",
-    description: "Be part of a growing network of innovators.",
+    image: images.image3,
+    title: "ወደ መንፈሳዊ ቤተሰባችን ይቀላቀሉ",
+    description: "ከኦርቶዶክሳውያን ተማሪዎችና ምሁራን ጋር በመተባበር በመንፈሳዊ ሕይወት የሚጸኑበትንና ከመደበኛ ትምህርትዎ ጎን ለጎን በሥነ ምግባር የሚታነጹበትን ማኅበረሰብ ይቀላቀሉ።",
   },
 ];
 

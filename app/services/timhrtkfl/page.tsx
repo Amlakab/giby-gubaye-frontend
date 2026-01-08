@@ -160,7 +160,7 @@ export default function AbalateGudayPage() {
               >
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
-                    src="/images/insa8.png"
+                    src="/images/timhrt2.jpg"
                     alt="Cybersecurity Policy Development"
                     fill
                     className="object-cover"

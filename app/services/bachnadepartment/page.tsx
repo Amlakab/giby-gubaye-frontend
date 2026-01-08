@@ -122,7 +122,7 @@ export default function BatchDepartmentPage() {
               >
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl overflow-hidden shadow-xl">
                   <Image
-                    src="/images/insa8.png"
+                    src="/images/bach2.jpg"
                     alt="ባችና ዲፓርትመንት አገልግሎት"
                     fill
                     className="object-cover"
