@@ -23,7 +23,9 @@ const menuItems = [
   { name: 'Approve Agenda', href: '/admin/agenda-approve', icon: FileText },
   { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
   { name: 'Approve transaction', href: '/admin/transactions/approve', icon: Wallet },
-  { name: 'Transactions', href: '/admin/transactions/complete', icon: Wallet },  
+  { name: 'Transactions', href: '/admin/transactions/complete', icon: Wallet },
+  { name: 'Family', href: '/admin/manage-families', icon: Users },
+  
 
   // { name: 'Games', href: '/admin/games', icon: Gamepad2 },
   { name: 'Accountants', href: '/admin/accountants', icon: CreditCard },
