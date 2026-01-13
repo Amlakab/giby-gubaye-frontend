@@ -16,6 +16,7 @@ import {
   TableHead, TableRow, Divider,
   Tabs, Tab
 } from '@mui/material';
+import AutoAssignChildrenDialog from '@/components/common/AutoAssignChildrenDialog';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/lib/theme-context';
 import {
@@ -578,6 +579,41 @@ const ManageFamilyPage = () => {
   // Store all fetched students
   const [allStudents, setAllStudents] = useState<Student[]>([]);
   const [loadingStudents, setLoadingStudents] = useState(false);
+
+  // Add state for the dialog
+const [openAutoAssignDialog, setOpenAutoAssignDialog] = useState(false);
+
+// Add these calculations to determine eligibility
+const [eligibleFamilies, setEligibleFamilies] = useState<Family[]>([]);
+const [availableStudents, setAvailableStudents] = useState(0);
+
+// Add this effect to calculate eligibility
+useEffect(() => {
+  // Filter families that have both parents
+  const familiesWithBothParents = families.filter(family => 
+    family.grandParents?.some(gp => 
+      gp.families?.some(f => f.father?.student && f.mother?.student)
+    )
+  );
+  
+  setEligibleFamilies(familiesWithBothParents);
+  
+  // You might want to fetch available students count here
+  // This is a simplified version
+  if (familiesWithBothParents.length > 0) {
+    // Calculate total children already assigned
+    const totalAssignedChildren = families.reduce((total, family) => {
+      return total + (family.grandParents?.reduce((gpTotal, gp) => {
+        return gpTotal + (gp.families?.reduce((fTotal, f) => {
+          return fTotal + (f.children?.length || 0);
+        }, 0) || 0);
+      }, 0) || 0);
+    }, 0);
+    
+    // This is a placeholder - you'll need to fetch actual student count
+    setAvailableStudents(Math.max(0, 100 - totalAssignedChildren)); // Example
+  }
+}, [families]);
 
   const themeStyles = {
     background: theme === 'dark' 
@@ -2234,6 +2270,34 @@ const ManageFamilyPage = () => {
                               >
                                 Add Family
                               </Button>
+
+                               {(eligibleFamilies.length > 0 && availableStudents > 0) && (
+                                <Button
+                                  variant="contained"
+                                  startIcon={<People />}
+                                  onClick={() => setOpenAutoAssignDialog(true)}
+                                  sx={{
+                                    background: theme === 'dark'
+                                      ? 'linear-gradient(135deg, #ff9900, #cc7a00)'
+                                      : 'linear-gradient(135deg, #ff9900, #cc7a00)',
+                                    borderRadius: 1,
+                                    boxShadow: theme === 'dark'
+                                      ? '0 2px 4px rgba(255, 153, 0, 0.2)'
+                                      : '0 2px 4px rgba(255, 153, 0, 0.2)',
+                                    '&:hover': {
+                                      background: theme === 'dark'
+                                        ? 'linear-gradient(135deg, #cc7a00, #995c00)'
+                                        : 'linear-gradient(135deg, #cc7a00, #995c00)',
+                                      boxShadow: theme === 'dark'
+                                        ? '0 4px 8px rgba(255, 153, 0, 0.3)'
+                                        : '0 4px 8px rgba(255, 153, 0, 0.3)'
+                                    }
+                                  }}
+                                >
+                                  Auto-Assign Children
+                                </Button>
+                              )}
+                              
                             </Box>
                             
                             {gp.families.map((family, fIndex) => (
@@ -2349,7 +2413,9 @@ const ManageFamilyPage = () => {
                                       >
                                         Add Child
                                       </Button>
+                                     
                                     </Box>
+                                  
                                     
                                     {family.children.map((child, cIndex) => (
                                       <Paper 
@@ -3470,9 +3536,20 @@ const ManageFamilyPage = () => {
               {success}
             </Alert>
           </Snackbar>
+
+          <AutoAssignChildrenDialog
+            open={openAutoAssignDialog}
+            onClose={() => setOpenAutoAssignDialog(false)}
+            onSuccess={() => {
+              fetchFamilies(); // Refresh the family list
+              setSuccess('Children assigned successfully!');
+            }}
+          />
+
         </Box>
       </div>
     </LocalizationProvider>
+    
   );
 };
 

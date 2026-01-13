@@ -8,7 +8,8 @@ import {
   Home, Users, Gamepad2, BarChart3, Wallet, 
   X, Settings, LogOut, History, ChevronLeft, ChevronRight,
   FileText, MessageSquare, CreditCard, Database, Shield, 
-  Bell, Calendar, Layers, TrendingUp
+  Bell, Calendar, Layers, TrendingUp,
+  UserPlus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +18,7 @@ const menuItems = [
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Students', href: '/admin/students', icon: Users },
   { name: 'Assin Job', href: '/admin/job-assignment', icon: FileText },
+  { name: 'Family', href: '/admin/manage-families', icon: Users },
   { name: 'Blogs', href: '/admin/blogs', icon: FileText },
   { name: 'Approve Blogs', href: '/admin/blog-approve', icon: FileText },
   { name: 'Agenda', href: '/admin/agendas', icon: FileText },
@@ -24,7 +26,6 @@ const menuItems = [
   { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
   { name: 'Approve transaction', href: '/admin/transactions/approve', icon: Wallet },
   { name: 'Transactions', href: '/admin/transactions/complete', icon: Wallet },
-  { name: 'Family', href: '/admin/manage-families', icon: Users },
   
 
   // { name: 'Games', href: '/admin/games', icon: Gamepad2 },
