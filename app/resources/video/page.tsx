@@ -73,7 +73,7 @@ export default function VideoPage() {
         setError(null);
         
         // Using the correct API endpoint - make sure your backend is running on port 5000
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        const API_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://giby-gubaye-backend.onrender.com/api';
         const response = await fetch(`${API_URL}/resources/public?type=video&status=approved&visibility=visible&limit=50`);
         
         if (!response.ok) {
