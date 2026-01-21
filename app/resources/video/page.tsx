@@ -127,22 +127,26 @@ export default function VideoPage() {
   };
 
   // Function to extract YouTube ID from URL
-  const extractYouTubeId = (url: string): string => {
-    const patterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
-      /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
-      /youtube\.com\/v\/([a-zA-Z0-9_-]+)/
-    ];
-    
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
+  // Function to extract YouTube ID from URL
+const extractYouTubeId = (url: string | undefined): string => {
+  // Return empty string if URL is undefined or empty
+  if (!url) return '';
+  
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+    /youtube\.com\/v\/([a-zA-Z0-9_-]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
     }
-    
-    return '';
-  };
+  }
+  
+  return '';
+};
 
   // Function to format date
   const formatDate = (dateString: string) => {
@@ -301,7 +305,7 @@ export default function VideoPage() {
           <div key={sectionIndex}>
             {videoPair.map((video, index) => {
               const videoIndex = sectionIndex * 2 + index;
-              const videoId = video.videoId || extractYouTubeId(video.youtubeUrl);
+              const videoId = video.videoId || extractYouTubeId(video.youtubeUrl || '');
               const thumbnail = video.thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
               return (
