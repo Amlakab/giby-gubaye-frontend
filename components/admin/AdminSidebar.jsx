@@ -25,15 +25,18 @@ const menuItems = [
   { name: 'Approve Agenda', href: '/admin/agenda-approve', icon: FileText },
   { name: 'Wallet', href: '/admin/wallet', icon: Wallet },
   { name: 'Approve transaction', href: '/admin/transactions/approve', icon: Wallet },
-  { name: 'Transactions', href: '/admin/transactions/complete', icon: Wallet },
-  
+  { name: 'Accountants', href: '/admin/transactions/complete', icon: Wallet },
+  { name: 'Resources', href: '/admin/resources', icon: CreditCard },
+  { name: 'Approve Resources', href: '/admin/approve-resources', icon: CreditCard },
+
 
   // { name: 'Games', href: '/admin/games', icon: Gamepad2 },
-  { name: 'Accountants', href: '/admin/accountants', icon: CreditCard },
   { name: 'Calculator', href: '/admin/calculator', icon: CreditCard },
   // { name: 'Game History', href: '/admin/game-history', icon: History },
   // { name: 'Transactions', href: '/admin/transactions', icon: Database },
   { name: 'Analytics', href: '/admin/reports/transactions', icon: BarChart3 },
+  { name: 'Accounts', href: '/admin/accountants', icon: CreditCard },
+
   { name: 'Feedback', href: '/admin/feedback', icon: MessageSquare },
   // { name: 'Spinner History', href: '/admin/spinner-history', icon: Layers },
   { name: 'Notifications', href: '/admin/notifications', icon: Bell },

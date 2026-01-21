@@ -111,7 +111,7 @@ const Navbar: React.FC = () => {
   const resourceLinks = [
     { href: '/resources/document', label: 'Document' },
     { href: '/resources/video', label: 'Video' },
-    { href: '/resources/audio', label: 'Audio' },
+    { href: '/resources/gallery', label: 'Gallery' },
   ];
 
   const isActive = (href: string) => pathname === href;
