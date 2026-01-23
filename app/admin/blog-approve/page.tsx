@@ -590,6 +590,10 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
       const successMessage = `Blog ${approvalAction === 'approve' ? 'approved' : 'rejected'} successfully`;
       setSuccess(successMessage);
       setOpenApproveDialog(false);
+      setOpenViewDialog(false);
+
+       // Refresh all data
+    await refreshAllData();
       
       // If approved, ask if they want to share
       if (approvalAction === 'approve') {
@@ -605,6 +609,44 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
       setError(error.response?.data?.message || `Failed to ${approvalAction} blog`);
     }
   };
+
+  // Function to refresh all data
+const refreshAllData = async () => {
+  try {
+    // Fetch blogs with current filters
+    await fetchBlogs();
+    
+    // Fetch updated stats
+    await fetchStats();
+    
+    // Refresh filter options (in case categories/authors changed)
+    await fetchFilterOptions();
+    
+    // Optional: Refresh any other related data
+    // For example, if you have notification counts or other dashboard data
+    await refreshDashboardData();
+    
+  } catch (error: any) {
+    console.error('Error refreshing data:', error);
+    // Don't show error to user for background refresh
+  }
+};
+
+// Function to fetch dashboard data (optional)
+const refreshDashboardData = async () => {
+  try {
+    // If you have other models that need refreshing
+    // Example: User stats, notification counts, etc.
+    // await api.get('/dashboard/stats');
+    
+    // If you have a cache system, you might want to clear it
+    // Example: clear any cached blog data
+    // localStorage.removeItem('cached_blogs');
+    
+  } catch (error) {
+    console.error('Error refreshing dashboard data:', error);
+  }
+};
 
   const handleFilterChange = (field: string, value: string | number) => {
     setFilters(prev => ({
@@ -714,6 +756,32 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
       case 'draft': return 'Draft';
       case 'archived': return 'Archived';
       default: return status;
+    }
+  };
+
+   // Form field styles
+  const textFieldStyle = {
+    '& .MuiOutlinedInput-root': {
+      backgroundColor: theme === 'dark' ? '#1e293b' : 'white',
+      color: theme === 'dark' ? '#ccd6f6' : '#333333',
+      '& fieldset': {
+        borderColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+      },
+      '&:hover fieldset': {
+        borderColor: theme === 'dark' ? '#00ffff' : '#007bff',
+      },
+      '&.Mui-focused fieldset': {
+        borderColor: theme === 'dark' ? '#00ffff' : '#007bff',
+      },
+    },
+    '& .MuiInputLabel-root': {
+      color: theme === 'dark' ? '#a8b2d1' : '#666666',
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
+      color: theme === 'dark' ? '#00ffff' : '#007bff',
+    },
+    '& .MuiFormHelperText-root': {
+      color: theme === 'dark' ? '#ff6b6b' : '#dc3545',
     }
   };
 
@@ -2328,7 +2396,7 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
             </DialogContent>
           </Dialog>
 
-          {/* Approve/Reject Dialog */}
+         {/* Approve/Reject Dialog - Keep as is */}
           <Dialog 
             open={openApproveDialog} 
             onClose={() => setOpenApproveDialog(false)}
@@ -2342,7 +2410,93 @@ Shared from ቴፒ ግቢ ጉባኤ ብሎግ
               }
             }}
           >
-            {/* Approve/Reject dialog content remains the same */}
+            <DialogTitle sx={{ 
+              backgroundColor: approvalAction === 'approve' 
+                ? (theme === 'dark' ? '#00ff0020' : '#28a74520')
+                : (theme === 'dark' ? '#ff000020' : '#dc354520'),
+              borderBottom: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
+              py: 3
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {approvalAction === 'approve' ? (
+                  <CheckCircle sx={{ color: theme === 'dark' ? '#00ff00' : '#28a745', fontSize: 32 }} />
+                ) : (
+                  <Cancel sx={{ color: theme === 'dark' ? '#ff0000' : '#dc3545', fontSize: 32 }} />
+                )}
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme === 'dark' ? '#ccd6f6' : '#333333' }}>
+                  {approvalAction === 'approve' ? 'Approve Blog' : 'Reject Blog'}
+                </Typography>
+              </Box>
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              <Typography variant="body1" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ mb: 2 }}>
+                {approvalAction === 'approve' 
+                  ? `You are about to approve the blog post "${selectedBlog?.title}". This will publish it immediately.`
+                  : `You are about to reject the blog post "${selectedBlog?.title}". Please provide a reason for rejection.`
+                }
+              </Typography>
+              
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label={approvalAction === 'approve' ? 'Approval Notes (Optional)' : 'Rejection Reason *'}
+                value={approvalNotes}
+                onChange={(e) => setApprovalNotes(e.target.value)}
+                placeholder={approvalAction === 'approve' 
+                  ? 'Add any notes for the author...'
+                  : 'Explain why this blog is being rejected...'
+                }
+                required={approvalAction === 'reject'}
+                sx={textFieldStyle}
+              />
+              
+              {approvalAction === 'reject' && (
+                <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ display: 'block', mt: 1 }}>
+                  Rejection reason is required and will be visible to the author.
+                </Typography>
+              )}
+            </DialogContent>
+            <DialogActions sx={{ 
+              p: 3,
+              borderTop: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb',
+              backgroundColor: theme === 'dark' ? '#0f172a' : 'white'
+            }}>
+              <Button 
+                onClick={() => setOpenApproveDialog(false)}
+                sx={{
+                  color: theme === 'dark' ? '#00ffff' : '#007bff',
+                  '&:hover': {
+                    backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
+                  }
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleApproveBlog}
+                variant="contained"
+                disabled={approvalAction === 'reject' && !approvalNotes.trim()}
+                color={approvalAction === 'approve' ? 'success' : 'error'}
+                sx={{
+                  backgroundColor: approvalAction === 'approve'
+                    ? (theme === 'dark' ? '#00ff00' : '#28a745')
+                    : (theme === 'dark' ? '#ff0000' : '#dc3545'),
+                  color: theme === 'dark' ? '#0a192f' : 'white',
+                  '&:hover': {
+                    backgroundColor: approvalAction === 'approve'
+                      ? (theme === 'dark' ? '#00b300' : '#218838')
+                      : (theme === 'dark' ? '#cc0000' : '#c82333')
+                  },
+                  '&.Mui-disabled': {
+                    backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                    color: theme === 'dark' ? '#94a3b8' : '#94a3b8'
+                  }
+                }}
+              >
+                {approvalAction === 'approve' ? 'Approve Blog' : 'Reject Blog'}
+              </Button>
+            </DialogActions>
           </Dialog>
 
           {/* Share Blog Dialog */}
