@@ -31,6 +31,11 @@ interface Resource {
     contentType: string;
     fileName: string;
   };
+  documentData?: {
+    contentType: string;
+    fileName: string;
+    fileSize: number;
+  };
   downloadLink?: string;
   createdAt: string;
   updatedAt: string;
@@ -49,7 +54,7 @@ const decodeMongoDBBinary = (binaryData: any): string => {
       return Buffer.from(binaryData.data).toString('base64');
     }
     
-    // If it's MongoDB BSON format with $binary
+    // If it's MongoDB BSON format with $binary (from your console log)
     if (binaryData && binaryData.$binary && binaryData.$binary.base64) {
       return binaryData.$binary.base64;
     }
@@ -59,7 +64,12 @@ const decodeMongoDBBinary = (binaryData: any): string => {
       return binaryData.buffer.toString('base64');
     }
     
-    console.log('Unknown binary format:', binaryData);
+    // If it's object with $binary field
+    if (binaryData && typeof binaryData === 'object' && binaryData.$binary) {
+      return binaryData.$binary.base64;
+    }
+    
+    console.log('Unknown binary format:', typeof binaryData, binaryData);
     return '';
   } catch (error) {
     console.error('Error decoding binary data:', error);
@@ -69,19 +79,32 @@ const decodeMongoDBBinary = (binaryData: any): string => {
 
 // Helper function to get image URL from resource
 const getDocumentImageUrl = (document: Resource): string => {
-  if (document.previewImageData && document.previewImageData.data) {
-    try {
-      const base64Data = decodeMongoDBBinary(document.previewImageData.data);
-      
-      if (base64Data) {
-        const contentType = document.previewImageData.contentType || 'image/jpeg';
-        return `data:${contentType};base64,${base64Data}`;
-      }
-    } catch (error) {
-      console.error('Error creating image URL:', error);
-    }
+  if (!document.previewImageData || !document.previewImageData.data) {
+    return '';
   }
-  return '';
+  
+  try {
+    const base64Data = decodeMongoDBBinary(document.previewImageData.data);
+    
+    if (!base64Data) {
+      console.warn('No base64 data decoded for document:', document._id);
+      return '';
+    }
+    
+    // Clean the base64 data (remove whitespace and newlines)
+    const cleanBase64 = base64Data.replace(/\s/g, '').replace(/\n/g, '');
+    
+    if (cleanBase64.length < 50) {
+      console.warn('Base64 data too short for document:', document._id);
+      return '';
+    }
+    
+    const contentType = document.previewImageData.contentType || 'image/jpeg';
+    return `data:${contentType};base64,${cleanBase64}`;
+  } catch (error) {
+    console.error('Error creating image URL for document:', document._id, error);
+    return '';
+  }
 };
 
 export default function DocumentPage() {
@@ -108,8 +131,15 @@ export default function DocumentPage() {
         
         if (response.data.success) {
           const docs = response.data.data.resources || [];
-          console.log('Fetched documents:', docs);
-          console.log('First document structure:', docs[0]);
+          console.log('Fetched documents:', docs.length);
+          console.log('First document preview data:', docs[0]?.previewImageData);
+          
+          // Debug: Check base64 data
+          if (docs.length > 0 && docs[0].previewImageData) {
+            const base64 = decodeMongoDBBinary(docs[0].previewImageData.data);
+            console.log('Decoded base64 length:', base64.length);
+            console.log('Base64 preview:', base64.substring(0, 100) + '...');
+          }
           
           setDocuments(docs);
           
@@ -288,24 +318,28 @@ export default function DocumentPage() {
                         viewport={{ once: true }}
                         className="w-full lg:w-1/2 flex justify-center"
                       >
-                        <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-xl">
+                        <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
                           {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt={doc.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                // Show fallback
-                                target.parentElement!.innerHTML = `
-                                  <div class="w-full h-full flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-[#334155]' : 'bg-gray-200'}">
-                                    <div class="text-4xl mb-2 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-[#007bff]'}">📄</div>
-                                    <div class="text-sm text-center px-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}">${doc.title.substring(0, 50)}${doc.title.length > 50 ? '...' : ''}</div>
-                                  </div>
-                                `;
-                              }}
-                            />
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                              <img
+                                src={imageUrl}
+                                alt={doc.title}
+                                className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.parentElement!.innerHTML = `
+                                    <div class="w-full h-full flex flex-col items-center justify-center">
+                                      <div class="text-4xl mb-2 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-[#007bff]'}">📄</div>
+                                      <div class="text-sm text-center px-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}">Image preview failed to load</div>
+                                    </div>
+                                  `;
+                                }}
+                                onLoad={() => {
+                                  console.log('Image loaded successfully for document:', doc._id);
+                                }}
+                              />
+                            </div>
                           ) : (
                             <div className={`w-full h-full flex flex-col items-center justify-center ${
                               theme === 'dark' ? 'bg-[#334155]' : 'bg-gray-200'
@@ -317,6 +351,9 @@ export default function DocumentPage() {
                                 theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                               }`}>
                                 {doc.title.substring(0, 50)}{doc.title.length > 50 ? '...' : ''}
+                              </p>
+                              <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                No preview available
                               </p>
                             </div>
                           )}
@@ -384,24 +421,28 @@ export default function DocumentPage() {
                         viewport={{ once: true }}
                         className="w-full lg:w-1/2 flex justify-center order-2 lg:order-1"
                       >
-                        <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-xl">
+                        <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-xl overflow-hidden shadow-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
                           {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt={doc.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                // Show fallback
-                                target.parentElement!.innerHTML = `
-                                  <div class="w-full h-full flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-[#334155]' : 'bg-gray-200'}">
-                                    <div class="text-4xl mb-2 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-[#007bff]'}">📄</div>
-                                    <div class="text-sm text-center px-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}">${doc.title.substring(0, 50)}${doc.title.length > 50 ? '...' : ''}</div>
-                                  </div>
-                                `;
-                              }}
-                            />
+                            <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                              <img
+                                src={imageUrl}
+                                alt={doc.title}
+                                className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  target.parentElement!.innerHTML = `
+                                    <div class="w-full h-full flex flex-col items-center justify-center">
+                                      <div class="text-4xl mb-2 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-[#007bff]'}">📄</div>
+                                      <div class="text-sm text-center px-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}">Image preview failed to load</div>
+                                    </div>
+                                  `;
+                                }}
+                                onLoad={() => {
+                                  console.log('Image loaded successfully for document:', doc._id);
+                                }}
+                              />
+                            </div>
                           ) : (
                             <div className={`w-full h-full flex flex-col items-center justify-center ${
                               theme === 'dark' ? 'bg-[#334155]' : 'bg-gray-200'
@@ -413,6 +454,9 @@ export default function DocumentPage() {
                                 theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
                               }`}>
                                 {doc.title.substring(0, 50)}{doc.title.length > 50 ? '...' : ''}
+                              </p>
+                              <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                No preview available
                               </p>
                             </div>
                           )}

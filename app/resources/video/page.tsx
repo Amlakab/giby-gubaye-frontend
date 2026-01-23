@@ -17,7 +17,8 @@ import {
   FaEye,
   FaCalendar,
   FaTags,
-  FaStar
+  FaStar,
+  FaYoutube
 } from 'react-icons/fa';
 
 interface VideoResource {
@@ -47,23 +48,10 @@ interface VideoResource {
 
 export default function VideoPage() {
   const { theme } = useTheme();
-  const [showLogin, setShowLogin] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
-  const [showOtpModal, setShowOtpModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [videos, setVideos] = useState<VideoResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Form states
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [signupName, setSignupName] = useState('');
-  const [signupEmail, setSignupEmail] = useState('');
-  const [signupCity, setSignupCity] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
-  const [signupRole, setSignupRole] = useState('USER');
-  const [otp, setOtp] = useState('');
 
   // Fetch videos from API
   useEffect(() => {
@@ -72,18 +60,33 @@ export default function VideoPage() {
         setLoading(true);
         setError(null);
         
-        // Using the correct API endpoint - make sure your backend is running on port 5000
         const API_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'https://giby-gubaye-backend.onrender.com/api';
-        const response = await fetch(`${API_URL}/resources/public?type=video&status=approved&visibility=visible&limit=50`);
+        const response = await fetch(`${API_URL}/resources/videos?type=video&status=approved&visibility=visible&limit=50`);
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch videos: ${response.status} ${response.statusText}`);
+          throw new Error(`Failed to fetch videos: ${response.status}`);
         }
         
         const data = await response.json();
         
         if (data.success) {
-          setVideos(data.data.resources || []);
+          // Process videos to ensure we have proper videoId
+          const processedVideos = data.data.resources.map((video: any) => {
+            let videoId = video.videoId;
+            
+            // If no videoId, try to extract from youtubeUrl
+            if (!videoId && video.youtubeUrl) {
+              videoId = extractYouTubeId(video.youtubeUrl);
+            }
+            
+            return {
+              ...video,
+              videoId: videoId || '',
+              thumbnail: video.thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+            };
+          });
+          
+          setVideos(processedVideos || []);
         } else {
           throw new Error(data.message || 'Failed to load videos');
         }
@@ -98,27 +101,41 @@ export default function VideoPage() {
     fetchVideos();
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Login logic here
-    setShowOtpModal(true);
-    setShowLogin(false);
-  };
-
-  const handleSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Signup logic here
-    setShowSignup(false);
-    setShowLogin(true);
-  };
-
-  const handleOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    // OTP verification logic here
-    setShowOtpModal(false);
+  // Improved YouTube ID extraction
+  const extractYouTubeId = (url: string): string => {
+    if (!url) return '';
+    
+    // Handle various YouTube URL formats
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    
+    if (match && match[7].length === 11) {
+      return match[7];
+    }
+    
+    // Try alternative patterns
+    const patterns = [
+      /youtu\.be\/([a-zA-Z0-9_-]+)/,
+      /youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+      /youtube\.com\/v\/([a-zA-Z0-9_-]+)/
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    
+    return '';
   };
 
   const openVideoModal = (videoId: string) => {
+    if (!videoId) {
+      console.error('No video ID provided');
+      return;
+    }
     setSelectedVideo(videoId);
   };
 
@@ -126,33 +143,11 @@ export default function VideoPage() {
     setSelectedVideo(null);
   };
 
-  // Function to extract YouTube ID from URL
-  // Function to extract YouTube ID from URL
-const extractYouTubeId = (url: string | undefined): string => {
-  // Return empty string if URL is undefined or empty
-  if (!url) return '';
-  
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
-    /youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
-    /youtube\.com\/v\/([a-zA-Z0-9_-]+)/
-  ];
-  
-  for (const pattern of patterns) {
-    const match = url.match(pattern);
-    if (match && match[1]) {
-      return match[1];
-    }
-  }
-  
-  return '';
-};
-
   // Function to format date
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleDateString('am-ET', {
+      return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -161,12 +156,6 @@ const extractYouTubeId = (url: string | undefined): string => {
       return '';
     }
   };
-
-  // Group videos into pairs for display
-  const groupedVideos = [];
-  for (let i = 0; i < videos.length; i += 2) {
-    groupedVideos.push(videos.slice(i, i + 2));
-  }
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
@@ -281,14 +270,6 @@ const extractYouTubeId = (url: string | undefined): string => {
                 }`}>
                   {error}
                 </p>
-                <div className={`text-sm mb-6 ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-text-secondary'
-                }`}>
-                  የኤፒአይ አድራሻውን ያረጋግጡ። ማውጫው እንደሚከተለው መሆን አለበት፡<br/>
-                  <code className="block mt-2 p-2 bg-black/20 rounded">
-                    http://localhost:5000/api/resources/public
-                  </code>
-                </div>
                 <button
                   onClick={() => window.location.reload()}
                   className="px-6 py-2 bg-primary hover:bg-secondary text-white rounded-lg font-medium transition-colors duration-300"
@@ -300,34 +281,29 @@ const extractYouTubeId = (url: string | undefined): string => {
           </section>
         )}
 
-        {/* Video Sections */}
-        {!loading && !error && groupedVideos.map((videoPair, sectionIndex) => (
-          <div key={sectionIndex}>
-            {videoPair.map((video, index) => {
-              const videoIndex = sectionIndex * 2 + index;
-              const videoId = video.videoId || extractYouTubeId(video.youtubeUrl || '');
-              const thumbnail = video.thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-
-              return (
-                <section
-                  key={video._id}
-                  className={`py-12 px-4 ${
-                    videoIndex % 2 === 0 
-                      ? (theme === 'dark' ? 'bg-surface/20' : 'bg-surface')
-                      : (theme === 'dark' ? 'bg-transparent' : 'bg-background')
-                  }`}
-                >
-                  <div className="container mx-auto">
-                    <div className={`flex flex-col lg:flex-row gap-8 items-center ${
-                      videoIndex % 2 === 0 ? '' : 'lg:flex-row-reverse'
-                    }`}>
+        {/* Videos Grid */}
+        {!loading && !error && videos.length > 0 && (
+          <section className="py-12 px-4">
+            <div className="container mx-auto">
+              <div className="flex flex-col gap-12">
+                {videos.map((video, index) => {
+                  const videoId = video.videoId;
+                  const thumbnail = video.thumbnail || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                  
+                  return (
+                    <div
+                      key={video._id}
+                      className={`flex flex-col lg:flex-row gap-8 items-center ${
+                        index % 2 === 0 ? '' : 'lg:flex-row-reverse'
+                      }`}
+                    >
                       {/* Content Column */}
                       <motion.div
-                        initial={{ x: videoIndex % 2 === 0 ? -100 : 100, opacity: 0 }}
+                        initial={{ x: index % 2 === 0 ? -100 : 100, opacity: 0 }}
                         whileInView={{ x: 0, opacity: 1 }}
                         transition={{ duration: 1 }}
                         viewport={{ once: true }}
-                        className={`${videoIndex % 2 === 0 ? 'lg:order-1' : 'lg:order-2'} text-center lg:text-left lg:w-1/2`}
+                        className={`${index % 2 === 0 ? 'lg:order-1' : 'lg:order-2'} text-center lg:text-left lg:w-1/2`}
                       >
                         <div className="flex items-center gap-2 mb-3">
                           {video.isFeatured && (
@@ -375,14 +351,15 @@ const extractYouTubeId = (url: string | undefined): string => {
                             <FaPlayCircle className="mr-2" />
                             ቪዲዮውን ይመልከቱ
                           </button>
+                          
                           {video.youtubeUrl && (
                             <a
                               href={video.youtubeUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium text-sm transition-colors duration-300"
+                              className="inline-flex items-center px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium text-sm transition-colors duration-300"
                             >
-                              <FaDownload className="mr-2" />
+                              <FaYoutube className="mr-2" />
                               በYouTube ይመልከቱ
                             </a>
                           )}
@@ -420,14 +397,16 @@ const extractYouTubeId = (url: string | undefined): string => {
 
                       {/* Video Thumbnail Column */}
                       <motion.div
-                        initial={{ x: videoIndex % 2 === 0 ? 100 : -100, opacity: 0 }}
+                        initial={{ x: index % 2 === 0 ? 100 : -100, opacity: 0 }}
                         whileInView={{ x: 0, opacity: 1 }}
                         transition={{ duration: 1 }}
                         viewport={{ once: true }}
-                        className={`${videoIndex % 2 === 0 ? 'lg:order-2' : 'lg:order-1'} cursor-pointer lg:w-1/2`}
-                        onClick={() => videoId && openVideoModal(videoId)}
+                        className={`${index % 2 === 0 ? 'lg:order-2' : 'lg:order-1'} cursor-pointer lg:w-1/2`}
                       >
-                        <div className="relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group">
+                        <div 
+                          className="relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group"
+                          onClick={() => videoId && openVideoModal(videoId)}
+                        >
                           {/* Thumbnail */}
                           <div className="relative aspect-video">
                             <img
@@ -467,12 +446,12 @@ const extractYouTubeId = (url: string | undefined): string => {
                         </div>
                       </motion.div>
                     </div>
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        ))}
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* No Videos Found */}
         {!loading && !error && videos.length === 0 && (
@@ -496,14 +475,6 @@ const extractYouTubeId = (url: string | undefined): string => {
                 }`}>
                   በአሁኑ ጊዜ ምንም ቪዲዮዎች የሉም። ቆየት እንደገና ይሞክሩ።
                 </p>
-                <div className={`text-sm p-4 rounded ${
-                  theme === 'dark' ? 'bg-gray-800/50 text-gray-400' : 'bg-gray-100 text-gray-600'
-                }`}>
-                  <p className="mb-2">የኤፒአይ አድራሻ መረጃ፡</p>
-                  <code className="block text-left p-2 bg-black/20 rounded">
-                    GET /api/resources/public?type=video&status=approved&visibility=visible
-                  </code>
-                </div>
               </div>
             </div>
           </section>
@@ -512,16 +483,20 @@ const extractYouTubeId = (url: string | undefined): string => {
 
       {/* Video Modal */}
       {selectedVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90"
+          onClick={closeVideoModal}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
             className="relative w-full max-w-4xl"
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={closeVideoModal}
-              className="absolute -top-10 right-0 text-white text-2xl hover:text-primary transition-colors duration-300"
+              className="absolute -top-10 right-0 text-white text-2xl hover:text-primary transition-colors duration-300 z-10"
             >
               ✕
             </button>
@@ -530,285 +505,18 @@ const extractYouTubeId = (url: string | undefined): string => {
                 src={`https://www.youtube.com/embed/${selectedVideo}?autoplay=1&rel=0`}
                 title="YouTube video player"
                 className="absolute inset-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
               ></iframe>
             </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Login Modal */}
-      {showLogin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={`w-full max-w-md rounded-xl shadow-xl ${
-              theme === 'dark' ? 'bg-surface border-border' : 'bg-white border'
-            }`}
-          >
-            <div className={`p-6 border-b ${
-              theme === 'dark' ? 'border-border' : 'border-gray-200'
-            }`}>
-              <h3 className={`text-xl font-bold ${
-                theme === 'dark' ? 'text-primary' : 'text-primary'
-              }`}>
-                ግባ
-              </h3>
-            </div>
-            <div className="p-6">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaEnvelope />
-                    <span>ኢሜይል</span>
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="ኢሜይል ያስገቡ"
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaKey />
-                    <span>የይለፍ ቃል</span>
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="የይለፍ ቃል"
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium text-base transition-colors duration-300"
-                >
-                  ግባ
-                </button>
-                <p className={`text-center mt-4 ${
-                  theme === 'dark' ? 'text-primary' : 'text-primary'
-                }`}>
-                  መለያ የለህም?{' '}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowLogin(false);
-                      setShowSignup(true);
-                    }}
-                    className="underline hover:text-secondary transition-colors"
-                  >
-                    ይመዝገቡ
-                  </button>
-                </p>
-              </form>
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Signup Modal */}
-      {showSignup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={`w-full max-w-md rounded-xl shadow-xl ${
-              theme === 'dark' ? 'bg-surface border-border' : 'bg-white border'
-            }`}
-          >
-            <div className={`p-6 border-b ${
-              theme === 'dark' ? 'border-border' : 'border-gray-200'
-            }`}>
-              <h3 className={`text-xl font-bold ${
-                theme === 'dark' ? 'text-primary' : 'text-primary'
-              }`}>
-                ይመዝገቡ
-              </h3>
-            </div>
-            <div className="p-6">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaUser />
-                    <span>ስም</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="ስም ያስገቡ"
-                    value={signupName}
-                    onChange={(e) => setSignupName(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaEnvelope />
-                    <span>ኢሜይል</span>
-                  </label>
-                  <input
-                    type="email"
-                    placeholder="ኢሜይል ያስገቡ"
-                    value={signupEmail}
-                    onChange={(e) => setSignupEmail(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaCity />
-                    <span>ከተማ</span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="ከተማ ያስገቡ"
-                    value={signupCity}
-                    onChange={(e) => setSignupCity(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaKey />
-                    <span>የይለፍ ቃል</span>
-                  </label>
-                  <input
-                    type="password"
-                    placeholder="የይለፍ ቃል"
-                    value={signupPassword}
-                    onChange={(e) => setSignupPassword(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className={`flex items-center space-x-2 mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    <FaUserTag />
-                    <span>ሚና</span>
-                  </label>
-                  <select
-                    value={signupRole}
-                    onChange={(e) => setSignupRole(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                  >
-                    <option value="USER">ተጠቃሚ</option>
-                    <option value="ADMIN">አስተዳዳሪ</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium text-base transition-colors duration-300"
-                >
-                  ይመዝገቡ
-                </button>
-              </form>
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* OTP Modal */}
-      {showOtpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={`w-full max-w-md rounded-xl shadow-xl ${
-              theme === 'dark' ? 'bg-surface border-border' : 'bg-white border'
-            }`}
-          >
-            <div className={`p-6 border-b ${
-              theme === 'dark' ? 'border-border' : 'border-gray-200'
-            }`}>
-              <h3 className={`text-xl font-bold ${
-                theme === 'dark' ? 'text-primary' : 'text-primary'
-              }`}>
-                OTP ማረጋገጫ
-              </h3>
-            </div>
-            <div className="p-6">
-              <form onSubmit={handleOtp} className="space-y-4">
-                <div>
-                  <label className={`block mb-2 ${
-                    theme === 'dark' ? 'text-primary' : 'text-primary'
-                  }`}>
-                    OTP ያስገቡ
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="OTP ያስገቡ"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    className={`w-full px-4 py-3 rounded-lg border text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
-                      theme === 'dark' 
-                        ? 'bg-surface/50 border-border text-white' 
-                        : 'bg-background border-border text-text-primary'
-                    }`}
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full px-6 py-3 bg-primary hover:bg-secondary text-white rounded-lg font-medium text-base transition-colors duration-300"
-                >
-                  OTP ያረጋግጡ
-                </button>
-              </form>
+            <div className="mt-4 text-center">
+              <button
+                onClick={closeVideoModal}
+                className="px-6 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium text-sm transition-colors duration-300"
+              >
+                ዝጋ
+              </button>
             </div>
           </motion.div>
         </div>

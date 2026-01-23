@@ -22,7 +22,8 @@ import {
   CheckCircle, Cancel, HourglassEmpty,
   Star, DateRange,
   ThumbUp, ThumbDown, Gavel,
-  YouTube, PictureAsPdf, InsertPhoto
+  YouTube, PictureAsPdf, InsertPhoto,
+  CloudDownload
 } from '@mui/icons-material';
 import api from '@/app/utils/api';
 import { format, parseISO } from 'date-fns';
@@ -54,8 +55,25 @@ interface Resource {
   
   // Document specific
   downloadLink?: string;
+  previewImageData?: {
+    data?: any;
+    contentType: string;
+    fileName: string;
+  };
+  documentData?: {
+    contentType: string;
+    fileName: string;
+    fileSize: number;
+  };
   
   // Image specific
+  imageGallery?: Array<{
+    _id: string;
+    contentType: string;
+    fileName: string;
+    caption?: string;
+    order: number;
+  }>;
   imageCount?: number;
   
   createdAt: string;
@@ -120,6 +138,7 @@ const ApproveResourcesPage = () => {
     search: '',
     type: '',
     category: '',
+    status: '',
     author: '',
     sortBy: 'createdAt',
     sortOrder: 'desc',
@@ -193,27 +212,41 @@ const ApproveResourcesPage = () => {
       setLoading(true);
       const params = new URLSearchParams();
       
-      // Always filter by pending status for approval queue
-      params.append('status', 'pending');
-      
       Object.entries(filters).forEach(([key, value]) => {
-        if (value && value !== '' && key !== 'status') {
+        if (value && value !== '') {
           params.append(key, value.toString());
         }
       });
 
-      const response = await api.get(`/resources/approval-queue?${params}`);
-      setResources(response.data.data.resources || []);
-      setPagination(response.data.data.pagination || {
+      console.log('Fetching approval resources with params:', params.toString());
+      
+      const response = await api.get(`/resources?${params}`);
+      console.log('Approval resources API response:', response.data);
+      
+      // Handle both response structures
+      let resourcesData: Resource[] = [];
+      let paginationData: PaginationData = {
         currentPage: 1,
         totalPages: 1,
         totalResources: 0,
         hasNext: false,
         hasPrev: false
-      });
+      };
+      
+      if (response.data.data && response.data.data.resources) {
+        resourcesData = response.data.data.resources;
+        paginationData = response.data.data.pagination;
+      } else if (response.data.resources) {
+        resourcesData = response.data.resources;
+        paginationData = response.data.pagination;
+      }
+      
+      console.log('Processed approval resources:', resourcesData);
+      setResources(resourcesData);
+      setPagination(paginationData);
       setError('');
     } catch (error: any) {
-      console.error('Error fetching resources:', error);
+      console.error('Error fetching approval resources:', error);
       setError(error.response?.data?.message || 'Failed to fetch resources');
       setResources([]);
       setPagination({
@@ -306,6 +339,7 @@ const ApproveResourcesPage = () => {
       search: '',
       type: '',
       category: '',
+      status: '',
       author: '',
       sortBy: 'createdAt',
       sortOrder: 'desc',
@@ -386,6 +420,18 @@ const ApproveResourcesPage = () => {
     return colors[index];
   };
 
+  const getPreviewImageUrl = (resource: Resource): string => {
+    return `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000/api'}/resources/${resource._id}/preview-image`;
+  };
+
+  const getGalleryImageUrl = (resource: Resource, index: number = 0): string => {
+    return `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000/api'}/resources/${resource._id}/gallery/${index}`;
+  };
+
+  const getDocumentDownloadUrl = (resource: Resource): string => {
+    return `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000/api'}/resources/${resource._id}/document`;
+  };
+
   const statCards = [
     {
       title: 'Pending Approval',
@@ -454,12 +500,9 @@ const ApproveResourcesPage = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
         >
           <Box sx={{ 
-            display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              md: 'repeat(4, 1fr)'
-            },
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            flexWrap: 'wrap',
             gap: 2,
             mb: 4
           }}>
@@ -467,6 +510,8 @@ const ApproveResourcesPage = () => {
               <Card 
                 key={index}
                 sx={{ 
+                  flex: '1 1 200px',
+                  minWidth: { xs: '100%', sm: '200px' },
                   borderRadius: 2,
                   boxShadow: theme === 'dark' 
                     ? '0 2px 8px rgba(0,0,0,0.3)' 
@@ -576,84 +621,82 @@ const ApproveResourcesPage = () => {
               
               {/* Filter Controls */}
               <Box sx={{ 
-                display: 'grid',
-                gridTemplateColumns: {
-                  xs: '1fr',
-                  sm: 'repeat(2, 1fr)',
-                  md: 'repeat(4, 1fr)'
-                },
+                display: 'flex',
+                flexDirection: 'column',
                 gap: 2
               }}>
-                <TextField
-                  fullWidth
-                  size="small"
-                  label="Search Resources"
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
-                  placeholder="Title, description, or tags..."
-                  InputProps={{
-                    startAdornment: (
-                      <Search sx={{ 
-                        color: theme === 'dark' ? '#a8b2d1' : '#666666',
-                        mr: 1 
-                      }} />
-                    ),
-                  }}
-                  sx={textFieldStyle}
-                />
-                
-                <FormControl fullWidth size="small">
-                  <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Type</InputLabel>
-                  <Select
-                    value={filters.type}
-                    label="Type"
-                    onChange={(e) => handleFilterChange('type', e.target.value)}
-                    sx={selectStyle}
-                  >
-                    <MenuItem value="">All Types</MenuItem>
-                    <MenuItem value="video">Video</MenuItem>
-                    <MenuItem value="document">Document</MenuItem>
-                    <MenuItem value="image">Image</MenuItem>
-                  </Select>
-                </FormControl>
-                
-                <FormControl fullWidth size="small">
-                  <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Category</InputLabel>
-                  <Select
-                    value={filters.category}
-                    label="Category"
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
-                    sx={selectStyle}
-                  >
-                    <MenuItem value="">All Categories</MenuItem>
-                    {filterOptions.categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
-                          {category}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                
-                <FormControl fullWidth size="small">
-                  <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Author</InputLabel>
-                  <Select
-                    value={filters.author}
-                    label="Author"
-                    onChange={(e) => handleFilterChange('author', e.target.value)}
-                    sx={selectStyle}
-                  >
-                    <MenuItem value="">All Authors</MenuItem>
-                    {filterOptions.authors.map((author) => (
-                      <MenuItem key={author._id} value={author._id}>
-                        <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
-                          {author.firstName} {author.lastName}
-                        </Typography>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <Box sx={{ 
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  flexWrap: 'wrap',
+                  gap: 2
+                }}>
+                  <TextField
+                    sx={{ flex: '1 1 200px', ...textFieldStyle }}
+                    size="small"
+                    label="Search Resources"
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    placeholder="Title, description, or tags..."
+                    InputProps={{
+                      startAdornment: (
+                        <Search sx={{ 
+                          color: theme === 'dark' ? '#a8b2d1' : '#666666',
+                          mr: 1 
+                        }} />
+                      ),
+                    }}
+                  />
+                  
+                  <FormControl sx={{ flex: '1 1 150px' }} size="small">
+                    <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Type</InputLabel>
+                    <Select
+                      value={filters.type}
+                      label="Type"
+                      onChange={(e) => handleFilterChange('type', e.target.value)}
+                      sx={selectStyle}
+                    >
+                      <MenuItem value="">All Types</MenuItem>
+                      <MenuItem value="video">Video</MenuItem>
+                      <MenuItem value="document">Document</MenuItem>
+                      <MenuItem value="image">Image</MenuItem>
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl sx={{ flex: '1 1 150px' }} size="small">
+                    <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Category</InputLabel>
+                    <Select
+                      value={filters.category}
+                      label="Category"
+                      onChange={(e) => handleFilterChange('category', e.target.value)}
+                      sx={selectStyle}
+                    >
+                      <MenuItem value="">All Categories</MenuItem>
+                      {filterOptions.categories.map((category) => (
+                        <MenuItem key={category} value={category}>
+                          <Typography variant="body2" color={theme === 'dark' ? '#ccd6f6' : '#333333'}>
+                            {category}
+                          </Typography>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  
+                  <FormControl sx={{ flex: '1 1 150px' }} size="small">
+                    <InputLabel sx={{ color: theme === 'dark' ? '#a8b2d1' : '#666666' }}>Status</InputLabel>
+                    <Select
+                      value={filters.status}
+                      label="Status"
+                      onChange={(e) => handleFilterChange('status', e.target.value)}
+                      sx={selectStyle}
+                    >
+                      <MenuItem value="">All Status</MenuItem>
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="approved">Approved</MenuItem>
+                      <MenuItem value="rejected">Rejected</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
               </Box>
             </CardContent>
           </Card>
@@ -759,11 +802,106 @@ const ApproveResourcesPage = () => {
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb'
+                              backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                              position: 'relative'
                             }}>
-                              <Box sx={{ color: getTypeColor(resource.type) }}>
-                                {getTypeIcon(resource.type)}
-                              </Box>
+                              {/* Show preview image for documents, first image for galleries, or thumbnail for videos */}
+                              {resource.type === 'document' && resource.previewImageData ? (
+                                <img 
+                                  src={getPreviewImageUrl(resource)} 
+                                  alt={resource.title}
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover' 
+                                  }}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                          <svg style="color: ${getTypeColor(resource.type)}; width: 24px; height: 24px;" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,10V11H8V17H10V18H14V17H16V11H14V10H10M10,12H14V16H10V12Z"/>
+                                          </svg>
+                                        </div>
+                                      `;
+                                    }
+                                  }}
+                                />
+                              ) : resource.type === 'image' && resource.imageGallery && resource.imageGallery.length > 0 ? (
+                                <img 
+                                  src={getGalleryImageUrl(resource, 0)} 
+                                  alt={resource.title}
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover' 
+                                  }}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                          <svg style="color: ${getTypeColor(resource.type)}; width: 24px; height: 24px;" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.9 20.1,3 19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19Z"/>
+                                          </svg>
+                                        </div>
+                                      `;
+                                    }
+                                  }}
+                                />
+                              ) : resource.type === 'video' && resource.thumbnail ? (
+                                <img 
+                                  src={resource.thumbnail} 
+                                  alt={resource.title}
+                                  style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'cover' 
+                                  }}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.innerHTML = `
+                                        <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                          <svg style="color: ${getTypeColor(resource.type)}; width: 24px; height: 24px;" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.56 21.94,11.16L22,12C22,14.19 21.84,15.8 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.69,18.94 13.59,18.94L12,19C7.81,19 5.2,18.84 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.44 2.06,12.84L2,12C2,9.81 2.16,8.2 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.31,5.06 10.41,5.06L12,5C16.19,5 18.8,5.16 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z"/>
+                                          </svg>
+                                        </div>
+                                      `;
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <Box sx={{ color: getTypeColor(resource.type) }}>
+                                  {getTypeIcon(resource.type)}
+                                </Box>
+                              )}
+                              
+                              {/* Image count badge for galleries */}
+                              {resource.type === 'image' && resource.imageGallery && resource.imageGallery.length > 0 && (
+                                <Box sx={{
+                                  position: 'absolute',
+                                  bottom: 0,
+                                  right: 0,
+                                  backgroundColor: 'rgba(0,0,0,0.7)',
+                                  color: 'white',
+                                  fontSize: '0.6rem',
+                                  padding: '1px 4px',
+                                  borderTopLeftRadius: '4px'
+                                }}>
+                                  {resource.imageGallery.length}
+                                </Box>
+                              )}
                             </Box>
                             <Box>
                               <Typography variant="body2" sx={{ 
@@ -853,35 +991,39 @@ const ApproveResourcesPage = () => {
                               </IconButton>
                             </Tooltip>
                             
-                            <Tooltip title="Approve">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleOpenApproveDialog(resource, 'approve')}
-                                sx={{ 
-                                  color: theme === 'dark' ? '#00ff00' : '#28a745',
-                                  '&:hover': {
-                                    backgroundColor: theme === 'dark' ? '#00ff0020' : '#28a74510'
-                                  }
-                                }}
-                              >
-                                <ThumbUp fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            
-                            <Tooltip title="Reject">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleOpenApproveDialog(resource, 'reject')}
-                                sx={{ 
-                                  color: theme === 'dark' ? '#ff0000' : '#dc3545',
-                                  '&:hover': {
-                                    backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
-                                  }
-                                }}
-                              >
-                                <ThumbDown fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                            {resource.status === 'pending' && (
+                              <>
+                                <Tooltip title="Approve">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleOpenApproveDialog(resource, 'approve')}
+                                    sx={{ 
+                                      color: theme === 'dark' ? '#00ff00' : '#28a745',
+                                      '&:hover': {
+                                        backgroundColor: theme === 'dark' ? '#00ff0020' : '#28a74510'
+                                      }
+                                    }}
+                                  >
+                                    <ThumbUp fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                
+                                <Tooltip title="Reject">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => handleOpenApproveDialog(resource, 'reject')}
+                                    sx={{ 
+                                      color: theme === 'dark' ? '#ff0000' : '#dc3545',
+                                      '&:hover': {
+                                        backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
+                                      }
+                                    }}
+                                  >
+                                    <ThumbDown fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -902,10 +1044,10 @@ const ApproveResourcesPage = () => {
                     mb: 2
                   }} />
                   <Typography variant="h6" color={theme === 'dark' ? '#a8b2d1' : '#666666'} sx={{ mb: 1 }}>
-                    No pending resources
+                    No resources found
                   </Typography>
                   <Typography variant="body2" color={theme === 'dark' ? '#94a3b8' : '#999999'}>
-                    All resources have been reviewed
+                    Try adjusting your filters
                   </Typography>
                 </Box>
               )}
@@ -1042,25 +1184,186 @@ const ApproveResourcesPage = () => {
                               Document File
                             </Typography>
                             <Typography variant="body2" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                              Ready for download after approval
+                              {selectedResource.documentData?.fileName || 'Document file'}
                             </Typography>
                           </Box>
                         </Box>
-                        <Button
-                          variant="outlined"
-                          startIcon={<PictureAsPdf />}
-                          href={`/api/resources/${selectedResource._id}/document`}
-                          target="_blank"
-                          sx={{
-                            borderColor: theme === 'dark' ? '#00ffff' : '#007bff',
-                            color: theme === 'dark' ? '#00ffff' : '#007bff',
-                            '&:hover': {
-                              backgroundColor: theme === 'dark' ? '#00ffff20' : '#007bff10'
-                            }
-                          }}
-                        >
-                          Preview Document
-                        </Button>
+                        
+                        {/* Document Preview Image */}
+                        <Box sx={{ 
+                          width: '100%',
+                          maxWidth: 300,
+                          height: 200,
+                          margin: '0 auto 16px',
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                          position: 'relative'
+                        }}>
+                          {selectedResource.previewImageData ? (
+                            <img
+                              src={getPreviewImageUrl(selectedResource)}
+                              alt="Document Preview"
+                              style={{ 
+                                width: '100%', 
+                                height: '100%', 
+                                objectFit: 'contain' 
+                              }}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `
+                                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background: ${theme === 'dark' ? '#1e293b' : '#f5f5f5'}">
+                                      <svg style="color: #f44336; width: 48px; height: 48px; margin-bottom: 8px;" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,10V11H8V17H10V18H14V17H16V11H14V10H10M10,12H14V16H10V12Z"/>
+                                      </svg>
+                                      <span style="color: ${theme === 'dark' ? '#94a3b8' : '#666666'}; font-size: 12px;">PDF Document</span>
+                                    </div>
+                                  `;
+                                }
+                              }}
+                            />
+                          ) : (
+                            <Box sx={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              alignItems: 'center', 
+                              justifyContent: 'center',
+                              width: '100%',
+                              height: '100%'
+                            }}>
+                              <PictureAsPdf sx={{ fontSize: 48, color: '#f44336', mb: 1 }} />
+                              <Typography variant="caption" color={theme === 'dark' ? '#94a3b8' : '#666666'}>
+                                Document Preview
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                        
+                        {selectedResource.status === 'approved' && (
+                          <Button
+                            variant="contained"
+                            startIcon={<CloudDownload />}
+                            href={getDocumentDownloadUrl(selectedResource)}
+                            target="_blank"
+                            sx={{
+                              backgroundColor: theme === 'dark' ? '#f44336' : '#f44336',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: theme === 'dark' ? '#d32f2f' : '#d32f2f'
+                              }
+                            }}
+                          >
+                            Download Document
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {selectedResource.type === 'image' && selectedResource.imageGallery && selectedResource.imageGallery.length > 0 && (
+                    <Card sx={{ mb: 3 }}>
+                      <CardContent sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ 
+                          mb: 2,
+                          color: theme === 'dark' ? '#ccd6f6' : '#333333'
+                        }}>
+                          Image Gallery ({selectedResource.imageGallery.length} images)
+                        </Typography>
+                        
+                        <Box sx={{ 
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: 2,
+                          justifyContent: 'center'
+                        }}>
+                          {selectedResource.imageGallery.slice(0, 6).map((image, index) => (
+                            <Box 
+                              key={index}
+                              sx={{ 
+                                width: 120,
+                                height: 90,
+                                borderRadius: 1,
+                                overflow: 'hidden',
+                                backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                                cursor: 'pointer',
+                                position: 'relative',
+                                '&:hover': {
+                                  transform: 'scale(1.05)',
+                                  transition: 'transform 0.2s'
+                                }
+                              }}
+                              onClick={() => {
+                                window.open(getGalleryImageUrl(selectedResource, index), '_blank');
+                              }}
+                            >
+                              <img
+                                src={getGalleryImageUrl(selectedResource, index)}
+                                alt={`${selectedResource.title} - Image ${index + 1}`}
+                                style={{ 
+                                  width: '100%', 
+                                  height: '100%', 
+                                  objectFit: 'cover' 
+                                }}
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const parent = target.parentElement;
+                                  if (parent) {
+                                    parent.innerHTML = `
+                                      <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: ${theme === 'dark' ? '#1e293b' : '#f5f5f5'}">
+                                        <svg style="color: #4caf50; width: 32px; height: 32px;" viewBox="0 0 24 24">
+                                          <path fill="currentColor" d="M8.5,13.5L11,16.5L14.5,12L19,18H5M21,19V5C21,3.9 20.1,3 19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19Z"/>
+                                        </svg>
+                                      </div>
+                                    `;
+                                  }
+                                }}
+                              />
+                              
+                              {/* Image number overlay */}
+                              <Box sx={{
+                                position: 'absolute',
+                                top: 4,
+                                right: 4,
+                                backgroundColor: 'rgba(0,0,0,0.7)',
+                                color: 'white',
+                                fontSize: '0.6rem',
+                                padding: '1px 4px',
+                                borderRadius: '4px'
+                              }}>
+                                {index + 1}
+                              </Box>
+                            </Box>
+                          ))}
+                          
+                          {selectedResource.imageGallery.length > 6 && (
+                            <Box 
+                              sx={{ 
+                                width: 120,
+                                height: 90,
+                                borderRadius: 1,
+                                backgroundColor: theme === 'dark' ? '#334155' : '#e5e7eb',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  backgroundColor: theme === 'dark' ? '#475569' : '#d1d5db'
+                                }
+                              }}
+                              onClick={() => {
+                                window.open(getGalleryImageUrl(selectedResource, 0), '_blank');
+                              }}
+                            >
+                              <Typography variant="body2" color={theme === 'dark' ? '#94a3b8' : '#666666'}>
+                                +{selectedResource.imageGallery.length - 6} more
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
                       </CardContent>
                     </Card>
                   )}
@@ -1107,10 +1410,11 @@ const ApproveResourcesPage = () => {
                   <Divider sx={{ my: 3 }} />
                   
                   {/* Author and Dates */}
-                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, flexWrap: 'wrap', gap: 3 }}>
                     {/* Author Card */}
                     <Card sx={{ 
-                      flex: 1,
+                      flex: '1 1 300px',
+                      minWidth: { xs: '100%', md: '300px' },
                       backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
                       border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
                     }}>
@@ -1147,7 +1451,8 @@ const ApproveResourcesPage = () => {
                     
                     {/* Dates Card */}
                     <Card sx={{ 
-                      flex: 1,
+                      flex: '1 1 300px',
+                      minWidth: { xs: '100%', md: '300px' },
                       backgroundColor: theme === 'dark' ? '#1e293b' : '#f8f9fa',
                       border: theme === 'dark' ? '1px solid #334155' : '1px solid #e5e7eb'
                     }}>
@@ -1162,7 +1467,10 @@ const ApproveResourcesPage = () => {
                           {formatDate(selectedResource.createdAt)}
                         </Typography>
                         <Typography variant="caption" color={theme === 'dark' ? '#a8b2d1' : '#666666'}>
-                          Waiting for review since {format(parseISO(selectedResource.createdAt), 'MMM dd, yyyy')}
+                          {selectedResource.status === 'pending' 
+                            ? `Waiting for review since ${format(parseISO(selectedResource.createdAt), 'MMM dd, yyyy')}`
+                            : `Submitted on ${format(parseISO(selectedResource.createdAt), 'MMM dd, yyyy')}`
+                          }
                         </Typography>
                       </CardContent>
                     </Card>
@@ -1185,38 +1493,40 @@ const ApproveResourcesPage = () => {
                 >
                   Close
                 </Button>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button 
-                    onClick={() => handleOpenApproveDialog(selectedResource, 'reject')}
-                    variant="outlined"
-                    color="error"
-                    startIcon={<ThumbDown />}
-                    sx={{
-                      borderColor: theme === 'dark' ? '#ff0000' : '#dc3545',
-                      color: theme === 'dark' ? '#ff0000' : '#dc3545',
-                      '&:hover': {
-                        backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
-                      }
-                    }}
-                  >
-                    Reject
-                  </Button>
-                  <Button 
-                    onClick={() => handleOpenApproveDialog(selectedResource, 'approve')}
-                    variant="contained"
-                    color="success"
-                    startIcon={<ThumbUp />}
-                    sx={{
-                      backgroundColor: theme === 'dark' ? '#00ff00' : '#28a745',
-                      color: theme === 'dark' ? '#0a192f' : 'white',
-                      '&:hover': {
-                        backgroundColor: theme === 'dark' ? '#00b300' : '#218838'
-                      }
-                    }}
-                  >
-                    Approve
-                  </Button>
-                </Box>
+                {selectedResource.status === 'pending' && (
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button 
+                      onClick={() => handleOpenApproveDialog(selectedResource, 'reject')}
+                      variant="outlined"
+                      color="error"
+                      startIcon={<ThumbDown />}
+                      sx={{
+                        borderColor: theme === 'dark' ? '#ff0000' : '#dc3545',
+                        color: theme === 'dark' ? '#ff0000' : '#dc3545',
+                        '&:hover': {
+                          backgroundColor: theme === 'dark' ? '#ff000020' : '#dc354510'
+                        }
+                      }}
+                    >
+                      Reject
+                    </Button>
+                    <Button 
+                      onClick={() => handleOpenApproveDialog(selectedResource, 'approve')}
+                      variant="contained"
+                      color="success"
+                      startIcon={<ThumbUp />}
+                      sx={{
+                        backgroundColor: theme === 'dark' ? '#00ff00' : '#28a745',
+                        color: theme === 'dark' ? '#0a192f' : 'white',
+                        '&:hover': {
+                          backgroundColor: theme === 'dark' ? '#00b300' : '#218838'
+                        }
+                      }}
+                    >
+                      Approve
+                    </Button>
+                  </Box>
+                )}
               </DialogActions>
             </>
           )}
@@ -1402,7 +1712,7 @@ const ApproveResourcesPage = () => {
             {success}
           </Alert>
         </Snackbar>
-      </Box> 
+      </Box>
     </div>
   );
 };
