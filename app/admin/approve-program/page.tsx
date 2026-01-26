@@ -400,6 +400,7 @@ const ApproveProgramPage = () => {
         }
       }
       
+      await api.patch(`/programs/${selectedProgram._id}/publish`);
       setSuccess('Program items approved/rejected successfully');
       setOpenApproveDialog(false);
       fetchPrograms();
