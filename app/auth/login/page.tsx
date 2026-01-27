@@ -90,10 +90,11 @@ export default function LoginPage() {
           router.push('/admin');
         } else if (user.role === 'accountant' || user.role === 'Audite'|| user.role === 'Bachna-Department' || user.role === 'Muyana-Terado') {
           router.push('/admin');
-        } else if (user.role === 'Timhrt') {
-          router.push('/sub-agent');
+        } else if (user.role === 'Timhrt' || user.role === 'Priesedant' || user.role === 'Vice-Priesedant' || user.role === 'Secretary') {
+          router.push('/admin');
         } else {
-          router.push('/user/dashboard');
+          // router.push('/user/dashboard');
+          setMessage('Login failed: User role is missing');
         }
       } else {
         setMessage('Login failed: User data is missing');
