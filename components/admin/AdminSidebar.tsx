@@ -238,52 +238,6 @@ const leadershipItems: MenuItem[] = [
   }
 ];
 
-// Other items that multiple roles can access
-const sharedItems: MenuItem[] = [
-  { 
-    name: 'Programs', 
-    href: '/admin/program', 
-    icon: FolderTree,
-    allowedRoles: ['admin', 'Priesedant', 'Vice-Priesedant', 'Secretary'] 
-  },
-  { 
-    name: 'Blogs', 
-    href: '/admin/blogs', 
-    icon: FileText,
-    allowedRoles: ['admin', 'Bachna-Department'] 
-  },
-  { 
-    name: 'Resources', 
-    href: '/admin/resources', 
-    icon: Database,
-    allowedRoles: ['admin', 'Abalat-Guday', 'Timhrt'] 
-  },
-  { 
-    name: 'Students', 
-    href: '/admin/students', 
-    icon: GraduationCap,
-    allowedRoles: ['admin', 'Abalat-Guday'] 
-  },
-  { 
-    name: 'Family', 
-    href: '/admin/manage-families', 
-    icon: Users,
-    allowedRoles: ['admin', 'Abalat-Guday'] 
-  },
-  { 
-    name: 'Transactions', 
-    href: '/admin/transactions', 
-    icon: DollarSign,
-    allowedRoles: ['admin', 'accountant'] 
-  },
-  { 
-    name: 'Calculator', 
-    href: '/admin/calculator', 
-    icon: Calculator,
-    allowedRoles: ['admin', 'accountant'] 
-  }
-];
-
 // Combine all menu items
 const allMenuItems: MenuItem[] = [
   ...commonItems,
@@ -293,8 +247,7 @@ const allMenuItems: MenuItem[] = [
   ...bachnaDepartmentItems,
   ...accountantItems,
   ...timhrtItems,
-  ...leadershipItems,
-  ...sharedItems
+  ...leadershipItems
 ];
 
 // Remove duplicates by name (keeping the first occurrence)
@@ -465,7 +418,7 @@ export default function AdminSidebar({
       
       {/* Sidebar */}
       <div className={cn(
-        "fixed top-0 left-0 h-full z-50 transform transition-all duration-300 ease-in-out",
+        "fixed top-0 left-0 h-screen z-50 transform transition-all duration-300 ease-in-out flex flex-col",
         "lg:relative lg:translate-x-0 lg:z-auto lg:h-screen lg:sticky lg:top-0",
         isOpen ? "translate-x-0" : "-translate-x-full",
         isCollapsed ? "w-20" : "w-64",
@@ -473,19 +426,20 @@ export default function AdminSidebar({
           ? "bg-[#0a192f] border-r border-[#00ffff]/20" 
           : "bg-white border-r border-gray-200"
       )}>
-        {/* Header */}
+        {/* Header - Fixed height */}
         <div className={`
-          flex items-center justify-between p-4 border-b transition-colors duration-300
+          flex-shrink-0 flex items-center justify-between p-4 border-b transition-colors duration-300
           ${theme === 'dark' 
             ? 'border-[#00ffff]/20' 
             : 'border-gray-200'
           }
           ${isCollapsed ? 'justify-center' : ''}
+          h-16
         `}>
           {!isCollapsed && (
             <div className="flex flex-col">
               <h2 className={`
-                text-lg font-semibold transition-colors duration-300
+                text-lg font-semibold transition-colors duration-300 leading-tight
                 ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
               `}>
                 {getSidebarTitle()}
@@ -536,107 +490,112 @@ export default function AdminSidebar({
           )}
         </div>
         
-        {/* Navigation */}
-        <nav className="p-4 overflow-y-auto h-[calc(100vh-140px)]">
-          <div className="mb-3">
-            <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#00ffff]/70' : 'text-blue-600/70'}`}>
-              Common Access
-            </p>
-          </div>
-          <ul className="space-y-2">
-            {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                
-                return (
-                  <li key={`${item.name}-${item.href}`}>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "flex items-center px-3 py-3 rounded-lg transition-all duration-300 group",
-                        isActive 
-                          ? theme === 'dark'
-                            ? "bg-[#00ffff20] border-l-2 border-[#00ffff] text-[#00ffff]" 
-                            : "bg-blue-100 border-l-2 border-blue-600 text-blue-700"
-                          : theme === 'dark'
-                            ? "text-gray-300 hover:bg-[#00ffff10] hover:text-[#00ffff] hover:border-l-2 hover:border-[#00ffff]/50"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-l-2 hover:border-gray-300"
-                      )}
-                      onClick={() => {
-                        if (window.innerWidth < 1024) {
-                          onClose?.();
-                        }
-                      }}
-                    >
-                      <Icon className={cn(
-                        "h-5 w-5 flex-shrink-0 transition-colors duration-300",
-                        isCollapsed ? "mx-auto" : "mr-3"
-                      )} />
-                      
-                      {!isCollapsed && (
-                        <span className="font-medium text-sm truncate">
-                          {item.name}
-                        </span>
-                      )}
+        {/* Navigation - Flexible container that will scroll */}
+        <div className="flex-1 overflow-hidden">
+          <nav className="h-full">
+            <div className="p-4 pb-2">
+              <p className={`text-xs font-semibold uppercase tracking-wider mb-3 ${theme === 'dark' ? 'text-[#00ffff]/70' : 'text-blue-600/70'}`}>
+                Navigation
+              </p>
+            </div>
+            <div className="h-[calc(100%-60px)] overflow-y-auto px-4 pb-4">
+              <ul className="space-y-2">
+                {filteredMenuItems.length > 0 ? (
+                  filteredMenuItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                    
+                    return (
+                      <li key={`${item.name}-${item.href}`}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "flex items-center px-3 py-3 rounded-lg transition-all duration-300 group",
+                            isActive 
+                              ? theme === 'dark'
+                                ? "bg-[#00ffff20] border-l-2 border-[#00ffff] text-[#00ffff]" 
+                                : "bg-blue-100 border-l-2 border-blue-600 text-blue-700"
+                              : theme === 'dark'
+                                ? "text-gray-300 hover:bg-[#00ffff10] hover:text-[#00ffff] hover:border-l-2 hover:border-[#00ffff]/50"
+                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-l-2 hover:border-gray-300"
+                          )}
+                          onClick={() => {
+                            if (window.innerWidth < 1024) {
+                              onClose?.();
+                            }
+                          }}
+                        >
+                          <Icon className={cn(
+                            "h-5 w-5 flex-shrink-0 transition-colors duration-300",
+                            isCollapsed ? "mx-auto" : "mr-3"
+                          )} />
+                          
+                          {!isCollapsed && (
+                            <span className="font-medium text-sm truncate">
+                              {item.name}
+                            </span>
+                          )}
 
-                      {/* Tooltip for collapsed state */}
-                      {isCollapsed && (
-                        <div className={`
-                          absolute left-full ml-2 px-3 py-2 rounded-md opacity-0 invisible 
-                          group-hover:opacity-100 group-hover:visible transition-all duration-300
-                          whitespace-nowrap z-50 shadow-lg
-                          ${theme === 'dark' 
-                            ? 'bg-[#0a192f] border border-[#00ffff]/20 text-white' 
-                            : 'bg-white border border-gray-200 text-gray-900'
-                          }
-                        `}>
-                          {item.name}
-                        </div>
-                      )}
-                    </Link>
+                          {/* Tooltip for collapsed state */}
+                          {isCollapsed && (
+                            <div className={`
+                              absolute left-full ml-2 px-3 py-2 rounded-md opacity-0 invisible 
+                              group-hover:opacity-100 group-hover:visible transition-all duration-300
+                              whitespace-nowrap z-50 shadow-lg
+                              ${theme === 'dark' 
+                                ? 'bg-[#0a192f] border border-[#00ffff]/20 text-white' 
+                                : 'bg-white border border-gray-200 text-gray-900'
+                              }
+                            `}>
+                              {item.name}
+                            </div>
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  })
+                ) : (
+                  // Show message if no menu items are accessible
+                  <li className="px-3 py-4 text-center">
+                    <div className={`
+                      p-3 rounded-lg transition-colors duration-300
+                      ${theme === 'dark' 
+                        ? 'bg-[#00ffff10] text-[#a8b2d1]' 
+                        : 'bg-blue-50 text-gray-600'
+                      }
+                    `}>
+                      <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm font-medium">No Access</p>
+                      <p className="text-xs mt-1">Contact administrator for permissions</p>
+                    </div>
                   </li>
-                );
-              })
-            ) : (
-              // Show message if no menu items are accessible
-              <li className="px-3 py-4 text-center">
-                <div className={`
-                  p-3 rounded-lg transition-colors duration-300
-                  ${theme === 'dark' 
-                    ? 'bg-[#00ffff10] text-[#a8b2d1]' 
-                    : 'bg-blue-50 text-gray-600'
-                  }
-                `}>
-                  <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm font-medium">No Access</p>
-                  <p className="text-xs mt-1">Contact administrator for permissions</p>
-                </div>
-              </li>
-            )}
-          </ul>
-        </nav>
+                )}
+              </ul>
+            </div>
+          </nav>
+        </div>
         
-        {/* Footer */}
+        {/* Footer - Fixed height at bottom */}
         <div className={`
-          absolute bottom-0 w-full p-4 border-t transition-colors duration-300
+          flex-shrink-0 w-full p-4 border-t transition-colors duration-300
           ${theme === 'dark' 
             ? 'border-[#00ffff]/20' 
             : 'border-gray-200'
           }
           ${isCollapsed ? 'px-2' : ''}
+          h-20
         `}>
           {!isCollapsed ? (
-            <div className="flex items-center px-3 py-2">
+            <div className="flex items-center h-full px-3">
               <div className={`
-                h-8 w-8 rounded-full flex items-center justify-center mr-3 transition-colors duration-300
+                h-10 w-10 rounded-full flex items-center justify-center mr-3 transition-colors duration-300 flex-shrink-0
                 ${theme === 'dark' 
                   ? 'bg-[#00ffff20]' 
                   : 'bg-blue-100'
                 }
               `}>
                 <Users className={`
-                  h-4 w-4 transition-colors duration-300
+                  h-5 w-5 transition-colors duration-300
                   ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}
                 `} />
               </div>
@@ -654,7 +613,7 @@ export default function AdminSidebar({
               <button
                 onClick={handleLogout}
                 className={`
-                  p-1.5 rounded-md transition-all duration-300 hover:scale-105
+                  p-1.5 rounded-md transition-all duration-300 hover:scale-105 flex-shrink-0
                   ${theme === 'dark' 
                     ? 'hover:bg-[#ff000020] text-red-400 hover:text-red-300' 
                     : 'hover:bg-red-50 text-red-600 hover:text-red-700'
@@ -666,16 +625,16 @@ export default function AdminSidebar({
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center space-y-2">
+            <div className="flex flex-col items-center justify-center h-full space-y-2">
               <div className={`
-                h-8 w-8 rounded-full flex items-center justify-center transition-colors duration-300
+                h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-300
                 ${theme === 'dark' 
                   ? 'bg-[#00ffff20]' 
                   : 'bg-blue-100'
                 }
               `}>
                 <Users className={`
-                  h-4 w-4 transition-colors duration-300
+                  h-5 w-5 transition-colors duration-300
                   ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}
                 `} />
               </div>
@@ -701,7 +660,7 @@ export default function AdminSidebar({
           <button
             onClick={onToggleCollapse}
             className={`
-              hidden absolute -right-3 top-16 items-center justify-center p-1.5 rounded-full 
+              hidden absolute -right-3 top-1/2 transform -translate-y-1/2 items-center justify-center p-1.5 rounded-full 
               transition-all duration-300 hover:scale-105 z-40 shadow-lg
               ${theme === 'dark' 
                 ? 'bg-[#00ffff] hover:bg-[#00ffff] text-[#0a192f]' 
