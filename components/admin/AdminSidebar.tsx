@@ -538,11 +538,11 @@ export default function AdminSidebar({
         
         {/* Navigation */}
         <nav className="p-4 overflow-y-auto h-[calc(100vh-140px)]">
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#00ffff]/70' : 'text-blue-600/70'}`}>
               Common Access
             </p>
-          </div>
+          </div> */}
           <ul className="space-y-2">
             {filteredMenuItems.length > 0 ? (
               filteredMenuItems.map((item) => {
