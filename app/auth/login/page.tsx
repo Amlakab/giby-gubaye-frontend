@@ -88,8 +88,8 @@ export default function LoginPage() {
         // Keep the original role routing
         if (user.role === 'admin' || user.role === 'Mezmur' || user.role === 'Abalat-Guday' || user.role === 'Limat') {
           router.push('/admin');
-        } else if (user.role === 'accountant') {
-          router.push('/agent');
+        } else if (user.role === 'accountant' || user.role === 'Audite'|| user.role === 'Bachna-Department' || user.role === 'Muyana-Terado') {
+          router.push('/admin');
         } else if (user.role === 'Timhrt') {
           router.push('/sub-agent');
         } else {
