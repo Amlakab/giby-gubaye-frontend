@@ -10,9 +10,9 @@ import {
   FileText, MessageSquare, CreditCard, Database, Shield, 
   Bell, Calendar, TrendingUp,
   UserCheck, CheckCircle, BookOpen, GraduationCap,
-  Briefcase, FolderCheck, DollarSign, Calculator,
+  Briefcase, DollarSign, Calculator,
   AlertCircle, FileCheck, ClipboardCheck, Library,
-  UserPlus, ShieldCheck
+  UserPlus, ShieldCheck, FolderTree
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,7 +32,7 @@ interface AdminSidebarProps {
   onToggleCollapse?: () => void;
 }
 
-// Common items for all roles (Home, Assign Job, Agenda, Add Programs, Wallet, Reports)
+// Common items for ALL roles (Home, Assign Job, Agenda, Add Programs, Wallet, Reports)
 const commonItems: MenuItem[] = [
   { 
     name: 'Home', 
@@ -106,48 +106,12 @@ const approvalItems: MenuItem[] = [
   }
 ];
 
-// Admin only items
+// Admin ONLY items (should NOT be accessible by other roles)
 const adminOnlyItems: MenuItem[] = [
   { 
     name: 'Users', 
     href: '/admin/users', 
     icon: UserPlus,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Students', 
-    href: '/admin/students', 
-    icon: GraduationCap,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Family', 
-    href: '/admin/manage-families', 
-    icon: Users,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Blogs', 
-    href: '/admin/blogs', 
-    icon: FileText,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Programs', 
-    href: '/admin/program', 
-    icon: BookOpen,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Accountants', 
-    href: '/admin/transactions/complete', 
-    icon: UserCheck,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Resources', 
-    href: '/admin/resources', 
-    icon: Database,
     allowedRoles: ['admin'] 
   },
   { 
@@ -163,24 +127,6 @@ const adminOnlyItems: MenuItem[] = [
     allowedRoles: ['admin'] 
   },
   { 
-    name: 'Feedback', 
-    href: '/admin/feedback', 
-    icon: MessageSquare,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Notifications', 
-    href: '/admin/notifications', 
-    icon: Bell,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Events', 
-    href: '/admin/events', 
-    icon: Calendar,
-    allowedRoles: ['admin'] 
-  },
-  { 
     name: 'Security', 
     href: '/admin/security', 
     icon: Shield,
@@ -190,18 +136,6 @@ const adminOnlyItems: MenuItem[] = [
     name: 'Settings', 
     href: '/admin/settings', 
     icon: Settings,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Calculator', 
-    href: '/admin/calculator', 
-    icon: Calculator,
-    allowedRoles: ['admin'] 
-  },
-  { 
-    name: 'Transactions', 
-    href: '/admin/transactions', 
-    icon: DollarSign,
     allowedRoles: ['admin'] 
   }
 ];
@@ -304,6 +238,52 @@ const leadershipItems: MenuItem[] = [
   }
 ];
 
+// Other items that multiple roles can access
+const sharedItems: MenuItem[] = [
+  { 
+    name: 'Programs', 
+    href: '/admin/program', 
+    icon: FolderTree,
+    allowedRoles: ['admin', 'Priesedant', 'Vice-Priesedant', 'Secretary'] 
+  },
+  { 
+    name: 'Blogs', 
+    href: '/admin/blogs', 
+    icon: FileText,
+    allowedRoles: ['admin', 'Bachna-Department'] 
+  },
+  { 
+    name: 'Resources', 
+    href: '/admin/resources', 
+    icon: Database,
+    allowedRoles: ['admin', 'Abalat-Guday', 'Timhrt'] 
+  },
+  { 
+    name: 'Students', 
+    href: '/admin/students', 
+    icon: GraduationCap,
+    allowedRoles: ['admin', 'Abalat-Guday'] 
+  },
+  { 
+    name: 'Family', 
+    href: '/admin/manage-families', 
+    icon: Users,
+    allowedRoles: ['admin', 'Abalat-Guday'] 
+  },
+  { 
+    name: 'Transactions', 
+    href: '/admin/transactions', 
+    icon: DollarSign,
+    allowedRoles: ['admin', 'accountant'] 
+  },
+  { 
+    name: 'Calculator', 
+    href: '/admin/calculator', 
+    icon: Calculator,
+    allowedRoles: ['admin', 'accountant'] 
+  }
+];
+
 // Combine all menu items
 const allMenuItems: MenuItem[] = [
   ...commonItems,
@@ -313,7 +293,8 @@ const allMenuItems: MenuItem[] = [
   ...bachnaDepartmentItems,
   ...accountantItems,
   ...timhrtItems,
-  ...leadershipItems
+  ...leadershipItems,
+  ...sharedItems
 ];
 
 // Remove duplicates by name (keeping the first occurrence)
@@ -356,6 +337,11 @@ export default function AdminSidebar({
     const filtered = uniqueMenuItems.filter(item => 
       item.allowedRoles.includes(userRole)
     );
+    
+    // Debug log to see what items are being filtered
+    console.log('User Role:', userRole);
+    console.log('Filtered Items:', filtered);
+    
     setFilteredMenuItems(filtered);
   }, [userRole]);
 
@@ -552,6 +538,11 @@ export default function AdminSidebar({
         
         {/* Navigation */}
         <nav className="p-4 overflow-y-auto h-[calc(100vh-140px)]">
+          <div className="mb-3">
+            <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#00ffff]/70' : 'text-blue-600/70'}`}>
+              Common Access
+            </p>
+          </div>
           <ul className="space-y-2">
             {filteredMenuItems.length > 0 ? (
               filteredMenuItems.map((item) => {
