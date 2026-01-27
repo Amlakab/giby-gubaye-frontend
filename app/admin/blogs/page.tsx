@@ -40,6 +40,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import api from '@/app/utils/api';
 import { format, parseISO } from 'date-fns';
+import { useNotification } from '@/app/contexts/NotificationContext';
 
 import dynamic from 'next/dynamic';
 const ReactQuill = dynamic(() => import('react-quill'), { 
@@ -194,6 +195,8 @@ const FormRow = ({ children, columns = 1, spacing = 2 }: {
 };
 
 const BlogsPage = () => {
+
+  const { addNotification } = useNotification();
   const { theme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
@@ -578,6 +581,18 @@ const BlogsPage = () => {
       resetForm();
       fetchBlogs();
       fetchStats();
+      //add notification
+     try {
+      await addNotification(
+        `New blog created: ${formData.title}`,
+        `/admin/blog-approve`,
+        'Audite'
+      );
+    } catch (notificationError) {
+      console.error('Failed to add notification:', notificationError);
+      // Optionally show error to user
+    }
+
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to create blog');
     }
