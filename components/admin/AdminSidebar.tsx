@@ -465,7 +465,7 @@ export default function AdminSidebar({
       
       {/* Sidebar */}
       <div className={cn(
-        "fixed top-0 left-0 h-full z-50 transform transition-all duration-300 ease-in-out",
+        "fixed top-0 left-0 h-full z-50 transform transition-all duration-300 ease-in-out flex flex-col",
         "lg:relative lg:translate-x-0 lg:z-auto lg:h-screen lg:sticky lg:top-0",
         isOpen ? "translate-x-0" : "-translate-x-full",
         isCollapsed ? "w-20" : "w-64",
@@ -473,9 +473,9 @@ export default function AdminSidebar({
           ? "bg-[#0a192f] border-r border-[#00ffff]/20" 
           : "bg-white border-r border-gray-200"
       )}>
-        {/* Header */}
+        {/* Header - Fixed at top */}
         <div className={`
-          flex items-center justify-between p-4 border-b transition-colors duration-300
+          flex-shrink-0 flex items-center justify-between p-4 border-b transition-colors duration-300
           ${theme === 'dark' 
             ? 'border-[#00ffff]/20' 
             : 'border-gray-200'
@@ -536,95 +536,92 @@ export default function AdminSidebar({
           )}
         </div>
         
-        {/* Navigation */}
-        <nav className="p-4 overflow-y-auto h-[calc(100vh-140px)]">
-          {/* <div className="mb-3">
-            <p className={`text-xs font-semibold uppercase tracking-wider ${theme === 'dark' ? 'text-[#00ffff]/70' : 'text-blue-600/70'}`}>
-              Common Access
-            </p>
-          </div> */}
-          <ul className="space-y-2">
-            {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                
-                return (
-                  <li key={`${item.name}-${item.href}`}>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "flex items-center px-3 py-3 rounded-lg transition-all duration-300 group",
-                        isActive 
-                          ? theme === 'dark'
-                            ? "bg-[#00ffff20] border-l-2 border-[#00ffff] text-[#00ffff]" 
-                            : "bg-blue-100 border-l-2 border-blue-600 text-blue-700"
-                          : theme === 'dark'
-                            ? "text-gray-300 hover:bg-[#00ffff10] hover:text-[#00ffff] hover:border-l-2 hover:border-[#00ffff]/50"
-                            : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-l-2 hover:border-gray-300"
-                      )}
-                      onClick={() => {
-                        if (window.innerWidth < 1024) {
-                          onClose?.();
-                        }
-                      }}
-                    >
-                      <Icon className={cn(
-                        "h-5 w-5 flex-shrink-0 transition-colors duration-300",
-                        isCollapsed ? "mx-auto" : "mr-3"
-                      )} />
-                      
-                      {!isCollapsed && (
-                        <span className="font-medium text-sm truncate">
-                          {item.name}
-                        </span>
-                      )}
-
-                      {/* Tooltip for collapsed state */}
-                      {isCollapsed && (
-                        <div className={`
-                          absolute left-full ml-2 px-3 py-2 rounded-md opacity-0 invisible 
-                          group-hover:opacity-100 group-hover:visible transition-all duration-300
-                          whitespace-nowrap z-50 shadow-lg
-                          ${theme === 'dark' 
-                            ? 'bg-[#0a192f] border border-[#00ffff]/20 text-white' 
-                            : 'bg-white border border-gray-200 text-gray-900'
+        {/* Navigation - Scrollable area */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="p-4">
+            <ul className="space-y-2">
+              {filteredMenuItems.length > 0 ? (
+                filteredMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                  
+                  return (
+                    <li key={`${item.name}-${item.href}`}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center px-3 py-3 rounded-lg transition-all duration-300 group",
+                          isActive 
+                            ? theme === 'dark'
+                              ? "bg-[#00ffff20] border-l-2 border-[#00ffff] text-[#00ffff]" 
+                              : "bg-blue-100 border-l-2 border-blue-600 text-blue-700"
+                            : theme === 'dark'
+                              ? "text-gray-300 hover:bg-[#00ffff10] hover:text-[#00ffff] hover:border-l-2 hover:border-[#00ffff]/50"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-l-2 hover:border-gray-300"
+                        )}
+                        onClick={() => {
+                          if (window.innerWidth < 1024) {
+                            onClose?.();
                           }
-                        `}>
-                          {item.name}
-                        </div>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })
-            ) : (
-              // Show message if no menu items are accessible
-              <li className="px-3 py-4 text-center">
-                <div className={`
-                  p-3 rounded-lg transition-colors duration-300
-                  ${theme === 'dark' 
-                    ? 'bg-[#00ffff10] text-[#a8b2d1]' 
-                    : 'bg-blue-50 text-gray-600'
-                  }
-                `}>
-                  <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm font-medium">No Access</p>
-                  <p className="text-xs mt-1">Contact administrator for permissions</p>
-                </div>
-              </li>
-            )}
-          </ul>
-        </nav>
+                        }}
+                      >
+                        <Icon className={cn(
+                          "h-5 w-5 flex-shrink-0 transition-colors duration-300",
+                          isCollapsed ? "mx-auto" : "mr-3"
+                        )} />
+                        
+                        {!isCollapsed && (
+                          <span className="font-medium text-sm truncate">
+                            {item.name}
+                          </span>
+                        )}
+
+                        {/* Tooltip for collapsed state */}
+                        {isCollapsed && (
+                          <div className={`
+                            absolute left-full ml-2 px-3 py-2 rounded-md opacity-0 invisible 
+                            group-hover:opacity-100 group-hover:visible transition-all duration-300
+                            whitespace-nowrap z-50 shadow-lg
+                            ${theme === 'dark' 
+                              ? 'bg-[#0a192f] border border-[#00ffff]/20 text-white' 
+                              : 'bg-white border border-gray-200 text-gray-900'
+                            }
+                          `}>
+                            {item.name}
+                          </div>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })
+              ) : (
+                // Show message if no menu items are accessible
+                <li className="px-3 py-4 text-center">
+                  <div className={`
+                    p-3 rounded-lg transition-colors duration-300
+                    ${theme === 'dark' 
+                      ? 'bg-[#00ffff10] text-[#a8b2d1]' 
+                      : 'bg-blue-50 text-gray-600'
+                    }
+                  `}>
+                    <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium">No Access</p>
+                    <p className="text-xs mt-1">Contact administrator for permissions</p>
+                  </div>
+                </li>
+              )}
+            </ul>
+          </nav>
+        </div>
         
-        {/* Footer */}
+        {/* Footer - Fixed at bottom */}
         <div className={`
-          absolute bottom-0 w-full p-4 border-t transition-colors duration-300
+          flex-shrink-0 border-t transition-colors duration-300
           ${theme === 'dark' 
-            ? 'border-[#00ffff]/20' 
-            : 'border-gray-200'
+            ? 'border-[#00ffff]/20 bg-[#0a192f]' 
+            : 'border-gray-200 bg-white'
           }
-          ${isCollapsed ? 'px-2' : ''}
+          ${isCollapsed ? 'px-2 py-3' : 'p-4'}
         `}>
           {!isCollapsed ? (
             <div className="flex items-center px-3 py-2">
@@ -666,7 +663,7 @@ export default function AdminSidebar({
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center space-y-2">
+            <div className="flex flex-col items-center space-y-3">
               <div className={`
                 h-8 w-8 rounded-full flex items-center justify-center transition-colors duration-300
                 ${theme === 'dark' 
