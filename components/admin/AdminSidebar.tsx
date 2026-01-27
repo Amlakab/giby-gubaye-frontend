@@ -415,63 +415,75 @@ export default function AdminSidebar({
         />
       )}
       
-      {/* Sidebar - SIMPLIFIED LAYOUT */}
+      {/* Sidebar - SIMPLE HEIGHT APPROACH */}
       <div className={cn(
-        "fixed top-0 left-0 h-screen z-50 flex flex-col",
-        "lg:relative lg:translate-x-0 lg:z-auto lg:h-screen lg:sticky lg:top-0",
+        "fixed top-0 left-0 z-50",
+        "lg:relative lg:translate-x-0 lg:z-auto lg:sticky lg:top-0",
         isOpen ? "translate-x-0" : "-translate-x-full",
         isCollapsed ? "w-20" : "w-64",
         theme === 'dark' 
           ? "bg-[#0a192f] border-r border-[#00ffff]/20" 
           : "bg-white border-r border-gray-200"
-      )}>
-        {/* Header */}
+      )} style={{ height: '100vh' }}>
+        
+        {/* Header - Fixed at top */}
         <div className={`
-          h-16 flex-shrink-0 flex items-center justify-between p-4 border-b
+          h-16 border-b
           ${theme === 'dark' 
             ? 'border-[#00ffff]/20' 
             : 'border-gray-200'
           }
-          ${isCollapsed ? 'justify-center px-2' : ''}
         `}>
-          {!isCollapsed ? (
-            <>
-              <div className="flex flex-col">
-                <h2 className={`
-                  text-lg font-semibold
-                  ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
+          <div className={`
+            flex items-center justify-between h-full px-4
+            ${isCollapsed ? 'justify-center' : ''}
+          `}>
+            {!isCollapsed ? (
+              <>
+                <div className="flex flex-col">
+                  <h2 className={`
+                    text-lg font-semibold
+                    ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
+                  `}>
+                    {getSidebarTitle()}
+                  </h2>
+                  <span className={`text-xs px-2 py-1 rounded-full w-fit mt-1 ${getRoleColor(userRole)}`}>
+                    {userRoleDisplay}
+                  </span>
+                </div>
+                <button 
+                  onClick={onClose}
+                  className={`
+                    p-1 rounded-md
+                    ${theme === 'dark' 
+                      ? 'hover:bg-[#00ffff20] text-white' 
+                      : 'hover:bg-gray-100 text-gray-900'
+                    }
+                    lg:hidden
+                  `}
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center justify-center w-full">
+                <div className={`
+                  h-8 w-8 rounded-full flex items-center justify-center
+                  ${theme === 'dark' ? 'bg-[#00ffff20]' : 'bg-blue-100'}
                 `}>
-                  {getSidebarTitle()}
-                </h2>
-                <span className={`text-xs px-2 py-1 rounded-full w-fit mt-1 ${getRoleColor(userRole)}`}>
-                  {userRoleDisplay}
-                </span>
+                  <Users className={`h-4 w-4 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
+                </div>
               </div>
-              <button 
-                onClick={onClose}
-                className="p-1 rounded-md lg:hidden"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </>
-          ) : (
-            <div className="w-full flex justify-center">
-              <div className={`
-                h-8 w-8 rounded-full flex items-center justify-center
-                ${theme === 'dark' ? 'bg-[#00ffff20]' : 'bg-blue-100'}
-              `}>
-                <Users className={`h-4 w-4 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
         
-        {/* Navigation - Takes remaining space with scroll */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <div className="h-full overflow-y-auto px-4 py-3">
-            {filteredMenuItems.length > 0 ? (
-              <ul className="space-y-2">
-                {filteredMenuItems.map((item) => {
+        {/* Navigation - Fixed height that leaves space for footer */}
+        <div className="h-[calc(100vh-8rem)] overflow-y-auto">
+          <div className="p-4">
+            <ul className="space-y-2">
+              {filteredMenuItems.length > 0 ? (
+                filteredMenuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                   
@@ -523,113 +535,146 @@ export default function AdminSidebar({
                       </Link>
                     </li>
                   );
-                })}
-              </ul>
-            ) : (
-              <div className={`
-                p-3 rounded-lg text-center
-                ${theme === 'dark' 
-                  ? 'bg-[#00ffff10] text-[#a8b2d1]' 
-                  : 'bg-blue-50 text-gray-600'
-                }
-              `}>
-                <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-medium">No Access</p>
-                <p className="text-xs mt-1">Contact administrator for permissions</p>
-              </div>
-            )}
+                })
+              ) : (
+                <li className="px-3 py-4 text-center">
+                  <div className={`
+                    p-3 rounded-lg
+                    ${theme === 'dark' 
+                      ? 'bg-[#00ffff10] text-[#a8b2d1]' 
+                      : 'bg-blue-50 text-gray-600'
+                    }
+                  `}>
+                    <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm font-medium">No Access</p>
+                    <p className="text-xs mt-1">Contact administrator for permissions</p>
+                  </div>
+                </li>
+              )}
+            </ul>
           </div>
         </div>
         
-        {/* Footer */}
+        {/* Footer - Fixed at bottom */}
         <div className={`
-          h-20 flex-shrink-0 w-full p-4 border-t
+          h-20 border-t absolute bottom-0 left-0 right-0
           ${theme === 'dark' 
-            ? 'border-[#00ffff]/20' 
-            : 'border-gray-200'
+            ? 'border-[#00ffff]/20 bg-[#0a192f]' 
+            : 'border-gray-200 bg-white'
           }
-          ${isCollapsed ? 'px-2' : ''}
+          ${isCollapsed ? 'px-2' : 'px-4'}
         `}>
-          {!isCollapsed ? (
-            <div className="flex items-center h-full">
-              <div className={`
-                h-10 w-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0
-                ${theme === 'dark' 
-                  ? 'bg-[#00ffff20]' 
-                  : 'bg-blue-100'
-                }
-              `}>
-                <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`
-                  text-sm font-medium truncate
-                  ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
+          <div className={`
+            flex items-center justify-between h-full
+            ${isCollapsed ? 'flex-col justify-center' : ''}
+          `}>
+            {!isCollapsed ? (
+              <>
+                <div className="flex items-center">
+                  <div className={`
+                    h-10 w-10 rounded-full flex items-center justify-center mr-3
+                    ${theme === 'dark' 
+                      ? 'bg-[#00ffff20]' 
+                      : 'bg-blue-100'
+                    }
+                  `}>
+                    <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
+                  </div>
+                  <div>
+                    <p className={`
+                      text-sm font-medium truncate max-w-[120px]
+                      ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
+                    `}>
+                      {userDisplayName}
+                    </p>
+                    <p className={`text-xs truncate px-2 py-0.5 rounded-full w-fit mt-1 ${getRoleColor(userRole)}`}>
+                      {userRoleDisplay}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {onToggleCollapse && (
+                    <button
+                      onClick={onToggleCollapse}
+                      className={`
+                        p-1.5 rounded-md hidden lg:flex
+                        ${theme === 'dark' 
+                          ? 'hover:bg-[#00ffff20] text-white' 
+                          : 'hover:bg-gray-100 text-gray-900'
+                        }
+                      `}
+                      title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    >
+                      {isCollapsed ? (
+                        <ChevronRight className="h-4 w-4" />
+                      ) : (
+                        <ChevronLeft className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    className={`
+                      p-1.5 rounded-md
+                      ${theme === 'dark' 
+                        ? 'hover:bg-[#ff000020] text-red-400 hover:text-red-300' 
+                        : 'hover:bg-red-50 text-red-600 hover:text-red-700'
+                      }
+                    `}
+                    title="Logout"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`
+                  h-10 w-10 rounded-full flex items-center justify-center mb-2
+                  ${theme === 'dark' 
+                    ? 'bg-[#00ffff20]' 
+                    : 'bg-blue-100'
+                  }
                 `}>
-                  {userDisplayName}
-                </p>
-                <p className={`text-xs truncate px-2 py-0.5 rounded-full w-fit mt-1 ${getRoleColor(userRole)}`}>
-                  {userRoleDisplay}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {onToggleCollapse && (
+                  <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
+                </div>
+                <div className="flex items-center gap-2">
+                  {onToggleCollapse && (
+                    <button
+                      onClick={onToggleCollapse}
+                      className={`
+                        p-1.5 rounded-md hidden lg:flex
+                        ${theme === 'dark' 
+                          ? 'hover:bg-[#00ffff20] text-white' 
+                          : 'hover:bg-gray-100 text-gray-900'
+                        }
+                      `}
+                      title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    >
+                      {isCollapsed ? (
+                        <ChevronRight className="h-4 w-4" />
+                      ) : (
+                        <ChevronLeft className="h-4 w-4" />
+                      )}
+                    </button>
+                  )}
                   <button
-                    onClick={onToggleCollapse}
-                    className="p-1.5 rounded-md hidden lg:flex"
-                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    onClick={handleLogout}
+                    className={`
+                      p-1.5 rounded-md
+                      ${theme === 'dark' 
+                        ? 'hover:bg-[#ff000020] text-red-400 hover:text-red-300' 
+                        : 'hover:bg-red-50 text-red-600 hover:text-red-700'
+                      }
+                    `}
+                    title="Logout"
                   >
-                    {isCollapsed ? (
-                      <ChevronRight className="h-4 w-4" />
-                    ) : (
-                      <ChevronLeft className="h-4 w-4" />
-                    )}
+                    <LogOut className="h-4 w-4" />
                   </button>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="p-1.5 rounded-md"
-                  title="Logout"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full space-y-2">
-              <div className={`
-                h-10 w-10 rounded-full flex items-center justify-center
-                ${theme === 'dark' 
-                  ? 'bg-[#00ffff20]' 
-                  : 'bg-blue-100'
-                }
-              `}>
-                <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
-              </div>
-              <div className="flex items-center gap-2">
-                {onToggleCollapse && (
-                  <button
-                    onClick={onToggleCollapse}
-                    className="p-1.5 rounded-md hidden lg:flex"
-                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                  >
-                    {isCollapsed ? (
-                      <ChevronRight className="h-4 w-4" />
-                    ) : (
-                      <ChevronLeft className="h-4 w-4" />
-                    )}
-                  </button>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="p-1.5 rounded-md"
-                  title="Logout"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* External Collapse Toggle */}
@@ -637,7 +682,7 @@ export default function AdminSidebar({
           <button
             onClick={onToggleCollapse}
             className={`
-              hidden absolute -right-3 top-20 items-center justify-center p-1.5 rounded-full 
+              hidden absolute -right-3 top-1/2 transform -translate-y-1/2 items-center justify-center p-1.5 rounded-full 
               z-40 shadow-lg
               ${theme === 'dark' 
                 ? 'bg-[#00ffff] text-[#0a192f]' 
