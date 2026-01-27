@@ -291,7 +291,6 @@ export default function AdminSidebar({
       item.allowedRoles.includes(userRole)
     );
     
-    // Debug log to see what items are being filtered
     console.log('User Role:', userRole);
     console.log('Filtered Items:', filtered);
     
@@ -416,9 +415,9 @@ export default function AdminSidebar({
         />
       )}
       
-      {/* Sidebar */}
+      {/* Sidebar - SIMPLIFIED LAYOUT */}
       <div className={cn(
-        "fixed top-0 left-0 h-screen z-50 transform transition-all duration-300 ease-in-out flex flex-col",
+        "fixed top-0 left-0 h-screen z-50 flex flex-col",
         "lg:relative lg:translate-x-0 lg:z-auto lg:h-screen lg:sticky lg:top-0",
         isOpen ? "translate-x-0" : "-translate-x-full",
         isCollapsed ? "w-20" : "w-64",
@@ -426,182 +425,145 @@ export default function AdminSidebar({
           ? "bg-[#0a192f] border-r border-[#00ffff]/20" 
           : "bg-white border-r border-gray-200"
       )}>
-        {/* Header - Fixed height */}
+        {/* Header */}
         <div className={`
-          flex-shrink-0 flex items-center justify-between p-4 border-b transition-colors duration-300
+          h-16 flex-shrink-0 flex items-center justify-between p-4 border-b
           ${theme === 'dark' 
             ? 'border-[#00ffff]/20' 
             : 'border-gray-200'
           }
-          ${isCollapsed ? 'justify-center' : ''}
-          h-16
+          ${isCollapsed ? 'justify-center px-2' : ''}
         `}>
-          {!isCollapsed && (
-            <div className="flex flex-col">
-              <h2 className={`
-                text-lg font-semibold transition-colors duration-300 leading-tight
-                ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
+          {!isCollapsed ? (
+            <>
+              <div className="flex flex-col">
+                <h2 className={`
+                  text-lg font-semibold
+                  ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
+                `}>
+                  {getSidebarTitle()}
+                </h2>
+                <span className={`text-xs px-2 py-1 rounded-full w-fit mt-1 ${getRoleColor(userRole)}`}>
+                  {userRoleDisplay}
+                </span>
+              </div>
+              <button 
+                onClick={onClose}
+                className="p-1 rounded-md lg:hidden"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </>
+          ) : (
+            <div className="w-full flex justify-center">
+              <div className={`
+                h-8 w-8 rounded-full flex items-center justify-center
+                ${theme === 'dark' ? 'bg-[#00ffff20]' : 'bg-blue-100'}
               `}>
-                {getSidebarTitle()}
-              </h2>
-              <span className={`text-xs px-2 py-1 rounded-full w-fit mt-1 ${getRoleColor(userRole)}`}>
-                {userRoleDisplay}
-              </span>
+                <Users className={`h-4 w-4 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
+              </div>
             </div>
-          )}
-          
-          {!isCollapsed && (
-            <button 
-              onClick={onClose}
-              className={`
-                p-1 rounded-md transition-all duration-300 hover:scale-105
-                ${theme === 'dark' 
-                  ? 'hover:bg-[#00ffff20] text-white' 
-                  : 'hover:bg-gray-100 text-gray-900'
-                }
-                lg:hidden
-              `}
-            >
-              <X className="h-5 w-5" />
-            </button>
-          )}
-
-          {/* Collapse Toggle (Desktop) */}
-          {onToggleCollapse && (
-            <button
-              onClick={onToggleCollapse}
-              className={`
-                hidden lg:flex items-center justify-center p-1.5 rounded-md 
-                transition-all duration-300 hover:scale-105
-                ${theme === 'dark' 
-                  ? 'hover:bg-[#00ffff20] text-white' 
-                  : 'hover:bg-gray-100 text-gray-900'
-                }
-                ${isCollapsed ? 'w-full' : ''}
-              `}
-              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {isCollapsed ? (
-                <ChevronRight className="h-4 w-4" />
-              ) : (
-                <ChevronLeft className="h-4 w-4" />
-              )}
-            </button>
           )}
         </div>
         
-        {/* Navigation - Flexible container that will scroll */}
-        <div className="flex-1 overflow-hidden">
-          <nav className="h-full">
-            <div className="p-4 pb-2">
-              <p className={`text-xs font-semibold uppercase tracking-wider mb-3 ${theme === 'dark' ? 'text-[#00ffff]/70' : 'text-blue-600/70'}`}>
-                Navigation
-              </p>
-            </div>
-            <div className="h-[calc(100%-60px)] overflow-y-auto px-4 pb-4">
+        {/* Navigation - Takes remaining space with scroll */}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="h-full overflow-y-auto px-4 py-3">
+            {filteredMenuItems.length > 0 ? (
               <ul className="space-y-2">
-                {filteredMenuItems.length > 0 ? (
-                  filteredMenuItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-                    
-                    return (
-                      <li key={`${item.name}-${item.href}`}>
-                        <Link
-                          href={item.href}
-                          className={cn(
-                            "flex items-center px-3 py-3 rounded-lg transition-all duration-300 group",
-                            isActive 
-                              ? theme === 'dark'
-                                ? "bg-[#00ffff20] border-l-2 border-[#00ffff] text-[#00ffff]" 
-                                : "bg-blue-100 border-l-2 border-blue-600 text-blue-700"
-                              : theme === 'dark'
-                                ? "text-gray-300 hover:bg-[#00ffff10] hover:text-[#00ffff] hover:border-l-2 hover:border-[#00ffff]/50"
-                                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-l-2 hover:border-gray-300"
-                          )}
-                          onClick={() => {
-                            if (window.innerWidth < 1024) {
-                              onClose?.();
-                            }
-                          }}
-                        >
-                          <Icon className={cn(
-                            "h-5 w-5 flex-shrink-0 transition-colors duration-300",
-                            isCollapsed ? "mx-auto" : "mr-3"
-                          )} />
-                          
-                          {!isCollapsed && (
-                            <span className="font-medium text-sm truncate">
-                              {item.name}
-                            </span>
-                          )}
+                {filteredMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                  
+                  return (
+                    <li key={`${item.name}-${item.href}`}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center px-3 py-3 rounded-lg transition-all duration-300 group",
+                          isActive 
+                            ? theme === 'dark'
+                              ? "bg-[#00ffff20] border-l-2 border-[#00ffff] text-[#00ffff]" 
+                              : "bg-blue-100 border-l-2 border-blue-600 text-blue-700"
+                            : theme === 'dark'
+                              ? "text-gray-300 hover:bg-[#00ffff10] hover:text-[#00ffff] hover:border-l-2 hover:border-[#00ffff]/50"
+                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 hover:border-l-2 hover:border-gray-300"
+                        )}
+                        onClick={() => {
+                          if (window.innerWidth < 1024) {
+                            onClose?.();
+                          }
+                        }}
+                      >
+                        <Icon className={cn(
+                          "h-5 w-5 flex-shrink-0",
+                          isCollapsed ? "mx-auto" : "mr-3"
+                        )} />
+                        
+                        {!isCollapsed && (
+                          <span className="font-medium text-sm truncate">
+                            {item.name}
+                          </span>
+                        )}
 
-                          {/* Tooltip for collapsed state */}
-                          {isCollapsed && (
-                            <div className={`
-                              absolute left-full ml-2 px-3 py-2 rounded-md opacity-0 invisible 
-                              group-hover:opacity-100 group-hover:visible transition-all duration-300
-                              whitespace-nowrap z-50 shadow-lg
-                              ${theme === 'dark' 
-                                ? 'bg-[#0a192f] border border-[#00ffff]/20 text-white' 
-                                : 'bg-white border border-gray-200 text-gray-900'
-                              }
-                            `}>
-                              {item.name}
-                            </div>
-                          )}
-                        </Link>
-                      </li>
-                    );
-                  })
-                ) : (
-                  // Show message if no menu items are accessible
-                  <li className="px-3 py-4 text-center">
-                    <div className={`
-                      p-3 rounded-lg transition-colors duration-300
-                      ${theme === 'dark' 
-                        ? 'bg-[#00ffff10] text-[#a8b2d1]' 
-                        : 'bg-blue-50 text-gray-600'
-                      }
-                    `}>
-                      <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm font-medium">No Access</p>
-                      <p className="text-xs mt-1">Contact administrator for permissions</p>
-                    </div>
-                  </li>
-                )}
+                        {/* Tooltip for collapsed state */}
+                        {isCollapsed && (
+                          <div className={`
+                            absolute left-full ml-2 px-3 py-2 rounded-md opacity-0 invisible 
+                            group-hover:opacity-100 group-hover:visible transition-all duration-300
+                            whitespace-nowrap z-50 shadow-lg
+                            ${theme === 'dark' 
+                              ? 'bg-[#0a192f] border border-[#00ffff]/20 text-white' 
+                              : 'bg-white border border-gray-200 text-gray-900'
+                            }
+                          `}>
+                            {item.name}
+                          </div>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
-            </div>
-          </nav>
+            ) : (
+              <div className={`
+                p-3 rounded-lg text-center
+                ${theme === 'dark' 
+                  ? 'bg-[#00ffff10] text-[#a8b2d1]' 
+                  : 'bg-blue-50 text-gray-600'
+                }
+              `}>
+                <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">No Access</p>
+                <p className="text-xs mt-1">Contact administrator for permissions</p>
+              </div>
+            )}
+          </div>
         </div>
         
-        {/* Footer - Fixed height at bottom */}
+        {/* Footer */}
         <div className={`
-          flex-shrink-0 w-full p-4 border-t transition-colors duration-300
+          h-20 flex-shrink-0 w-full p-4 border-t
           ${theme === 'dark' 
             ? 'border-[#00ffff]/20' 
             : 'border-gray-200'
           }
           ${isCollapsed ? 'px-2' : ''}
-          h-20
         `}>
           {!isCollapsed ? (
-            <div className="flex items-center h-full px-3">
+            <div className="flex items-center h-full">
               <div className={`
-                h-10 w-10 rounded-full flex items-center justify-center mr-3 transition-colors duration-300 flex-shrink-0
+                h-10 w-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0
                 ${theme === 'dark' 
                   ? 'bg-[#00ffff20]' 
                   : 'bg-blue-100'
                 }
               `}>
-                <Users className={`
-                  h-5 w-5 transition-colors duration-300
-                  ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}
-                `} />
+                <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className={`
-                  text-sm font-medium truncate transition-colors duration-300
+                  text-sm font-medium truncate
                   ${theme === 'dark' ? 'text-[#ccd6f6]' : 'text-gray-900'}
                 `}>
                   {userDisplayName}
@@ -610,61 +572,76 @@ export default function AdminSidebar({
                   {userRoleDisplay}
                 </p>
               </div>
-              <button
-                onClick={handleLogout}
-                className={`
-                  p-1.5 rounded-md transition-all duration-300 hover:scale-105 flex-shrink-0
-                  ${theme === 'dark' 
-                    ? 'hover:bg-[#ff000020] text-red-400 hover:text-red-300' 
-                    : 'hover:bg-red-50 text-red-600 hover:text-red-700'
-                  }
-                `}
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {onToggleCollapse && (
+                  <button
+                    onClick={onToggleCollapse}
+                    className="p-1.5 rounded-md hidden lg:flex"
+                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight className="h-4 w-4" />
+                    ) : (
+                      <ChevronLeft className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="p-1.5 rounded-md"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full space-y-2">
               <div className={`
-                h-10 w-10 rounded-full flex items-center justify-center transition-colors duration-300
+                h-10 w-10 rounded-full flex items-center justify-center
                 ${theme === 'dark' 
                   ? 'bg-[#00ffff20]' 
                   : 'bg-blue-100'
                 }
               `}>
-                <Users className={`
-                  h-5 w-5 transition-colors duration-300
-                  ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}
-                `} />
+                <Users className={`h-5 w-5 ${theme === 'dark' ? 'text-[#00ffff]' : 'text-blue-600'}`} />
               </div>
-              <button
-                onClick={handleLogout}
-                className={`
-                  p-1.5 rounded-md transition-all duration-300 hover:scale-105
-                  ${theme === 'dark' 
-                    ? 'hover:bg-[#ff000020] text-red-400 hover:text-red-300' 
-                    : 'hover:bg-red-50 text-red-600 hover:text-red-700'
-                  }
-                `}
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                {onToggleCollapse && (
+                  <button
+                    onClick={onToggleCollapse}
+                    className="p-1.5 rounded-md hidden lg:flex"
+                    title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  >
+                    {isCollapsed ? (
+                      <ChevronRight className="h-4 w-4" />
+                    ) : (
+                      <ChevronLeft className="h-4 w-4" />
+                    )}
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  className="p-1.5 rounded-md"
+                  title="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Collapse Toggle (Mobile) */}
+        {/* External Collapse Toggle */}
         {onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
             className={`
-              hidden absolute -right-3 top-1/2 transform -translate-y-1/2 items-center justify-center p-1.5 rounded-full 
-              transition-all duration-300 hover:scale-105 z-40 shadow-lg
+              hidden absolute -right-3 top-20 items-center justify-center p-1.5 rounded-full 
+              z-40 shadow-lg
               ${theme === 'dark' 
-                ? 'bg-[#00ffff] hover:bg-[#00ffff] text-[#0a192f]' 
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                ? 'bg-[#00ffff] text-[#0a192f]' 
+                : 'bg-blue-600 text-white'
               }
               lg:flex
             `}
