@@ -20,17 +20,17 @@ interface User {
 }
 
 interface AdminHeaderProps {
-  onToggleSidebar?: () => void;
-  showSidebarToggle?: boolean;
-  onMenuClick?: () => void; // Alias for onToggleSidebar
-  isSidebarCollapsed?: boolean; // For compatibility
+  onMenuClick: () => void; // Required for mobile sidebar toggle
+  onSidebarToggle: () => void; // Required for desktop sidebar collapse
+  isSidebarCollapsed?: boolean; // Optional, for display purposes
+  showSidebarToggle?: boolean; // Optional, to control visibility
 }
 
 export default function AdminHeader({ 
-  onToggleSidebar, 
   onMenuClick,
-  showSidebarToggle = true,
-  isSidebarCollapsed
+  onSidebarToggle,
+  isSidebarCollapsed = false,
+  showSidebarToggle = true
 }: AdminHeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -182,31 +182,38 @@ export default function AdminHeader({
     return roleMap[role] || role;
   };
 
-  // Handle menu click (for mobile)
-  const handleMenuClick = () => {
-    if (onMenuClick) {
-      onMenuClick();
-    } else if (onToggleSidebar) {
-      onToggleSidebar();
-    }
-  };
-
   return (
     <header className="
-      bg-white shadow-sm py-3 px-6 flex items-center justify-between sticky top-0 z-40
+      bg-white shadow-sm py-3 px-6 flex items-center justify-between sticky top-0 z-50
       dark:bg-gray-900 dark:border-gray-700
     ">
       <div className="flex items-center space-x-4">
         {showSidebarToggle && (
-          <button 
-            onClick={handleMenuClick}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 lg:hidden dark:hover:bg-gray-800 dark:text-gray-300"
-            aria-label="Toggle sidebar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          <>
+            {/* Mobile menu button */}
+            <button 
+              onClick={onMenuClick}
+              className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 lg:hidden dark:hover:bg-gray-800 dark:text-gray-300"
+              aria-label="Toggle sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            
+            {/* Desktop sidebar toggle */}
+            <button 
+              onClick={onSidebarToggle}
+              className="hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600 lg:flex items-center
+                       dark:hover:bg-gray-800 dark:text-gray-300"
+              aria-label="Toggle sidebar collapsed state"
+              title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </>
         )}
         
         <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
