@@ -9,8 +9,8 @@ import { ThemeProvider } from '@/lib/theme-context'; // If you have theme contex
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Your App Name',
-  description: 'Your app description',
+  title: 'Tepi Gibie Gubaye',
+  description: 'Tepi Gibie Gubaye Management System',
 };
 
 export default function RootLayout({
