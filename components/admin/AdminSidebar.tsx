@@ -103,6 +103,12 @@ const approvalItems: MenuItem[] = [
     href: '/admin/approve-resources', 
     icon: ShieldCheck,
     allowedRoles: ['admin', 'Audite', 'Priesedant'] 
+  },
+  { 
+    name: 'Notifications', 
+    href: '/admin/notifications', 
+    icon: Bell,
+    allowedRoles: ['admin', 'Priesedant', 'Vice-Priesedant', 'Secretary'] 
   }
 ];
 

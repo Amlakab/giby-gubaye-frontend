@@ -14,6 +14,7 @@ import {
   Stack, Tooltip, Switch, Tab, Tabs,
   Radio, RadioGroup, FormLabel
 } from '@mui/material';
+import { useNotification } from '@/app/contexts/NotificationContext';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/lib/theme-context';
 import {
@@ -192,6 +193,7 @@ const SafeAvatar = ({ user, size = 32 }: { user: any; size?: number }) => {
 
 const ResourcePage = () => {
   const { theme } = useTheme();
+  const { addNotification } = useNotification();
   const isMobile = useMediaQuery('(max-width: 768px)');
   
   const [resources, setResources] = useState<Resource[]>([]);
@@ -468,6 +470,19 @@ const ResourcePage = () => {
       resetForm();
       fetchResources();
       fetchStats();
+
+      //add notification
+     try {
+      await addNotification(
+        `New resource created: ${formData.title}`,
+        `/admin/approve-resources`,
+        'Audite'
+      );
+    } catch (notificationError) {
+      console.error('Failed to add notification:', notificationError);
+      // Optionally show error to user
+    }
+      
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to create resource');
     }

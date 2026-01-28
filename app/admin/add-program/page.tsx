@@ -30,6 +30,7 @@ import {
   PublishedWithChanges, DoneAll,
   Timer
 } from '@mui/icons-material';
+import { useNotification } from '@/app/contexts/NotificationContext';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -98,6 +99,7 @@ interface UserItem {
 
 const AddProgramItemsPage = () => {
   const { theme } = useTheme();
+  const { addNotification } = useNotification();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { user } = useAuth();
   
@@ -431,6 +433,24 @@ const AddProgramItemsPage = () => {
       setSuccess('Program item added successfully');
       setOpenAddItemDialog(false);
       fetchPrograms();
+
+      //add notification
+     try {
+      await addNotification(
+        `New program item created: ${formData.title}`,
+        `/admin/approve-program`,
+        'Audite'
+      );
+      await addNotification(
+        `New program item created: ${formData.title}`,
+        `/admin/program`,
+        'Priesedant'
+      );
+    } catch (notificationError) {
+      console.error('Failed to add notification:', notificationError);
+      // Optionally show error to user
+    }
+
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to add program item');
     }

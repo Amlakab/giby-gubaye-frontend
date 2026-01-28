@@ -27,6 +27,7 @@ import {
   Check, Clear, KeyboardArrowDown,
   KeyboardArrowUp, PersonOutline
 } from '@mui/icons-material';
+import { useNotification } from '@/app/contexts/NotificationContext';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -111,6 +112,7 @@ interface FilterOptions {
 
 const AgendaManagementPage = () => {
   const { theme } = useTheme();
+  const { addNotification } = useNotification();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { user } = useAuth();
   
@@ -657,6 +659,19 @@ const AgendaManagementPage = () => {
       setOpenCreateDialog(false);
       fetchAgendas();
       fetchStats();
+
+       //add notification
+     try {
+      await addNotification(
+        `New agenda created: ${formData.agendaTitles[0].title}`,
+        `/admin/agenda-approve`,
+        'Audite'
+      );
+    } catch (notificationError) {
+      console.error('Failed to add notification:', notificationError);
+      // Optionally show error to user
+    }
+
     } catch (error: any) {
       setError(error.response?.data?.message || 'Failed to create agenda');
     }

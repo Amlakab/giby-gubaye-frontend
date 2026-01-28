@@ -27,6 +27,7 @@ import {
   Printer,
   Download
 } from 'lucide-react';
+import { useNotification } from '@/app/contexts/NotificationContext';
 import api from '@/app/utils/api';
 
 type TransactionType = {
@@ -82,6 +83,7 @@ type PaymentConfig = {
 };
 
 export default function WalletPage() {
+  const { addNotification } = useNotification();
   const [activeTab, setActiveTab] = useState<'overview' | 'deposit' | 'withdraw'>('overview');
   const [stats, setStats] = useState<WalletStats | null>(null);
   const [transactions, setTransactions] = useState<TransactionType[]>([]);
@@ -929,6 +931,18 @@ export default function WalletPage() {
           });
           fetchStats();
           fetchTransactions();
+
+          //add notification
+        try {
+          await addNotification(
+            `New deposit created: ${formData.description || 'Deposit Request'}`,
+            `/admin/transactions/approve`,
+            'Audite'
+          );
+        } catch (notificationError) {
+          console.error('Failed to add notification:', notificationError);
+          // Optionally show error to user
+        }
         } else {
           showMessage('Failed to submit deposit request', 'error');
         }
@@ -1248,6 +1262,19 @@ export default function WalletPage() {
           });
           fetchStats();
           fetchTransactions();
+
+           //add notification
+        try {
+          await addNotification(
+            `New withdrawal created: ${formData.description || 'Withdrawal Request'}`,
+            `/admin/transactions/approve`,
+            'Audite'
+          );
+        } catch (notificationError) {
+          console.error('Failed to add notification:', notificationError);
+          // Optionally show error to user
+        }
+
         } else {
           showMessage('Failed to submit withdrawal request', 'error');
         }
