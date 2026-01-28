@@ -1,29 +1,34 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+// app/layout.tsx
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { NotificationProvider } from '@/app/contexts/NotificationContext';
+import { AuthProvider } from '@/lib/auth'; // If you have an auth provider
+import { ThemeProvider } from '@/lib/theme-context'; // If you have theme context
 
-import { ThemeProvider } from "@/lib/theme-context";
-import { AuthProvider } from "@/lib/auth";
-
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Tepi Giby Gubaye",
-  description: "Official website of Tepi Giby Gubaye",
+  title: 'Your App Name',
+  description: 'Your app description',
 };
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </AuthProvider>
+        {/* Wrap with all necessary providers */}
+        <ThemeProvider> {/* If you have theme provider */}
+          <AuthProvider> {/* If you have auth provider */}
+            <NotificationProvider>
+              {children}
+            </NotificationProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
