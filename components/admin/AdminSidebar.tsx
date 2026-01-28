@@ -112,7 +112,7 @@ const approvalItems: MenuItem[] = [
   }
 ];
 
-// Admin ONLY items (should NOT be accessible by other roles)
+// Admin ONLY items (should NOT be accessible  by other roles)
 const adminOnlyItems: MenuItem[] = [
   { 
     name: 'Users', 
